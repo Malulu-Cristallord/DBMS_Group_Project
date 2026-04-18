@@ -1,5 +1,6 @@
 import requests
 import sys
+import json
 
 # Fetching data from Open Library API
 user_input = input("Enter the ISBN number: ")
@@ -13,6 +14,10 @@ try:
     author_api = f"https://openlibrary.org{author_id}.json"
     author_response = requests.get(author_api)
     author_data = author_response.json()
+
+    # Print the whole JSON for testing
+    print(json.dumps(book_data, indent=4))
+    # Test stat = 9780439362139 (Harry Potter 1)
 
 except KeyError:
     sys.exit("Unable to retrieve data. Check the ISBN number.")
@@ -35,21 +40,10 @@ def format_dewey():
         return "None"
 
 
-author_name = author_data["name"]
-subjects = format_subjects()
-dewey = format_dewey()
+print("Row added.")
 
-row_data = {
-    "myBook": {
-        "copies": 1,
-        "title": book_data["title"],
-        "author": author_name.title(),
-        "publication": book_data["publish_date"],
-        "publisher": book_data["publishers"][0],
-        "isbn": user_input,
-        "subjects": subjects,
-        "dewey": dewey
-    }
-}
 
-print("Row added.", row_data["myBook"])
+
+
+
+
