@@ -5,8 +5,8 @@ import book_request
 
 def update_isbn():
     isbn = st.session_state.user_input
-    book_request.request_book_data(isbn)
     st.session_state.book_data = book_request.request_book_data_with_returning_value(isbn)
+
 
 
 if 'book_data' not in st.session_state:

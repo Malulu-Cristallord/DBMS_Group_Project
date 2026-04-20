@@ -22,7 +22,7 @@ def request_book_data(user_input):
         print(json.dumps(book_data, indent=4))
         # Test stat = 9780439362139 (Harry Potter 1)
 
-    except KeyError:
+    except Exception:
         sys.exit("Unable to retrieve data. Check the ISBN number.")
 
 def request_book_data_with_returning_value(user_input):
@@ -39,8 +39,8 @@ def request_book_data_with_returning_value(user_input):
         return json.dumps(book_data, indent=4)
         # Test stat = 9780439362139 (Harry Potter 1)
 
-    except KeyError:
-        sys.exit("Unable to retrieve data. Check the ISBN number.")
+    except Exception:
+        return "Unable to retrieve data. Check the ISBN number."
 
 
 
