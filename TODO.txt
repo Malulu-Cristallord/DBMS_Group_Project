@@ -1,0 +1,15 @@
+Basic connections
+    -Make sure everyone has their device and their IDE connected to this Git Project(1/4)
+    -Establish connection to local db(0/1)
+
+Database
+    -Complete db building(0/???)
+        
+Functions
+    -Account & profile management(0/1)
+    -Book Discovery(0/1)
+    -Book Detail Page(0/1)
+    -Review & Rating(0/1)
+    -Posts(0/1)
+    -Reward System(0/1)
+
