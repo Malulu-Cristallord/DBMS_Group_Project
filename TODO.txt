@@ -4,7 +4,7 @@ Basic connections
 
 Database
     -Complete db building(0/???)
-        
+
 Functions
     -Account & profile management(0/1)
     -Book Discovery(0/1)
