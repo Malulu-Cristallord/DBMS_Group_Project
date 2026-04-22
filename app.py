@@ -1,20 +1,42 @@
 import streamlit as st
-
 import book_request
 
 
-def update_isbn():
-    isbn = st.session_state.user_input
-    st.session_state.book_data = book_request.request_book_data_with_returning_value(isbn)
-
-
-
+# Init session_state:
 if 'book_data' not in st.session_state:
-    st.session_state.counter = ''
+    st.session_state.book_data = ""
 
-st.header("type in the isbn and the system will find the book from open library!")
-st.text_input(label="ISBN", key='user_input', placeholder="Enter ISBN")
-st.button(label="Submit",on_click=update_isbn)
-st.text_area(label="Book data", key='book_data', placeholder="Will show book data here", height=2000)
+# Callback function
+def update_isbn():
+    isbn = st.session_state.user_input.strip()
 
-# Front end to be edited
+    if not isbn:
+        st.session_state.book_data = "Please enter a valid ISBN."
+        return
+
+    # Show loading feedback while blocking operations run
+    with st.spinner("Fetching book data..."):
+        result = book_request.request_book_data(isbn)
+
+    st.session_state.book_data = result
+
+
+# UI layout
+st.header("Enter an ISBN to fetch book data from Open Library")
+
+st.text_input(
+    label="ISBN",
+    key='user_input',
+    placeholder="e.g. 9780439362139"
+)
+
+st.button(
+    label="Submit",
+    on_click=update_isbn
+)
+
+st.text_area(
+    label="Book data",
+    value=st.session_state.book_data,
+    height=500
+)
