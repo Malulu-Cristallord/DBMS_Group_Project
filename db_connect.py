@@ -28,7 +28,7 @@ def insert_book(query, values=None):
         cursor.close()
         conn.close()
 
-    return "Insert successful"
+    print("Insert successful")
 
 def test_connection():
     query = """
@@ -49,7 +49,7 @@ def test_connection():
         2008
     )
 
-    return insert_book(query, values)
+    insert_book(query, values)
 
 
 def clean_table():

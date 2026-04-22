@@ -1,4 +1,5 @@
 import requests
+import json
 
 import db_connect
 
@@ -17,26 +18,42 @@ def format_subjects(book_data):
         return "None"
 
 def data_to_db(book_data, author_data):
-    # Gather title, bookID, ISBN, Category, Author, Description, publisher, PublishedYear
-    title = book_data["title"]
-    isbn = book_data["isbn_13"]
-    category = format_subjects(book_data)
-    author_name = author_data["personal_name"]
-    rating = 0
-    description = book_data["description"]
-    publisher = book_data["publishers"]
-    published_year = book_data["published_year"]
-
     try:
-        query = (f"INSERT INTO Books_Global"
-                 f"(Title, ISBN, Category, Author, AuthorName, Rating, Description, Publisher, Published_Year)")
-        values = f"{title}, {isbn}, {category}, {author_name}, {rating}, {description}, {publisher}, {published_year:%Y}"
+        title = book_data.get("title", "")
+        isbn = book_data.get("isbn_13", [""])[0]
+        category = " "
+        author_name = author_data.get("personal_name", "Unknown")
+        rating = 0
+
+        description = book_data.get("description", "")
+        if isinstance(description, dict):
+            description = description.get("value", "")
+
+        publisher = book_data.get("publishers", [""])[0]
+        published_year = book_data.get("publish_date","%Y")
+
+        query = """
+        INSERT INTO Books
+        (Title, ISBN, Category, Author, Rating, Description, Publisher, Published_Year)
+        VALUES (%s, %s, %s, %s, %d, %s, %s, %s)
+        """
+
+        values = (
+            title,
+            isbn,
+            category,
+            author_name,
+            rating,
+            description,
+            publisher,
+            published_year
+        )
+
         db_connect.insert_book(query, values)
-        return f"Query: {query}"
+        print(f"trying to insert: {query}\n{values}")
 
-    except KeyError:
-        return "Error occurred while inserting data into database"
-
+    except Exception as e:
+        print("Error occurred while inserting data:", e)
 
 
 def request_book_data(user_input):
@@ -50,9 +67,12 @@ def request_book_data(user_input):
         author_api = f"https://openlibrary.org{author_id}.json"
         author_response = requests.get(author_api, timeout=5)
         author_data = author_response.json()
-
-        return data_to_db(book_data, author_data)
+        print(book_api)
+        print(book_data)
+        print(author_api)
+        print(author_data)
+        data_to_db(book_data, author_data)
         # Test stat = 9780439362139 (Harry Potter 1)
 
-    except Exception:
+    except KeyError:
         return "Unable to retrieve data. Check the ISBN number."
