@@ -44,7 +44,7 @@ def register_user(name: str, email: str, password: str):
     
     # 未重複
     # (2) 密碼做 hash
-    # # 寫入 users table
+    # 寫入 users table
     password_hash = hash_password(password)
 
     cursor.execute(

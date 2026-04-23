@@ -1,3 +1,4 @@
+# db connection
 import mysql.connector
 
 db_connection = mysql.connector.connect(

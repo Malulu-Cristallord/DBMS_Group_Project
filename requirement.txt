@@ -1,0 +1,6 @@
+# ======================
+# some packages we have
+# ======================
+mysql-connector-python
+bcrypt => for pw 
+streamlit
