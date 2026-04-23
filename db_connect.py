@@ -1,19 +1,35 @@
 # db connection
 import mysql.connector
 
-db_connection = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="your_password",
-    database="books_global"
-)
+def get_connection():
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="iovadifu90u48grhoGE)UWQIoirgu9024SU()GRj34(U)SRJT$Ju90t409344jgwoiu90uwt4",
+        database="books_global",
+        connection_timeout=5
+    )
 
-if db_connection.is_connected():
-    print("Successfully connected to the database")
+def insert_book(query, values=None):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
 
+        if values:
+            cursor.execute(query, values)
+        else:
+            cursor.execute(query)
 
-cursor = db_connection.cursor()
-cursor.execute("TRUNCATE TABLE Books")
+        conn.commit()
+
+    except mysql.connector.Error as e:
+        return f"DB Error: {str(e)}"
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    print("Insert successful")
 
 def test_connection():
     query = """
@@ -34,16 +50,13 @@ def test_connection():
         2008
     )
 
-    cursor.execute(query, values)
-    db_connection.commit()
+    insert_book(query, values)
 
-    cursor.execute("SELECT * FROM Books")
-    rows = cursor.fetchall()
 
-    for row in rows:
-        print(row)
-
-test_connection()
-
-cursor.close()
-db_connection.close()
+def clean_table():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("TRUNCATE Books")
+    conn.commit()
+    cursor.close()
+    conn.close()

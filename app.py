@@ -9,9 +9,11 @@ from auth import login_user, register_user # 這兩個是登入、註冊的funct
 # user 手動輸入 isbn??? 改名成import_book_by_isbn()如何??
 # ===================   
 def update_isbn():
-    isbn = st.session_state.user_input
-    st.session_state.book_data = book_request.request_book_data_with_returning_value(isbn)
+    isbn = st.session_state.user_input.strip()
 
+    if not isbn:
+        st.session_state.book_data = "Please enter a valid ISBN."
+        return
 
 # ====================
 # session state 初始化 => 為了之後紀錄狀態(似建立空箱放入值)
@@ -20,10 +22,10 @@ def update_isbn():
 if 'book_data' not in st.session_state:
     st.session_state.counter = ''
 
-st.header("type in the isbn and the system will find the book from open library!")
-st.text_input(label="ISBN", key='user_input', placeholder="Enter ISBN")
-st.button(label="Submit",on_click=update_isbn)
-st.text_area(label="Book data", key='book_data', placeholder="Will show book data here", height=2000)
+st.button(
+    label="Submit",
+    on_click=update_isbn
+)
 
 if "user_id" not in st.session_state:
     st.session.user_id = None # 登入成功會將id存入
