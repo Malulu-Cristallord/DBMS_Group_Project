@@ -1,14 +1,34 @@
 # db connection
 import mysql.connector
+import os
+
+def test_env():
+    print(os.getenv('DB_PASSWORD'))
+
 
 def get_connection():
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password="iovadifu90u48grhoGE)UWQIoirgu9024SU()GRj34(U)SRJT$Ju90t409344jgwoiu90uwt4",
-        database="books_global",
+        password=os.getenv('DB_PASSWORD'),
+        database="dbms_group_project",
         connection_timeout=5
     )
+
+def execute_query(query):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query)
+        conn.commit()
+        print("committed")
+
+    except mysql.connector.Error as e:
+        return f"DB Error: {str(e)}"
+
+    finally:
+        cursor.close()
+        conn.close()
 
 def insert_book(query, values=None):
     try:

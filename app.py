@@ -28,13 +28,13 @@ st.button(
 )
 
 if "user_id" not in st.session_state:
-    st.session.user_id = None # 登入成功會將id存入
+    st.session_state.user_id = None # 登入成功會將id存入
 if "loged_in" not in st.session_state:
-    st.session.loged_in = False # 尚未登入
+    st.session_state.loged_in = False # 尚未登入
 if "user_email" not in st.session_state:
-    st.session.user_email = "" # 登入成功會將email放入
+    st.session_state.user_email = "" # 登入成功會將email放入
 if "user_name" not in st.session_state:
-    st.session.user_name = "" # 登入成功會將名字放入
+    st.session_state.user_name = "" # 登入成功會將名字放入
 
 # ====================
 # 側邊選單
