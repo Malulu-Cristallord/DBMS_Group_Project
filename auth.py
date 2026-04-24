@@ -1,7 +1,7 @@
 # log in/out logic
 # Webb's responsibility
 import bcrypt # encrypt
-from db_connect_Webb import get_connection
+from db_connect import get_connection
 
 # 1、密碼轉換: 將使用者原始密碼轉換為雜湊後的密碼
 def hash_password(password: str) -> str:

@@ -16,7 +16,14 @@ def initiate_books():
 
 
 def initiate_users():
-    query = ("CREATE TABLE IF NOT EXISTS users (")
+    query = (
+            "CREATE TABLE IF NOT EXISTS users ("
+            "id INT AUTO_INCREMENT PRIMARY KEY,"
+            "name VARCHAR(100) NOT NULL,"
+            "email VARCHAR(255) NOT NULL UNIQUE,"
+            "password_hash VARCHAR(255) NOT NULL,"
+            "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
+    db_connect.execute_query(query)
 
 def initiate_bookshelf():
     query = ("CREATE TABLE IF NOT EXISTS bookshelf (")
@@ -31,3 +38,5 @@ print("Select your desired function to run, or enter \'full\' for running all in
       "(N) delete all existing tables (!!Not recommended!!)\n")
 dev_input = input()
 
+initiate_books()
+initiate_users()
