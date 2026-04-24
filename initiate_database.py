@@ -30,6 +30,8 @@ def initiate_bookshelf():
 
 def del_all():
     query = ("DROP TABLE *")
+
+# Run program
 print("Welcome to our group project\nBefore we begin, please make sure that you have a database named \'dbms_group_project\" so that the system can connect\n")
 print("Select your desired function to run, or enter \'full\' for running all initiate db function:\n"
       "(A) initiate books table\n"
