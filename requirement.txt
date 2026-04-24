@@ -2,5 +2,5 @@
 # some packages we have
 # ======================
 mysql-connector-python
-bcrypt => for pw 
+bcrypt => for password
 streamlit
