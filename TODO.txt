@@ -6,10 +6,13 @@ Database
     -Complete db building(0/???)
 
 Functions
-    -Account & profile management(0/1)
+    -Account & profile management(0.5/1)
     -Book Discovery(0/1)
     -Book Detail Page(0/1)
     -Review & Rating(0/1)
     -Posts(0/1)
     -Reward System(0/1)
+
+04/24/2025
+    TODO: SEPARATE FILES IN APP.PY
 
