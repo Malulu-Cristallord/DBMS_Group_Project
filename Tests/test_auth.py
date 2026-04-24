@@ -1,4 +1,4 @@
-from auth import register_user, login_user
+from UI.auth import register_user, login_user
 
 print("=== 註冊測試 ===")
 print(register_user("Webb", "webb@example.com", "123456"))

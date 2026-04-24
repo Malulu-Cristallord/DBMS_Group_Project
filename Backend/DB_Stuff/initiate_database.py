@@ -1,4 +1,5 @@
-import db_connect
+from DB_Stuff import db_connect
+
 
 def initiate_books():
     query = (

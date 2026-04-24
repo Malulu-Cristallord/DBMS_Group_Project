@@ -2,8 +2,6 @@
 # Streamlit home page
 # ====================
 import streamlit as st
-import book_request
-from auth import login_user, register_user # 這兩個是登入、註冊的functions
 
 # ===================
 # user 手動輸入 isbn??? 改名成import_book_by_isbn()如何??
@@ -35,6 +33,7 @@ if "user_email" not in st.session_state:
     st.session_state.user_email = "" # 登入成功會將email放入
 if "user_name" not in st.session_state:
     st.session_state.user_name = "" # 登入成功會將名字放入
+
 
 # ====================
 # 側邊選單

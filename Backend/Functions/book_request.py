@@ -1,7 +1,7 @@
 import requests
-import json
 
-import db_connect
+from DB_Stuff import db_connect
+
 
 # Notes: The current db source, Open Library, is still our best choice when it comes to fetching books.
 # However, the db seems to have a major lack of books in Asian language.

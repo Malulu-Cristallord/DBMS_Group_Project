@@ -15,4 +15,5 @@ Functions
 
 04/24/2025
     TODO: SEPARATE FILES IN APP.PY
+    DONE: multiple directories created, .py files should be organized within the directories.
 
