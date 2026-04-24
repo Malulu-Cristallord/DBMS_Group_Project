@@ -29,7 +29,8 @@ def initiate_bookshelf():
     query = ("CREATE TABLE IF NOT EXISTS bookshelf (")
 
 def del_all():
-    query = ("DROP TABLE *")
+    query = "DROP TABLE IF EXISTS books, users;"
+    db_connect.execute_query(query)
     
 def execute_all_methods():
     initiate_books()
@@ -50,4 +51,14 @@ match dev_input:
         initiate_books()
     case 'B' :
         initiate_users()
-
+    case 'N' :
+        print("THIS IS NO JOKE, DO YOU REALLY WANT TO DELETE THE WHOLE DATABASE???(type \'affirmative\' to confirm)\ntype any key to stop")
+        confirmation_input = input()
+        if confirmation_input == 'affirmative':
+            print("Action confirmed, initiating deletion protocol.")
+            del_all()
+        else:
+            print("Phew, I saved your database")
+            exit()
+    case "full" :
+        execute_all_methods()
