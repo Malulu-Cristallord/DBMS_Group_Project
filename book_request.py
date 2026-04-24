@@ -3,11 +3,11 @@ import json
 
 import db_connect
 
-
 # Notes: The current db source, Open Library, is still our best choice when it comes to fetching books.
 # However, the db seems to have a major lack of books in Asian language.
 # I will try to use more APIs if possible, and keep them free cause even the biggest dbs I can find still have big holes in them.
 # -Malu
+
 # Formatting data
 def format_subjects(book_data):
     try:

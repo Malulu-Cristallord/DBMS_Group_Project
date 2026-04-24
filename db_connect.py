@@ -50,6 +50,8 @@ def insert_book(query, values=None):
         conn.close()
 
     print("Insert successful")
+    return None
+
 
 def test_connection():
     query = """
