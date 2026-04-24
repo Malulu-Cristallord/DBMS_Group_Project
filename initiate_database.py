@@ -16,6 +16,7 @@ def initiate_books():
 
 
 def initiate_users():
+    query = ("CREATE TABLE IF NOT EXISTS users (")
 
 def initiate_bookshelf():
     query = ("CREATE TABLE IF NOT EXISTS bookshelf (")
