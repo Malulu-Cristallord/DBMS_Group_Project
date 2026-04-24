@@ -30,6 +30,11 @@ def initiate_bookshelf():
 
 def del_all():
     query = ("DROP TABLE *")
+def execute_all_methods():
+    initiate_books()
+    initiate_users()
+
+
 print("Welcome to our group project\nBefore we begin, please make sure that you have a database named \'dbms_group_project\" so that the system can connect\n")
 print("Select your desired function to run, or enter \'full\' for running all initiate db function:\n"
       "(A) initiate books table\n"
@@ -37,6 +42,9 @@ print("Select your desired function to run, or enter \'full\' for running all in
       "(C) initiate bookshelf table\n"
       "(N) delete all existing tables (!!Not recommended!!)\n")
 dev_input = input()
+match dev_input:
+    case 'A' :
+        initiate_books()
+    case 'B' :
+        initiate_users()
 
-initiate_books()
-initiate_users()
