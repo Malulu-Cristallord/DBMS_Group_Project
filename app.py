@@ -2,6 +2,9 @@
 # Streamlit home page
 # ====================
 import streamlit as st
+from UI.Login import auth
+from UI.Login import check
+
 
 # ===================
 # user 手動輸入 isbn??? 改名成import_book_by_isbn()如何??
@@ -75,7 +78,7 @@ if menu == "註冊":
         else:
             # 反之，三個欄位都有值
 
-            success, message = register_user(name, email, password)
+            success, message = auth.register_user(name, email, password)
             # 呼叫 auth.py 裡的 register_user()
             # 它會回傳兩個東西：
             # success：True/False，代表註冊成功或失敗
@@ -118,7 +121,7 @@ elif menu == "登入":
         else:
             # 如果 email 和 password 都有填
 
-            success, result = login_user(email, password)
+            success, result = auth.login_user(email, password)
             # 呼叫 auth.py 裡的 login_user()
             # 傳入 email 和 password
             # 它會回傳：

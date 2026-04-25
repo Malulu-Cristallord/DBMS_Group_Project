@@ -1,4 +1,4 @@
-from DB_Stuff import db_connect
+import db_connect
 
 
 def initiate_books():
