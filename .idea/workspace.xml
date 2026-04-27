@@ -4,20 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4c0b4b54-7149-4888-b2c8-68a9273f4334" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TODO.txt" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/UI/Login/auth.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/book_request.py" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/Functions/book_request.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/check.py" beforeDir="false" afterPath="$PROJECT_DIR$/UI/Login/check.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db_connect.py" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/DB_Stuff/db_connect.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/initiate_database.py" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/DB_Stuff/initiate_database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test book stat.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/DB_Stuff/test book stat.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tests/test_auth.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_book_into_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tests/test_book_into_db.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_library.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tests/test_library.py" afterDir="false" />
-    </list>
+    <list default="true" id="4c0b4b54-7149-4888-b2c8-68a9273f4334" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
