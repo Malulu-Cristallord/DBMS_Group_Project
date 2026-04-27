@@ -44,7 +44,7 @@ def initiate_posts():
     db_connect.execute_query(query)
 
 def del_all():
-    query = "DROP TABLE IF EXISTS books, users;"
+    query = "DROP TABLE IF EXISTS books, users, posts;"
     db_connect.execute_query(query)
     
 def execute_all_methods():
