@@ -1,6 +1,8 @@
+from tokenize import String
+
 import requests
 
-from DB_Stuff import db_connect
+from Backend.DB_Stuff import db_connect
 
 
 # Notes: The current db source, Open Library, is still our best choice when it comes to fetching books.
@@ -58,6 +60,7 @@ def data_to_db(book_data, author_data):
 
 def request_book_data(user_input):
 
+    print("requesting book data...")
     # Gather data with api
     try:
         book_api = f"https://openlibrary.org/isbn/{user_input}.json"
@@ -73,6 +76,11 @@ def request_book_data(user_input):
         print(author_data)
         data_to_db(book_data, author_data)
         # Test stat = 9780439362139 (Harry Potter 1)
+        return book_data
 
     except KeyError:
         return "Unable to retrieve data. Check the ISBN number."
+
+print("input isbn(9780439362139)")
+isbn = input()
+request_book_data(isbn)
