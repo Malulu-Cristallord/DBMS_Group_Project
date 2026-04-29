@@ -1,161 +1,214 @@
-# ====================
-# Streamlit home page
-# ====================
+# =============================================================================
+# FILE: app.py
+# PURPOSE: Main entry point for the LibTrack Streamlit application.
+#          This file configures the app-wide settings and serves as the
+#          landing/home feed page.
+#
+# HOW TO RUN:
+#   streamlit run app.py
+#
+# NOTE: This is a FRONT-END ONLY project using mock data.
+#       No real database or back-end exists yet.
+#       All data comes from data/mock_data.py
+# =============================================================================
+
 import streamlit as st
-from UI.Login import auth
-from UI.Login import check
+import sys
+import os
 
+# Add the project root to the Python path so we can import our modules
+sys.path.insert(0, os.path.dirname(__file__))
 
-# ===================
-# user 手動輸入 isbn??? 改名成import_book_by_isbn()如何??
-# ===================   
-def update_isbn():
-    isbn = st.session_state.user_input.strip()
-
-    if not isbn:
-        st.session_state.book_data = "Please enter a valid ISBN."
-        return
-
-# ====================
-# session state 初始化 => 為了之後紀錄狀態(似建立空箱放入值)
-# ====================
-# 初始狀態都不會在
-if 'book_data' not in st.session_state:
-    st.session_state.counter = ''
-
-st.button(
-    label="Submit",
-    on_click=update_isbn
+from components.ui_helpers import (
+    inject_global_css,
+    render_navbar,
+    render_book_cover,
+    render_stars,
+    render_badge,
+    render_avatar,
+    page_spacer,
+    section_title,
+    COLORS,
+)
+from data.mock_data import (
+    CURRENT_USER,
+    BOOKS,
+    POSTS,
 )
 
-if "user_id" not in st.session_state:
-    st.session_state.user_id = None # 登入成功會將id存入
-if "loged_in" not in st.session_state:
-    st.session_state.loged_in = False # 尚未登入
-if "user_email" not in st.session_state:
-    st.session_state.user_email = "" # 登入成功會將email放入
-if "user_name" not in st.session_state:
-    st.session_state.user_name = "" # 登入成功會將名字放入
+# =============================================================================
+# PAGE CONFIGURATION
+# Must be the FIRST Streamlit command in every file.
+# =============================================================================
+st.set_page_config(
+    page_title="LibTrack — Your Reading Journey",
+    page_icon="📖",
+    layout="wide",
+    initial_sidebar_state="collapsed",
+)
 
+# Inject global CSS for consistent design
+inject_global_css()
 
-# ====================
-# 側邊選單
-# ===================
-# 先叫做選單
-menu = st.sidebar.selectbox("選單", ["註冊", "登入", "尋找書籍"]) # 單選
-# 若尋找不到，會需要 user 用 isbn 新增
+# =============================================================================
+# TOP NAVIGATION BAR
+# =============================================================================
+render_navbar(active_page="discover")
 
-# =================
-# 註冊頁 
-# =================
-if menu == "註冊":
-    # 選擇註冊就到「註冊頁面」
+page_spacer(24)
 
-    st.header("註冊帳號")
-    # 顯示頁面大標題「註冊帳號」
+# =============================================================================
+# WELCOME HEADER
+# =============================================================================
+col_welcome, col_action = st.columns([3, 1])
+with col_welcome:
+    st.markdown(
+        f'<h1 style="margin-bottom:4px;">Welcome back, {CURRENT_USER["username"].split()[0]} 👋</h1>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '<p class="secondary">Discover your next great read and share your journey.</p>',
+        unsafe_allow_html=True,
+    )
 
-    name = st.text_input("姓名")
-    # 建立一個文字輸入框，標籤是「姓名」
+with col_action:
+    page_spacer(10)
+    # In production: this button routes to the Create Post page.
+    if st.button("✏️ Create a post", type="primary", use_container_width=True):
+        st.switch_page("pages/07_Create_Post.py")
 
-    email = st.text_input("電子信箱")
-    # 建立另一個文字輸入框，標籤是「電子信箱」
+page_spacer(10)
 
-    password = st.text_input("密碼", type="password")
-    # 建立密碼輸入框
-    # type="password" 代表輸入內容會以隱藏形式顯示（例如 ****）
-    
-    if st.button("註冊"):
-        # 建立一顆按鈕，顯示文字是「註冊」(按下就執行)
+# =============================================================================
+# QUICK SEARCH BAR
+# In production: this value is sent to GET /api/books?search=<query>
+# =============================================================================
+search_query = st.text_input(
+    "",
+    placeholder="🔍  Search for a book, author, or genre...",
+    label_visibility="collapsed",
+    key="home_search",
+)
 
-        # 註冊邏輯判斷(任一欄不得為空)
-        if not name or not email or not password:
-            # 如果 name、email、password 任一欄為空
-            # not 代表空字串會被視為 False
+if search_query:
+    # In production: redirect to the book discovery page with the query pre-filled.
+    st.info(f"Searching for: **{search_query}** — go to the Book Discovery page for full results.")
 
-            st.warning("請完整填寫所有欄位")
-            # 顯示警告訊息，提醒使用者要把欄位填完整
+page_spacer(20)
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
-        else:
-            # 反之，三個欄位都有值
+# =============================================================================
+# RECOMMENDED BOOKS SECTION
+# In production: books come from GET /api/recommendations?user_id=<id>
+# =============================================================================
+section_title("📚 Recommended for you")
 
-            success, message = auth.register_user(name, email, password)
-            # 呼叫 auth.py 裡的 register_user()
-            # 它會回傳兩個東西：
-            # success：True/False，代表註冊成功或失敗
-            # message：要顯示給使用者看的訊息(成功/失敗)
+# Filter to show books matching user's preferred genres
+recommended = [
+    b for b in BOOKS
+    if b["category"] in CURRENT_USER["preferred_genres"]
+][:4]
 
-            if success:
-                st.success(message) # 顯示成功訊息
-            else:
-                st.error(message) # 顯示錯誤訊息，例如 email 已被註冊
+rec_cols = st.columns(4)
+for i, book in enumerate(recommended):
+    with rec_cols[i]:
+        st.markdown(render_book_cover(book["cover_color"], size="card"), unsafe_allow_html=True)
+        st.markdown(
+            f'<strong style="font-size:0.9rem; color:{COLORS["dark_green"]};">{book["title"]}</strong>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            f'<span class="muted">{book["author"]}</span><br>'
+            f'{render_stars(book["avg_rating"])}',
+            unsafe_allow_html=True,
+        )
+        # In production: this navigates to /books/<book_id>
+        if st.button("View", key=f"rec_{book['id']}", use_container_width=True):
+            st.session_state["selected_book_id"] = book["id"]
+            st.switch_page("pages/05_Book_Detail.py")
 
-# ==========
-# 登入頁
-# ==========
-elif menu == "登入":
-    # 如果側邊欄選的是「登入」
-    # 就顯示登入頁面
+page_spacer(20)
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
-    st.header("登入系統")
-    # 顯示頁面標題「登入系統」
+# =============================================================================
+# POPULAR BOOKS OF THE WEEK
+# In production: books come from GET /api/books/popular?period=week
+# =============================================================================
+section_title("🔥 Popular this week")
 
-    email = st.text_input("電子信箱")
-    # 建立 email 輸入框
-    # 使用者輸入的 email 會存進變數 email
+popular = [b for b in BOOKS if b.get("popular")][:6]
 
-    password = st.text_input("密碼", type="password")
-    # 建立密碼輸入框
-    # type="password" 會把內容隱藏起來(如: ****)
-    # 使用者輸入的密碼存進變數 password
+pop_cols = st.columns(6)
+for i, book in enumerate(popular):
+    with pop_cols[i]:
+        st.markdown(render_book_cover(book["cover_color"], size="card"), unsafe_allow_html=True)
+        st.markdown(
+            f'<span style="font-size:0.8rem; font-weight:600; color:{COLORS["dark_green"]};">'
+            f'{book["title"]}</span><br>'
+            f'<span class="muted" style="font-size:0.75rem;">{book["author"]}</span>',
+            unsafe_allow_html=True,
+        )
 
-    if st.button("登入"):
-        # 建立「登入」按鈕
-        # 如果按下，就執行以下內容
+page_spacer(20)
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
-        if not email or not password:
-            # 如果 email 或 password 有任一欄是空的
+# =============================================================================
+# COMMUNITY FEED
+# In production: posts come from GET /api/posts?feed=home&user_id=<id>
+# =============================================================================
+section_title("🌿 Activity feed")
 
-            st.warning("請輸入電子信箱與密碼")
-            # 顯示警告訊息
+for post in POSTS:
+    # Build the sub-heading line depending on action type
+    if post["action"] == "rated":
+        action_html = f'rated <strong>{post["book_title"]}</strong>'
+    elif post["action"] == "borrowed":
+        action_html = f'borrowed <strong>{post["book_title"]}</strong>'
+    else:
+        action_html = f'reviewed <strong>{post["book_title"]}</strong>'
 
-        else:
-            # 如果 email 和 password 都有填
+    # Optional: show star rating if review
+    rating_html = ""
+    if post.get("rating"):
+        rating_html = render_stars(post["rating"])
 
-            success, result = auth.login_user(email, password)
-            # 呼叫 auth.py 裡的 login_user()
-            # 傳入 email 和 password
-            # 它會回傳：
-            # success：True/False
-            # result：若成功，回傳歡迎某某使用者；若失敗，回傳對應的失敗原因
+    # Optional: format tag (Physical / E-book)
+    format_html = ""
+    if post.get("format_tag"):
+        format_html = render_badge(post["format_tag"], style="beige")
 
-            if success:
-                # 如果 success 是 True，表示登入成功
+    col_post, col_tag = st.columns([5, 1])
+    with col_post:
+        st.markdown(
+            f"""
+            <div class="card">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                    {render_avatar(post['initials'], post['avatar_color'], post['text_color'])}
+                    <div>
+                        <strong style="font-size:0.95rem;">{post['user']}</strong>
+                        <span class="muted"> {action_html} · {post['time_ago']}</span>
+                    </div>
+                    <div style="margin-left:auto;">{rating_html}</div>
+                </div>
+                <p style="margin:6px 0 10px 0; font-size:0.92rem; line-height:1.55;">{post['content']}</p>
+                <div class="action-row">
+                    ♡ {post['likes']} likes &nbsp;&nbsp; 💬 {post['comments']} comments
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col_tag:
+        page_spacer(8)
+        if post.get("format_tag"):
+            st.markdown(format_html, unsafe_allow_html=True)
 
-                st.session_state.logged_in = True
-                # 把登入狀態記成 True
-                # 之後系統就知道這個使用者目前是已登入狀態
+        # In production: LIKE sends POST /api/posts/<post_id>/like
+        if st.button(f"♡ Like", key=f"like_{post['id']}"):
+            st.toast(f"Liked post by {post['user']}!")
 
-                st.session_state.user_name = result["name"]
-                # 把登入者姓名存進 session_state
+        # In production: COMMENT opens comments panel or sends POST /api/comments
+        if st.button(f"💬 Comment", key=f"comment_{post['id']}"):
+            st.toast("Comments coming soon!")
 
-                st.session_state.user_email = result["email"]
-                # 把登入者 email 存進 session_state
-
-                st.session_state.user_id = result["id"]
-                # 把登入者 id 存進 session_state
-
-                st.success(f"登入成功，歡迎 {result['name']}！")
-                # 顯示登入成功訊息，並歡迎使用者
-
-            else:
-                # 如果 success 是 False，表示登入失敗
-
-                st.error(result)
-                # 顯示錯誤訊息
-                # 例如「查無此帳號」或「密碼錯誤」            
-
-# ==========
-# 尋找書籍
-# ==========
-
-# Front end to be edited
+page_spacer(20)
