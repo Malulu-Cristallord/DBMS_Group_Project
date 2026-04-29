@@ -12,7 +12,6 @@ st.set_page_config(
     page_title="Login — LibTrack",
     page_icon="📖",
     layout="wide",
-    initial_sidebar_state="collapsed",
 )
 inject_global_css()
 render_navbar()

@@ -44,8 +44,7 @@ from data.mock_data import (
 st.set_page_config(
     page_title="LibTrack — Your Reading Journey",
     page_icon="📖",
-    layout="wide",
-    initial_sidebar_state="collapsed",
+    layout="wide"
 )
 
 # Inject global CSS for consistent design
