@@ -5,25 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4c0b4b54-7149-4888-b2c8-68a9273f4334" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/components/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/ui_helpers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/mock_data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/original_app.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pages/01_Login.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pages/02_Register.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pages/03_Discovery.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pages/04_Borrowings.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pages/05_Book_Detail.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pages/05_Posts_Reviews.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pages/06_Create_Review.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pages/06_Reading_History.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pages/07_Create_Post.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pages/08_Profile.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pages/09_Settings.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pages/10_Stats_Leaderboard.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/DBMS_Group_Project.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/DBMS_Group_Project.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pages/11_Add_Books.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/Functions/book_request.py" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/Functions/book_request.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TODO.txt" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -64,22 +49,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.app.executor": "Run",
-    "Python.book_request.executor": "Run",
-    "Python.db_connect.executor": "Run",
-    "Python.initiate_database.executor": "Run",
-    "Python.test.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "Trying-to-Merge",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/twgam/OneDrive/桌面/Coding Projects/python/DBMS_Group_Project"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.app.executor&quot;: &quot;Run&quot;,
+    &quot;Python.book_request.executor&quot;: &quot;Run&quot;,
+    &quot;Python.db_connect.executor&quot;: &quot;Run&quot;,
+    &quot;Python.initiate_database.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Trying-to-Merge&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/twgam/OneDrive/桌面/Coding Projects/python/DBMS_Group_Project&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\twgam\OneDrive\桌面\Coding Projects\python\DBMS_Group_Project" />
@@ -97,7 +82,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-1bde30d8e611-7b97d883f26b-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.25557.130" />
+        <option value="bundled-python-sdk-07523f343e4f-968fe969f28a-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.28539.27" />
       </set>
     </attachedChunks>
   </component>

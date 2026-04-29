@@ -36,6 +36,7 @@ from data.mock_data import (
     POSTS,
 )
 
+
 # =============================================================================
 # PAGE CONFIGURATION
 # Must be the FIRST Streamlit command in every file.
@@ -129,6 +130,9 @@ for i, book in enumerate(recommended):
 
 page_spacer(20)
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+
+if st.button("Find books", type="primary"):
+    st.switch_page("pages/03_Discovery.py")
 
 # =============================================================================
 # POPULAR BOOKS OF THE WEEK
