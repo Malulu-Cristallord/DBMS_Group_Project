@@ -1,69 +1,55 @@
-# Login / logout logic
-# Webb's responsibility
+# Login, registration, and password helpers for readers.
 
-import bcrypt  # For password hashing
+import bcrypt
+
 from Backend.DB_Stuff.db_connect import get_connection
 
 
-# 1. Hash password:
-# Convert the user's plain-text password into a hashed password.
 def hash_password(password: str) -> str:
     hashed_bytes = bcrypt.hashpw(
-        password.encode("utf-8"),  # bcrypt requires bytes, not a Python string
-        bcrypt.gensalt()           # Generate a salt so the same password can produce different hashes
+        password.encode("utf-8"),
+        bcrypt.gensalt(),
     )
-    return hashed_bytes.decode("utf-8")  # Convert bytes back to string for database storage
+    return hashed_bytes.decode("utf-8")
 
 
-# 2. Verify password:
-# checkpw() is used to compare a plain-text password with a hashed password.
 def verify_password(password: str, password_hash: str) -> bool:
     return bcrypt.checkpw(
-        password.encode("utf-8"),       # Convert string to bytes
-        password_hash.encode("utf-8")   # Convert stored hash string to bytes
+        password.encode("utf-8"),
+        password_hash.encode("utf-8"),
     )
 
 
-# 3. Register:
-# Insert a new reader account into the database.
-def register_user(
+def register_reader(
     name: str,
     email: str,
     password: str,
-    preferred_category: str = None,
-    receive_recommendations: bool = True
-):
-    # The bcrypt algorithm only handles passwords up to 72 bytes.
+    preferred_category: str | None = None,
+    receive_recommendations: bool = True,
+) -> tuple[bool, str]:
     if len(password.encode("utf-8")) > 72:
         return False, "Password is too long. Please use a password under 72 bytes."
 
-    # Connect to the database before inserting data.
-    connection = get_connection()
-    if connection is None:
-        return False, "Database connection failed."
-
-    # A cursor is used to execute SQL commands.
-    cursor = connection.cursor(dictionary=True)
+    connection = None
+    cursor = None
 
     try:
-        # 1. Check whether the email already exists.
+        connection = get_connection()
+        cursor = connection.cursor(dictionary=True)
+
         cursor.execute(
             """
             SELECT Reader_ID
             FROM readers
             WHERE Email = %s
             """,
-            (email,)
+            (email,),
         )
-        existing_user = cursor.fetchone()
+        existing_reader = cursor.fetchone()
 
-        if existing_user:
+        if existing_reader:
             return False, "This email has already been registered."
 
-        # 2. Hash the password before storing it in the database.
-        password_hash = hash_password(password)
-
-        # 3. Insert the new reader into the readers table.
         cursor.execute(
             """
             INSERT INTO readers (
@@ -78,59 +64,67 @@ def register_user(
             (
                 name,
                 email,
-                password_hash,
+                hash_password(password),
                 preferred_category,
-                receive_recommendations
-            )
+                receive_recommendations,
+            ),
         )
 
         connection.commit()
         return True, "Registration successful."
 
-    except Exception as e:
-        connection.rollback()
-        return False, f"Registration failed: {e}"
+    except Exception as exc:
+        if connection:
+            connection.rollback()
+        return False, f"Registration failed: {exc}"
 
     finally:
-        cursor.close()
-        connection.close()
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
 
 
-# 4. Login:
-# Check whether the input email and password are correct.
-def login_user(email: str, password: str):
-    # Connect to the database to retrieve reader account data.
-    connection = get_connection()
-    if connection is None:
-        return False, "Database connection failed."
-
-    cursor = connection.cursor(dictionary=True)
+def login_reader(email: str, password: str) -> tuple[bool, str] | tuple[bool, str, dict]:
+    connection = None
+    cursor = None
 
     try:
-        # 1. Find the reader account by email.
+        connection = get_connection()
+        cursor = connection.cursor(dictionary=True)
+
         cursor.execute(
             """
-            SELECT Reader_ID, Name, Email, Password_Hash, Preferred_Category, Points
+            SELECT
+                Reader_ID,
+                Name,
+                Email,
+                Password_Hash,
+                Preferred_Category,
+                Points,
+                Receive_Recommendations,
+                Show_Reading_History,
+                Created_At
             FROM readers
             WHERE Email = %s
             """,
-            (email,)
+            (email,),
         )
-        user = cursor.fetchone()
+        reader = cursor.fetchone()
 
-        # Account does not exist.
-        if not user:
-            return False, "Account not found."
+        if not reader:
+            return False, "Reader account not found."
 
-        # 2. Verify the password.
-        if verify_password(password, user["Password_Hash"]):
-            return True, "Login successful.", user
+        if verify_password(password, reader["Password_Hash"]):
+            return True, "Login successful.", reader
 
         return False, "Incorrect password."
 
-    except Exception as e:
-        return False, f"Login failed: {e}"
+    except Exception as exc:
+        return False, f"Login failed: {exc}"
 
     finally:
-        cursor.close()
-        connection.close()
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()

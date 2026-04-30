@@ -1,7 +1,8 @@
-from UI.Login.auth import register_user, login_user
+from UI.Login.auth import login_reader, register_reader
 
-print("=== 註冊測試 ===")
-print(register_user("Webb", "webb@example.com", "123456"))
 
-print("\n=== 登入測試 ===")
-print(login_user("webb@example.com", "123456"))
+print("=== Register reader ===")
+print(register_reader("Webb", "webb@example.com", "12345678"))
+
+print("\n=== Login reader ===")
+print(login_reader("webb@example.com", "12345678"))

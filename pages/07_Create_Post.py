@@ -1,53 +1,61 @@
-# =============================================================================
-# FILE: pages/07_Create_Post.py
-# PURPOSE: Allows the user to create a new community post.
-#
-# FUTURE BACK-END INTEGRATION:
-#   - Submit post: POST /api/posts { content, book_id, milestone, visibility }
-#   - book_id links the post to a specific book in the books table
-#   - visibility controls who can see the post
-# =============================================================================
+from html import escape
+import os
+import sys
 
 import streamlit as st
-import sys, os
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from components.ui_helpers import (
-    inject_global_css, render_navbar, render_avatar,
-    page_spacer, section_title, COLORS,
+from Backend.Functions.library_data import (
+    create_post,
+    get_books,
+    get_reader_from_session,
+    reader_initials,
 )
-from data.mock_data import BOOKS, CURRENT_USER
+from components.ui_helpers import (
+    COLORS,
+    inject_global_css,
+    page_spacer,
+    render_avatar,
+    render_navbar,
+    section_title,
+)
+
 
 st.set_page_config(
-    page_title="Create Post — LibTrack",
-    page_icon="📖",
+    page_title="Create Post | LibTrack",
+    page_icon="LT",
     layout="wide",
 )
+
 inject_global_css()
 render_navbar(active_page="my_library")
 page_spacer(30)
+
+
+current_reader = get_reader_from_session(st.session_state)
+if current_reader is None:
+    st.warning("Please sign in before creating a post.")
+    if st.button("Go to Login", type="primary"):
+        st.switch_page("pages/01_Login.py")
+    st.stop()
+
 
 _, center_col, _ = st.columns([1, 2.5, 1])
 
 with center_col:
     section_title("Create a post")
 
-    # Show user avatar and name
     st.markdown(
         f'<div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">'
-        f'{render_avatar(CURRENT_USER["initials"], COLORS["gold"], COLORS["brown"], "normal")}'
-        f'<strong style="font-size:1rem; color:{COLORS["dark_green"]};">'
-        f'{CURRENT_USER["username"]}</strong>'
+        f'{render_avatar(reader_initials(current_reader["Name"]), COLORS["gold"], COLORS["brown"], "normal")}'
+        f'<strong style="font-size:1rem; color:{COLORS["dark_green"]};">{escape(current_reader["Name"])}</strong>'
         f'</div>',
         unsafe_allow_html=True,
     )
 
-    # -------------------------------------------------------------------------
-    # POST CONTENT TEXT AREA
-    # In production: sent as `content` to POST /api/posts
-    # -------------------------------------------------------------------------
     post_content = st.text_area(
-        "What's on your mind?",
+        "What is on your mind?",
         placeholder="Share your reading thoughts, a quote, a milestone, or a recommendation...",
         height=160,
         key="post_content",
@@ -56,53 +64,25 @@ with center_col:
 
     page_spacer(8)
 
-    # -------------------------------------------------------------------------
-    # OPTIONAL BOOK SELECTOR
-    # In production: the selected book_id is included in POST /api/posts
-    # to link this post to a specific book in the database.
-    # -------------------------------------------------------------------------
+    books = get_books(sort_option="title")
     book_options = {"No book linked": None}
-    book_options.update({f'{b["title"]} — {b["author"]}': b["id"] for b in BOOKS})
+    book_options.update({f'{book["title"]} - {book["author"]}': book["id"] for book in books})
+
+    default_book_id = st.session_state.get("post_book_id")
+    option_labels = list(book_options.keys())
+    default_index = 0
+    if default_book_id:
+        for index, label in enumerate(option_labels):
+            if str(book_options[label]) == str(default_book_id):
+                default_index = index
+                break
 
     linked_book = st.selectbox(
-        "Link to a book (optional)",
-        options=list(book_options.keys()),
+        "Link to a book",
+        options=option_labels,
+        index=default_index,
         key="post_book",
-        help="Link your post to a book so other readers can find it on the book page.",
-    )
-
-    # -------------------------------------------------------------------------
-    # OPTIONAL READING MILESTONE SELECTOR
-    # In production: stored as a `milestone_type` enum in the posts table.
-    # Milestones can trigger badge awards in the reward system.
-    # -------------------------------------------------------------------------
-    milestone_options = [
-        "No milestone",
-        "Started a new book",
-        "Finished a book",
-        "Read 5 books this month",
-        "Reached a reading streak",
-        "Personal record",
-    ]
-    milestone = st.selectbox(
-        "Reading milestone (optional)",
-        options=milestone_options,
-        key="post_milestone",
-        help="Share a reading achievement to inspire the community!",
-    )
-
-    page_spacer(4)
-
-    # -------------------------------------------------------------------------
-    # VISIBILITY SELECTOR
-    # In production: stored as `visibility` enum ('public', 'followers', 'private')
-    # in the posts table. Controls who can see this post.
-    # -------------------------------------------------------------------------
-    visibility = st.selectbox(
-        "Visibility",
-        options=["Public", "Followers only", "Private"],
-        key="post_visibility",
-        help="Public posts are visible to all readers on the platform.",
+        help="The selected value is stored as posts.Book_ID.",
     )
 
     page_spacer(12)
@@ -110,15 +90,18 @@ with center_col:
     publish_col, cancel_col = st.columns([3, 1])
 
     with publish_col:
-        # In production: sends POST /api/posts and redirects to the feed
         if st.button("Publish post", type="primary", use_container_width=True, key="pub_post"):
-            if post_content.strip():
-                st.success("Your post has been published to the community feed!")
-                st.balloons()
+            success, message = create_post(
+                reader_id=current_reader["Reader_ID"],
+                book_id=book_options[linked_book],
+                content=post_content,
+                rating=None,
+            )
+            if success:
+                st.success("Your post has been published to the community feed.")
             else:
-                st.error("Please write something before publishing.")
+                st.error(message)
 
     with cancel_col:
-        # In production: navigates back without saving
         if st.button("Cancel", use_container_width=True, key="cancel_post"):
             st.switch_page("app.py")
