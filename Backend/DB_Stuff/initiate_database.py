@@ -17,14 +17,21 @@ def initiate_books():
     db_connect.execute_query(query)
 
 
-def initiate_users():
+def initiate_readers():
     query = (
-            "CREATE TABLE IF NOT EXISTS users ("
-            "User_ID           INT AUTO_INCREMENT PRIMARY KEY,"
-            "Name              VARCHAR(100) NOT NULL,"
-            "Email             VARCHAR(255) NOT NULL UNIQUE,"
-            "Password_Hash     VARCHAR(255) NOT NULL,"
-            "Created_At        TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
+        """
+        CREATE TABLE IF NOT EXISTS readers (
+        reader_id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password_hash VARCHAR(255) NOT NULL,
+        preferred_category VARCHAR(255),
+        points INT DEFAULT 0,
+        receive_recommendations BOOLEAN DEFAULT TRUE,
+        show_reading_history BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
+        """
+    )
     db_connect.execute_query(query)
 
 def initiate_bookshelf():
@@ -35,7 +42,7 @@ def initiate_posts():
             "CREATE TABLE IF NOT EXISTS posts ("
             "Title            VARCHAR(255),"
             "Post_ID          INT AUTO_INCREMENT PRIMARY KEY NOT NULL,"
-            "User_ID          INT REFERENCES Users(User_ID),"
+            "Reader_ID          INT REFERENCES Readers(Reader_ID),"
             "Book_ID          INT REFERENCES Books(Book_ID),"
             "Upvote_count     INT,"
             "Created_Date     DATE,"
@@ -44,12 +51,12 @@ def initiate_posts():
     db_connect.execute_query(query)
 
 def del_all():
-    query = "DROP TABLE IF EXISTS books, users, posts;"
+    query = "DROP TABLE IF EXISTS books, readers, posts;"
     db_connect.execute_query(query)
     
 def execute_all_methods():
     initiate_books()
-    initiate_users()
+    initiate_readers()
     initiate_posts()
 
 
@@ -57,7 +64,7 @@ def execute_all_methods():
 print("Welcome to our group project\nBefore we begin, please make sure that you have a database named \'dbms_group_project\" so that the system can connect\n")
 print("Select your desired function to run, or enter \'full\' for running all initiate db function:\n"
       "(A) initiate books table\n"
-      "(B) initiate users table\n"
+      "(B) initiate readers table\n"
       "(C) initiate posts table\n"
       "(N) delete all existing tables (!!Not recommended!!)\n")
 dev_input = input()
@@ -66,7 +73,7 @@ match dev_input:
     case 'A' :
         initiate_books()
     case 'B' :
-        initiate_users()
+        initiate_readers()
     case 'C' :
         initiate_posts()
     case 'N' :
