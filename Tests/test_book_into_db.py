@@ -1,5 +1,5 @@
-import book_request
+from Backend.Functions import book_request
 
-#9780439362139
-input = input("Insert data")
-book_request.request_book_data(input)
+
+isbn = input("Insert ISBN: ").strip()
+print(book_request.request_book_data(isbn))

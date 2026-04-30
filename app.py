@@ -1,69 +1,78 @@
-# =============================================================================
-# FILE: app.py
-# PURPOSE: Main entry point for the LibTrack Streamlit application.
-#          This file configures the app-wide settings and serves as the
-#          landing/home feed page.
-#
-# HOW TO RUN:
-#   streamlit run app.py
-#
-# NOTE: This is a FRONT-END ONLY project using mock data.
-#       No real database or back-end exists yet.
-#       All data comes from data/mock_data.py
-# =============================================================================
+from html import escape
+import os
+import sys
 
 import streamlit as st
-import sys
-import os
 
-# Add the project root to the Python path so we can import our modules
 sys.path.insert(0, os.path.dirname(__file__))
 
+from Backend.Functions.library_data import (
+    get_book_by_id,
+    get_books,
+    get_posts,
+    get_reader_from_session,
+    get_recommended_books,
+    reader_initials,
+)
 from components.ui_helpers import (
-    inject_global_css,
-    render_navbar,
-    render_book_cover,
-    render_stars,
-    render_badge,
-    render_avatar,
-    page_spacer,
-    section_title,
     COLORS,
-)
-from data.mock_data import (
-    CURRENT_USER,
-    BOOKS,
-    POSTS,
+    inject_global_css,
+    page_spacer,
+    render_avatar,
+    render_badge,
+    render_book_cover,
+    render_navbar,
+    render_stars,
+    section_title,
 )
 
 
-# =============================================================================
-# PAGE CONFIGURATION
-# Must be the FIRST Streamlit command in every file.
-# =============================================================================
 st.set_page_config(
-    page_title="LibTrack — Your Reading Journey",
-    page_icon="📖",
-    layout="wide"
+    page_title="LibTrack | Home",
+    page_icon="LT",
+    layout="wide",
 )
 
-# Inject global CSS for consistent design
 inject_global_css()
 
-# =============================================================================
-# TOP NAVIGATION BAR
-# =============================================================================
-render_navbar(active_page="discover")
 
+if "logged_in" not in st.session_state:
+    st.session_state["logged_in"] = False
+
+if not st.session_state["logged_in"]:
+    render_navbar(active_page="discover")
+    page_spacer(40)
+    st.warning("Please sign in to access your LibTrack home page.")
+
+    if st.button("Go to Login", type="primary"):
+        st.switch_page("pages/01_Login.py")
+
+    st.stop()
+
+
+current_reader = get_reader_from_session(st.session_state)
+
+if current_reader is None:
+    render_navbar(active_page="discover")
+    page_spacer(40)
+    st.error("Could not load your reader profile. Please log in again.")
+
+    if st.button("Go to Login", type="primary"):
+        st.session_state.clear()
+        st.switch_page("pages/01_Login.py")
+
+    st.stop()
+
+
+render_navbar(active_page="discover")
 page_spacer(24)
 
-# =============================================================================
-# WELCOME HEADER
-# =============================================================================
 col_welcome, col_action = st.columns([3, 1])
+
 with col_welcome:
+    reader_first_name = (current_reader["Name"] or "reader").split()[0]
     st.markdown(
-        f'<h1 style="margin-bottom:4px;">Welcome back, {CURRENT_USER["username"].split()[0]} 👋</h1>',
+        f'<h1 style="margin-bottom:4px;">Welcome back, {escape(reader_first_name)}</h1>',
         unsafe_allow_html=True,
     )
     st.markdown(
@@ -73,59 +82,57 @@ with col_welcome:
 
 with col_action:
     page_spacer(10)
-    # In production: this button routes to the Create Post page.
-    if st.button("✏️ Create a post", type="primary", use_container_width=True):
+    if st.button("Create a post", type="primary", use_container_width=True):
         st.switch_page("pages/07_Create_Post.py")
+
 
 page_spacer(10)
 
-# =============================================================================
-# QUICK SEARCH BAR
-# In production: this value is sent to GET /api/books?search=<query>
-# =============================================================================
 search_query = st.text_input(
     "",
-    placeholder="🔍  Search for a book, author, or genre...",
+    placeholder="Search for a book, author, or genre...",
     label_visibility="collapsed",
     key="home_search",
 )
 
 if search_query:
-    # In production: redirect to the book discovery page with the query pre-filled.
-    st.info(f"Searching for: **{search_query}** — go to the Book Discovery page for full results.")
+    st.session_state["book_search_query"] = search_query
+    st.info(f"Searching for: **{search_query}**. Open Book Discovery for full results.")
+
+    if st.button("Open Book Discovery"):
+        st.switch_page("pages/03_Discovery.py")
+
 
 page_spacer(20)
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
-# =============================================================================
-# RECOMMENDED BOOKS SECTION
-# In production: books come from GET /api/recommendations?user_id=<id>
-# =============================================================================
-section_title("📚 Recommended for you")
+section_title("Recommended for you")
 
-# Filter to show books matching user's preferred genres
-recommended = [
-    b for b in BOOKS
-    if b["category"] in CURRENT_USER["preferred_genres"]
-][:4]
+recommended_books = get_recommended_books(current_reader, limit=4)
 
-rec_cols = st.columns(4)
-for i, book in enumerate(recommended):
-    with rec_cols[i]:
-        st.markdown(render_book_cover(book["cover_color"], size="card"), unsafe_allow_html=True)
-        st.markdown(
-            f'<strong style="font-size:0.9rem; color:{COLORS["dark_green"]};">{book["title"]}</strong>',
-            unsafe_allow_html=True,
-        )
-        st.markdown(
-            f'<span class="muted">{book["author"]}</span><br>'
-            f'{render_stars(book["avg_rating"])}',
-            unsafe_allow_html=True,
-        )
-        # In production: this navigates to /books/<book_id>
-        if st.button("View", key=f"rec_{book['id']}", use_container_width=True):
-            st.session_state["selected_book_id"] = book["id"]
-            st.switch_page("pages/05_Book_Detail.py")
+if not recommended_books:
+    st.info("No recommended books found yet. Add books to the database or update your preferred categories.")
+else:
+    rec_cols = st.columns(min(len(recommended_books), 4))
+
+    for index, book in enumerate(recommended_books[:4]):
+        with rec_cols[index]:
+            st.markdown(render_book_cover(book["cover"], size="card"), unsafe_allow_html=True)
+            st.markdown(
+                f'<strong style="font-size:0.9rem; color:{COLORS["dark_green"]};">'
+                f'{escape(book["title"])}</strong>',
+                unsafe_allow_html=True,
+            )
+            st.markdown(
+                f'<span class="muted">{escape(book["author"])}</span><br>'
+                f'{render_stars(book["avg_rating"])}',
+                unsafe_allow_html=True,
+            )
+
+            if st.button("View", key=f"rec_{book['id']}", use_container_width=True):
+                st.session_state["selected_book_id"] = book["id"]
+                st.switch_page("pages/05_Book_Detail.py")
+
 
 page_spacer(20)
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
@@ -133,85 +140,81 @@ st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 if st.button("Find books", type="primary"):
     st.switch_page("pages/03_Discovery.py")
 
-# =============================================================================
-# POPULAR BOOKS OF THE WEEK
-# In production: books come from GET /api/books/popular?period=week
-# =============================================================================
-section_title("🔥 Popular this week")
 
-popular = [b for b in BOOKS if b.get("popular")][:6]
+section_title("Popular this week")
 
-pop_cols = st.columns(6)
-for i, book in enumerate(popular):
-    with pop_cols[i]:
-        st.markdown(render_book_cover(book["cover_color"], size="card"), unsafe_allow_html=True)
-        st.markdown(
-            f'<span style="font-size:0.8rem; font-weight:600; color:{COLORS["dark_green"]};">'
-            f'{book["title"]}</span><br>'
-            f'<span class="muted" style="font-size:0.75rem;">{book["author"]}</span>',
-            unsafe_allow_html=True,
-        )
+popular_books = get_books(sort_option="rating", limit=6)
+
+if not popular_books:
+    st.info("No books found yet. Please insert book data into the books table.")
+else:
+    pop_cols = st.columns(min(len(popular_books), 6))
+
+    for index, book in enumerate(popular_books[:6]):
+        with pop_cols[index]:
+            st.markdown(render_book_cover(book["cover"], size="card"), unsafe_allow_html=True)
+            st.markdown(
+                f'<span style="font-size:0.8rem; font-weight:600; color:{COLORS["dark_green"]};">'
+                f'{escape(book["title"])}</span><br>'
+                f'<span class="muted" style="font-size:0.75rem;">{escape(book["author"])}</span>',
+                unsafe_allow_html=True,
+            )
+
 
 page_spacer(20)
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
-# =============================================================================
-# COMMUNITY FEED
-# In production: posts come from GET /api/posts?feed=home&user_id=<id>
-# =============================================================================
-section_title("🌿 Activity feed")
+section_title("Activity feed")
 
-for post in POSTS:
-    # Build the sub-heading line depending on action type
-    if post["action"] == "rated":
-        action_html = f'rated <strong>{post["book_title"]}</strong>'
-    elif post["action"] == "borrowed":
-        action_html = f'borrowed <strong>{post["book_title"]}</strong>'
-    else:
-        action_html = f'reviewed <strong>{post["book_title"]}</strong>'
+activity_posts = get_posts(limit=10)
 
-    # Optional: show star rating if review
-    rating_html = ""
-    if post.get("rating"):
-        rating_html = render_stars(post["rating"])
+if not activity_posts:
+    st.info("No activity yet. Reviews will appear here after readers create posts.")
+else:
+    for post in activity_posts:
+        rating_html = render_stars(post["rating"]) if post.get("rating") else ""
+        reader_name = post.get("reader_name") or "Unknown reader"
+        book_title = post.get("book_title") or "an unlinked book"
+        content = post.get("content") or "No content."
 
-    # Optional: format tag (Physical / E-book)
-    format_html = ""
-    if post.get("format_tag"):
-        format_html = render_badge(post["format_tag"], style="beige")
+        col_post, col_tag = st.columns([5, 1])
 
-    col_post, col_tag = st.columns([5, 1])
-    with col_post:
-        st.markdown(
-            f"""
-            <div class="card">
-                <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-                    {render_avatar(post['initials'], post['avatar_color'], post['text_color'])}
-                    <div>
-                        <strong style="font-size:0.95rem;">{post['user']}</strong>
-                        <span class="muted"> {action_html} · {post['time_ago']}</span>
+        with col_post:
+            st.markdown(
+                f"""
+                <div class="card">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                        {render_avatar(reader_initials(reader_name), COLORS["sage"] if "sage" in COLORS else COLORS["light_green"], COLORS["dark_green"])}
+                        <div>
+                            <strong style="font-size:0.95rem;">{escape(reader_name)}</strong>
+                            <span class="muted">
+                                reviewed <strong>{escape(book_title)}</strong> on {escape(str(post.get("created_at") or ""))}
+                            </span>
+                        </div>
+                        <div style="margin-left:auto;">{rating_html}</div>
                     </div>
-                    <div style="margin-left:auto;">{rating_html}</div>
+                    <p style="margin:6px 0 10px 0; font-size:0.92rem; line-height:1.55;">
+                        {escape(content)}
+                    </p>
+                    <div class="action-row">
+                        {int(post.get("upvote_count") or 0)} likes
+                    </div>
                 </div>
-                <p style="margin:6px 0 10px 0; font-size:0.92rem; line-height:1.55;">{post['content']}</p>
-                <div class="action-row">
-                    ♡ {post['likes']} likes &nbsp;&nbsp; 💬 {post['comments']} comments
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    with col_tag:
-        page_spacer(8)
-        if post.get("format_tag"):
-            st.markdown(format_html, unsafe_allow_html=True)
+                """,
+                unsafe_allow_html=True,
+            )
 
-        # In production: LIKE sends POST /api/posts/<post_id>/like
-        if st.button(f"♡ Like", key=f"like_{post['id']}"):
-            st.toast(f"Liked post by {post['user']}!")
+        with col_tag:
+            page_spacer(8)
+            st.markdown(render_badge("Review", style="beige"), unsafe_allow_html=True)
 
-        # In production: COMMENT opens comments panel or sends POST /api/comments
-        if st.button(f"💬 Comment", key=f"comment_{post['id']}"):
-            st.toast("Comments coming soon!")
+            if st.button("Details", key=f"feed_detail_{post['post_id']}"):
+                selected_book = get_book_by_id(post.get("book_id"))
+                if selected_book:
+                    st.session_state["selected_book_id"] = selected_book["id"]
+                    st.switch_page("pages/05_Book_Detail.py")
+                else:
+                    st.toast("This post is not linked to a book.")
+
 
 page_spacer(20)
