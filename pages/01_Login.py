@@ -100,6 +100,8 @@ with center_col:
             st.error("Please fill in all fields.")
         else:
             result = login_user(email_input, password_input)
+            # return three things: whether it succeeded or not, a success message, 
+            # and the user's information (Dictionary form, as shown below).
 
             # Expected result format:
             # success, message, user = login_user(email, password)
