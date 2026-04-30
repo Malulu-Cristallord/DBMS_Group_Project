@@ -1,95 +1,136 @@
-# log in/out logic
+# Login / logout logic
 # Webb's responsibility
-import bcrypt # encrypt
+
+import bcrypt  # For password hashing
 from Backend.DB_Stuff.db_connect import get_connection
 
-# 1、密碼轉換: 將使用者原始密碼轉換為雜湊後的密碼
+
+# 1. Hash password:
+# Convert the user's plain-text password into a hashed password.
 def hash_password(password: str) -> str:
-    hashed_bytes = bcrypt.hashpw( 
-        password.encode("utf-8"), # bcrypt 吃的是 bytes，不是一般 Python 字串 str
-        bcrypt.gensalt() # 產生salt，讓想同密碼每次hash可能不同
+    hashed_bytes = bcrypt.hashpw(
+        password.encode("utf-8"),  # bcrypt requires bytes, not a Python string
+        bcrypt.gensalt()           # Generate a salt so the same password can produce different hashes
     )
-    return hashed_bytes.decode("utf-8") # 轉回 str 
+    return hashed_bytes.decode("utf-8")  # Convert bytes back to string for database storage
 
-# 2、比對密碼: checkpw() 專門驗證密碼
+
+# 2. Verify password:
+# checkpw() is used to compare a plain-text password with a hashed password.
 def verify_password(password: str, password_hash: str) -> bool:
-    return bcrypt.checkpw( 
-        password.encode("utf-8"), # str 轉成 byte
-        password_hash.encode("utf-8") # str 轉成 byte
+    return bcrypt.checkpw(
+        password.encode("utf-8"),       # Convert string to bytes
+        password_hash.encode("utf-8")   # Convert stored hash string to bytes
     )
 
-# 3、註冊: 將新註冊資料放入資料庫
-def register_user(name: str, email: str, password: str):
-    # # The bcrypt algorithm only handles passwords up to 72 characters
-    # if len(password) > 72:
 
-    # 為放入資料庫，優先連線
-    connection = get_connection() # 呼叫 connect 資料夾的函式
-    if connection is None:
-        return False, "資料庫連線失敗"
+# 3. Register:
+# Insert a new reader account into the database.
+def register_user(
+    name: str,
+    email: str,
+    password: str,
+    preferred_category: str = None,
+    receive_recommendations: bool = True
+):
+    # The bcrypt algorithm only handles passwords up to 72 bytes.
+    if len(password.encode("utf-8")) > 72:
+        return False, "Password is too long. Please use a password under 72 bytes."
 
-    # cursor是游標，對資料庫下指令的工具
-    cursor = connection.cursor(dictionary=True) # 採用字典取值方便，如:users[email]=webb@...
-
-    # (1) 先檢查 email 是否已存在
-    # execute() 執行 sql 指令
-    cursor.execute("SELECT id FROM users WHERE email = %s", (email,)) # (email,)是真正的email值，單一元素這樣寫
-    existing_user = cursor.fetchone() # fetchone(): 抓查詢結果的第一筆資料
-    
-    # 重複
-    if existing_user: 
-        cursor.close()
-        connection.close()
-        return False, "此電子信箱已被註冊"
-    
-    # 未重複
-    # (2) 密碼做 hash
-    # 寫入 users table
-    password_hash = hash_password(password)
-
-    cursor.execute(
-        """
-        INSERT INTO users (name, email, password_hash)
-        VALUES (%s, %s, %s)
-        """,
-        (name, email, password_hash)
-    )
-    connection.commit() # 將記錄正式存入資料庫
-
-    cursor.close()
-    connection.close()
-    return True, "註冊成功"
-
-# 4、登入: 確認使用者輸入 email、pw 是否正確
-def login_user(email: str, password: str):
-    # 需要抓 DB 的資料比對，故須先連線
+    # Connect to the database before inserting data.
     connection = get_connection()
     if connection is None:
-        return False, "資料庫連線失敗"
+        return False, "Database connection failed."
+
+    # A cursor is used to execute SQL commands.
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+        # 1. Check whether the email already exists.
+        cursor.execute(
+            """
+            SELECT Reader_ID
+            FROM readers
+            WHERE Email = %s
+            """,
+            (email,)
+        )
+        existing_user = cursor.fetchone()
+
+        if existing_user:
+            return False, "This email has already been registered."
+
+        # 2. Hash the password before storing it in the database.
+        password_hash = hash_password(password)
+
+        # 3. Insert the new reader into the readers table.
+        cursor.execute(
+            """
+            INSERT INTO readers (
+                Name,
+                Email,
+                Password_Hash,
+                Preferred_Category,
+                Receive_Recommendations
+            )
+            VALUES (%s, %s, %s, %s, %s)
+            """,
+            (
+                name,
+                email,
+                password_hash,
+                preferred_category,
+                receive_recommendations
+            )
+        )
+
+        connection.commit()
+        return True, "Registration successful."
+
+    except Exception as e:
+        connection.rollback()
+        return False, f"Registration failed: {e}"
+
+    finally:
+        cursor.close()
+        connection.close()
+
+
+# 4. Login:
+# Check whether the input email and password are correct.
+def login_user(email: str, password: str):
+    # Connect to the database to retrieve reader account data.
+    connection = get_connection()
+    if connection is None:
+        return False, "Database connection failed."
 
     cursor = connection.cursor(dictionary=True)
-    
-    # (1) 先比對帳號(email)
-    cursor.execute(
-        """
-        SELECT id, name, email, password_hash
-        FROM users
-        WHERE email = %s
-        """,
-        (email,)
-    )
-    user = cursor.fetchone()
 
-    cursor.close()
-    connection.close()
-    
-    # 帳號不存在
-    if not user: # user["email"] 預設 null
-        return False, "查無此帳號"
-    
-    # 帳號存在
-    # (2) 再比較密碼
-    if verify_password(password, user["password_hash"]): # user["password_hash"] 取 DB 的 pw_hash
-        return True, "歡迎", user["name"]
+    try:
+        # 1. Find the reader account by email.
+        cursor.execute(
+            """
+            SELECT Reader_ID, Name, Email, Password_Hash, Preferred_Category, Points
+            FROM readers
+            WHERE Email = %s
+            """,
+            (email,)
+        )
+        user = cursor.fetchone()
 
-    return False, "密碼錯誤"
+        # Account does not exist.
+        if not user:
+            return False, "Account not found."
+
+        # 2. Verify the password.
+        if verify_password(password, user["Password_Hash"]):
+            return True, "Login successful.", user
+
+        return False, "Incorrect password."
+
+    except Exception as e:
+        return False, f"Login failed: {e}"
+
+    finally:
+        cursor.close()
+        connection.close()

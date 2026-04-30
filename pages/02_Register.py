@@ -2,25 +2,32 @@
 # FILE: pages/02_Register.py
 # PURPOSE: Registration page for new LibTrack users.
 #
-# FUTURE BACK-END INTEGRATION:
-#   - On submit: POST /api/auth/register with user data
-#   - Preferred genres stored in the `user_preferences` table
-#   - Recommendation toggle stored in user profile settings
-#   - On success: redirect to Login page or auto-login
+# BACK-END INTEGRATION:
+#   - On submit, the page calls register_user().
+#   - Reader data is inserted into the readers table.
+#   - Preferred genres are stored as a comma-separated string in Preferred_Category.
+#   - Recommendation preference is stored in Receive_Recommendations.
+#   - On success, the user is redirected to the Login page.
 # =============================================================================
 
 import streamlit as st
-import sys, os
+import sys
+import os
+
+# Allow this page to import modules from the project root directory.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from components.ui_helpers import inject_global_css, render_navbar, page_spacer, COLORS
+from components.ui_helpers import inject_global_css, render_navbar, page_spacer
 from data.mock_data import GENRES
+from UI.Login.auth import register_user
+
 
 st.set_page_config(
     page_title="Register — LibTrack",
     page_icon="📖",
     layout="wide",
 )
+
 inject_global_css()
 render_navbar()
 page_spacer(40)
@@ -38,20 +45,19 @@ with center_col:
     )
 
     # -------------------------------------------------------------------------
-    # USERNAME INPUT
-    # In production: sent to POST /api/auth/register as `username`.
-    # The API checks for uniqueness before creating the account.
+    # NAME INPUT
+    # This value is stored in readers.Name.
     # -------------------------------------------------------------------------
-    username_input = st.text_input(
-        "Username",
-        placeholder="marie_reads",
-        key="reg_username",
+    name_input = st.text_input(
+        "Name",
+        placeholder="Marie",
+        key="reg_name",
     )
 
     # -------------------------------------------------------------------------
     # EMAIL INPUT
-    # In production: sent as `email` to POST /api/auth/register.
-    # Must be a valid and unique email address.
+    # This value is stored in readers.Email.
+    # The database also checks that Email is unique.
     # -------------------------------------------------------------------------
     email_input = st.text_input(
         "Email address",
@@ -63,8 +69,8 @@ with center_col:
 
     # -------------------------------------------------------------------------
     # PASSWORD + CONFIRM PASSWORD
-    # In production: hashed client-side before sending to the API.
-    # Server will also verify the hash during login.
+    # The plain-text password is sent to register_user(), then hashed with bcrypt
+    # before being stored in readers.Password_Hash.
     # -------------------------------------------------------------------------
     with col_pw1:
         password_input = st.text_input(
@@ -73,6 +79,7 @@ with center_col:
             placeholder="At least 8 characters",
             key="reg_pw",
         )
+
     with col_pw2:
         confirm_pw = st.text_input(
             "Confirm password",
@@ -85,10 +92,11 @@ with center_col:
 
     # -------------------------------------------------------------------------
     # PREFERRED GENRES MULTI-SELECT
-    # In production: stored in the `user_preferences` table as a list of
-    # genre_id values. Used by the recommendation system.
+    # The selected genres are stored as a comma-separated string in
+    # readers.Preferred_Category.
     # -------------------------------------------------------------------------
     genre_list = [g for g in GENRES if g != "All genres"]
+
     preferred_genres = st.multiselect(
         "Preferred book genres (choose all that apply)",
         options=genre_list,
@@ -101,9 +109,7 @@ with center_col:
 
     # -------------------------------------------------------------------------
     # PERSONALIZED RECOMMENDATIONS TOGGLE
-    # In production: stored as `receive_recommendations` (boolean) in the
-    # user_settings table. Affects whether the recommendation engine
-    # generates suggestions for this user.
+    # This value is stored in readers.Receive_Recommendations.
     # -------------------------------------------------------------------------
     receive_recs = st.toggle(
         "Enable personalized book recommendations",
@@ -116,7 +122,7 @@ with center_col:
 
     # -------------------------------------------------------------------------
     # CREATE ACCOUNT BUTTON
-    # In production: sends all form data to POST /api/auth/register
+    # Calls the back-end register_user() function.
     # -------------------------------------------------------------------------
     register_btn = st.button(
         "Create my account",
@@ -126,34 +132,53 @@ with center_col:
     )
 
     if register_btn:
-        # MOCK VALIDATION — replace with real API call in production
         errors = []
-        if not username_input:
-            errors.append("Username is required.")
+
+        if not name_input:
+            errors.append("Name is required.")
+
         if not email_input or "@" not in email_input:
             errors.append("A valid email address is required.")
+
         if len(password_input) < 8:
             errors.append("Password must be at least 8 characters.")
+
         if password_input != confirm_pw:
             errors.append("Passwords do not match.")
+
         if not preferred_genres:
             errors.append("Please select at least one genre.")
 
         if errors:
             for err in errors:
                 st.error(err)
+
         else:
-            st.success("Account created successfully! You can now log in.")
-            # In production: auto-login or redirect to login page
-            st.balloons()
+            preferred_category = ", ".join(preferred_genres)
+
+            success, message = register_user(
+                name=name_input,
+                email=email_input,
+                password=password_input,
+                preferred_category=preferred_category,
+                receive_recommendations=receive_recs,
+            )
+
+            if success:
+                st.success(message)
+                st.balloons()
+                st.switch_page("pages/01_Login.py")
+            else:
+                st.error(message)
 
     page_spacer(12)
-    st.markdown('<hr>', unsafe_allow_html=True)
+    st.markdown("<hr>", unsafe_allow_html=True)
     page_spacer(4)
 
     st.markdown(
         '<div style="text-align:center;" class="muted">Already have an account?</div>',
         unsafe_allow_html=True,
     )
+
     if st.button("Sign in", use_container_width=True, key="go_login"):
         st.switch_page("pages/01_Login.py")

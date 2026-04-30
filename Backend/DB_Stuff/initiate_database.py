@@ -21,15 +21,15 @@ def initiate_readers():
     query = (
         """
         CREATE TABLE IF NOT EXISTS readers (
-        reader_id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        email VARCHAR(255) NOT NULL UNIQUE,
-        password_hash VARCHAR(255) NOT NULL,
-        preferred_category VARCHAR(255),
-        points INT DEFAULT 0,
-        receive_recommendations BOOLEAN DEFAULT TRUE,
-        show_reading_history BOOLEAN DEFAULT TRUE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
+        Reader_ID INT AUTO_INCREMENT PRIMARY KEY,
+        Name VARCHAR(100) NOT NULL,
+        Email VARCHAR(255) NOT NULL UNIQUE,
+        Password_Hash VARCHAR(255) NOT NULL,
+        Preferred_Category VARCHAR(255),
+        Points INT DEFAULT 0,
+        Receive_Recommendations BOOLEAN DEFAULT TRUE,
+        Show_Reading_History BOOLEAN DEFAULT TRUE,
+        Created_At TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
         """
     )
     db_connect.execute_query(query)
