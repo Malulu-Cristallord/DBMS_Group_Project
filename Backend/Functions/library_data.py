@@ -569,3 +569,16 @@ def get_reader_badges(reader: dict[str, Any] | None, posts_published: int = 0) -
     ]
     if not table_exists("posts"):
         return False, "The posts table does not exist yet. Run the database setup first."
+
+
+#for post request, we can search by title or isbn, 
+#if isbn is given, if we need to get the book data and insert into db?, 
+#if title is given, we can search for books with similar title, 
+
+def get_books_by_title(keyword): #it works now.
+    query = "SELECT * FROM books WHERE title LIKE %s"
+    return fetch_all(query, (f"%{keyword}%",))
+
+def get_book_by_isbn(isbn): #it doesnot work now
+    query = "SELECT * FROM books WHERE ISBN = %s"
+    return fetch_all(query, (f"%{isbn}%",))

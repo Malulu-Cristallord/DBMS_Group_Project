@@ -65,6 +65,5 @@ def test_connection():
 
     return insert_book(query, values)
 
-
 def clean_table():
     return execute_query("TRUNCATE TABLE books")

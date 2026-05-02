@@ -1,4 +1,5 @@
-from Backend.DB_Stuff import db_connect
+#from Backend.DB_Stuff 
+import db_connect
 
 
 def initiate_books():

@@ -11,6 +11,8 @@ from Backend.Functions.library_data import (
     get_books,
     get_reader_from_session,
     reader_initials,
+    get_book_by_isbn,
+    get_books_by_title
 )
 from components.ui_helpers import (
     COLORS,
@@ -64,26 +66,23 @@ with center_col:
 
     page_spacer(8)
 
-    books = get_books(sort_option="title")
+    search_type = st.radio("Search by", ["Title", "ISBN"], horizontal=True)
+
+    if search_type == "Title":
+        keyword = st.text_input("Enter book title")
+        books = get_books_by_title(keyword) if keyword else []
+    else:
+        isbn = st.text_input("Enter ISBN")
+        books = get_book_by_isbn(isbn) if isbn else []
+
     book_options = {"No book linked": None}
-    book_options.update({f'{book["title"]} - {book["author"]}': book["id"] for book in books})
-
-    default_book_id = st.session_state.get("post_book_id")
-    option_labels = list(book_options.keys())
-    default_index = 0
-    if default_book_id:
-        for index, label in enumerate(option_labels):
-            if str(book_options[label]) == str(default_book_id):
-                default_index = index
-                break
-
-    linked_book = st.selectbox(
-        "Link to a book",
-        options=option_labels,
-        index=default_index,
-        key="post_book",
-        help="The selected value is stored as posts.Book_ID.",
-    )
+    get_books()
+    st.write(books)
+    book_options.update({f'{b["Title"]} - {b["Author"]}': b["Book_ID"] for b in books})
+    linked_book = st.selectbox("Select book", list(book_options.keys()))
+    rating = None
+    if book_options[linked_book] is not None:
+       rating = st.slider("Rate this book", 1, 5)
 
     page_spacer(12)
 
@@ -95,7 +94,7 @@ with center_col:
                 reader_id=current_reader["Reader_ID"],
                 book_id=book_options[linked_book],
                 content=post_content,
-                rating=None,
+                rating=rating
             )
             if success:
                 st.success("Your post has been published to the community feed.")
