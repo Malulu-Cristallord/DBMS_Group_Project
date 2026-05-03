@@ -1,82 +1,101 @@
+#from Backend.DB_Stuff 
 import db_connect
 
 
 def initiate_books():
-    query = (
-            "CREATE TABLE IF NOT EXISTS books ("
-            "Title            VARCHAR(255) NOT NULL,"
-            "Book_ID          INT AUTO_INCREMENT PRIMARY KEY NOT NULL,"
-            "ISBN             VARCHAR(18) NOT NULL,"
-            "Category         VARCHAR(255),"
-            "Publisher        VARCHAR(255),"
-            "Published_Year   YEAR,"
-            "Author           VARCHAR(255),"
-            "Cover            VARCHAR(255),"
-            "Description      VARCHAR(255),"
-            "Rating           DECIMAL)")
+    query = """
+    CREATE TABLE IF NOT EXISTS books (
+        Book_ID INT AUTO_INCREMENT PRIMARY KEY,
+        Title VARCHAR(255) NOT NULL,
+        ISBN VARCHAR(18) NOT NULL,
+        Category VARCHAR(255),
+        Publisher VARCHAR(255),
+        Published_Year YEAR,
+        Author VARCHAR(255),
+        Cover VARCHAR(255),
+        Description VARCHAR(255),
+        Rating DECIMAL(3, 1)
+    )
+    """
     db_connect.execute_query(query)
 
 
-def initiate_users():
-    query = (
-            "CREATE TABLE IF NOT EXISTS users ("
-            "User_ID           INT AUTO_INCREMENT PRIMARY KEY,"
-            "Name              VARCHAR(100) NOT NULL,"
-            "Email             VARCHAR(255) NOT NULL UNIQUE,"
-            "Password_Hash     VARCHAR(255) NOT NULL,"
-            "Created_At        TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
+def initiate_readers():
+    query = """
+    CREATE TABLE IF NOT EXISTS readers (
+        Reader_ID INT AUTO_INCREMENT PRIMARY KEY,
+        Name VARCHAR(100) NOT NULL,
+        Email VARCHAR(255) NOT NULL UNIQUE,
+        Password_Hash VARCHAR(255) NOT NULL,
+        Preferred_Category VARCHAR(255),
+        Points INT DEFAULT 0,
+        Receive_Recommendations BOOLEAN DEFAULT TRUE,
+        Show_Reading_History BOOLEAN DEFAULT TRUE,
+        Created_At TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """
     db_connect.execute_query(query)
 
-def initiate_bookshelf():
-    query = ("CREATE TABLE IF NOT EXISTS bookshelf (") #TBA
 
 def initiate_posts():
-    query = (
-            "CREATE TABLE IF NOT EXISTS posts ("
-            "Title            VARCHAR(255),"
-            "Post_ID          INT AUTO_INCREMENT PRIMARY KEY NOT NULL,"
-            "User_ID          INT REFERENCES Users(User_ID),"
-            "Book_ID          INT REFERENCES Books(Book_ID),"
-            "Upvote_count     INT,"
-            "Created_Date     DATE,"
-            "Rating           SMALLINT)"
-            )
+    query = """
+    CREATE TABLE IF NOT EXISTS posts (
+        Post_ID INT AUTO_INCREMENT PRIMARY KEY,
+        Title VARCHAR(255),
+        Reader_ID INT,
+        Book_ID INT,
+        Upvote_count INT DEFAULT 0,
+        Created_Date DATE,
+        Rating SMALLINT,
+        CONSTRAINT fk_posts_reader
+            FOREIGN KEY (Reader_ID) REFERENCES readers(Reader_ID),
+        CONSTRAINT fk_posts_book
+            FOREIGN KEY (Book_ID) REFERENCES books(Book_ID)
+    )
+    """
     db_connect.execute_query(query)
 
+
 def del_all():
-    query = "DROP TABLE IF EXISTS books, users, posts;"
+    query = "DROP TABLE IF EXISTS posts, books, readers"
     db_connect.execute_query(query)
-    
+
+
 def execute_all_methods():
     initiate_books()
-    initiate_users()
+    initiate_readers()
     initiate_posts()
 
 
-# Run program
-print("Welcome to our group project\nBefore we begin, please make sure that you have a database named \'dbms_group_project\" so that the system can connect\n")
-print("Select your desired function to run, or enter \'full\' for running all initiate db function:\n"
-      "(A) initiate books table\n"
-      "(B) initiate users table\n"
-      "(C) initiate posts table\n"
-      "(N) delete all existing tables (!!Not recommended!!)\n")
-dev_input = input()
+def main():
+    print(
+        "Welcome to LibTrack database setup. Make sure database "
+        "'dbms_group_project' exists before running this script."
+    )
+    print(
+        "Select a setup option:\n"
+        "(A) initiate books table\n"
+        "(B) initiate readers table\n"
+        "(C) initiate posts table\n"
+        "(N) delete all existing tables\n"
+        "(full) initiate all tables\n"
+    )
+    dev_input = input().strip()
 
-match dev_input:
-    case 'A' :
-        initiate_books()
-    case 'B' :
-        initiate_users()
-    case 'C' :
-        initiate_posts()
-    case 'N' :
-        print("THIS IS NO JOKE, DO YOU REALLY WANT TO DELETE THE WHOLE DATABASE???(type \'affirmative\' to confirm)\ntype any key to stop")
-        confirmation_input = input()
-        if confirmation_input == 'affirmative':
-            print("Action confirmed, initiating deletion protocol.")
-            del_all()
-        else:
-            print("Phew, I saved your database")
-            exit()
-    case "full" :
-        execute_all_methods()
+    match dev_input:
+        case "A":
+            initiate_books()
+        case "B":
+            initiate_readers()
+        case "C":
+            initiate_posts()
+        case "N":
+            confirmation_input = input("Type 'affirmative' to drop posts, books, and readers: ").strip()
+            if confirmation_input == "affirmative":
+                del_all()
+        case "full":
+            execute_all_methods()
+
+
+if __name__ == "__main__":
+    main()

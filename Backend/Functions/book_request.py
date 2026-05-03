@@ -1,86 +1,67 @@
-from tokenize import String
-
 import requests
 
 from Backend.DB_Stuff import db_connect
 
 
-# Notes: The current db source, Open Library, is still our best choice when it comes to fetching books.
-# However, the db seems to have a major lack of books in Asian language.
-# I will try to use more APIs if possible, and keep them free cause even the biggest dbs I can find still have big holes in them.
-# -Malu
-
-# Formatting data
 def format_subjects(book_data):
-    try:
-        subjects_list = book_data["subjects"]
-        subjects_str = " / ".join(subjects_list)
-        return subjects_str
-    except KeyError:
-        return "None"
+    subjects = book_data.get("subjects", [])
+    return " / ".join(subjects) if subjects else "None"
+
 
 def data_to_db(book_data, author_data):
+    title = book_data.get("title", "")
+    isbn = book_data.get("isbn_13", [""])[0]
+    category = format_subjects(book_data)
+    author_name = author_data.get("personal_name", "Unknown")
+    rating = 0
+
+    description = book_data.get("description", "")
+    if isinstance(description, dict):
+        description = description.get("value", "")
+
+    publisher = book_data.get("publishers", [""])[0]
+    published_year = book_data.get("publish_date", "")[-4:]
+
+    query = """
+    INSERT INTO books
+    (Title, ISBN, Category, Author, Rating, Description, Publisher, Published_Year)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    """
+
+    values = (
+        title,
+        isbn,
+        category,
+        author_name,
+        rating,
+        description[:255] if description else "",
+        publisher,
+        published_year if published_year.isdigit() else None,
+    )
+
+    return db_connect.insert_book(query, values)
+
+
+def request_book_data(isbn_value):
     try:
-        title = book_data.get("title", "")
-        isbn = book_data.get("isbn_13", [""])[0]
-        category = " "
-        author_name = author_data.get("personal_name", "Unknown")
-        rating = 0
-
-        description = book_data.get("description", "")
-        if isinstance(description, dict):
-            description = description.get("value", "")
-
-        publisher = book_data.get("publishers", [""])[0]
-        published_year = book_data.get("publish_date","%Y")
-
-        query = """
-        INSERT INTO Books
-        (Title, ISBN, Category, Author, Rating, Description, Publisher, Published_Year)
-        VALUES (%s, %s, %s, %s, %d, %s, %s, %s)
-        """
-
-        values = (
-            title,
-            isbn,
-            category,
-            author_name,
-            rating,
-            description,
-            publisher,
-            published_year
-        )
-
-        db_connect.insert_book(query, values)
-        print(f"trying to insert: {query}\n{values}")
-
-    except Exception as e:
-        print("Error occurred while inserting data:", e)
-
-
-def request_book_data(user_input):
-
-    print("requesting book data...")
-    # Gather data with api
-    try:
-        book_api = f"https://openlibrary.org/isbn/{user_input}.json"
-        book_response = requests.get(book_api)
+        book_api = f"https://openlibrary.org/isbn/{isbn_value}.json"
+        book_response = requests.get(book_api, timeout=10)
+        book_response.raise_for_status()
         book_data = book_response.json()
+
         author_id = book_data["authors"][0]["key"]
         author_api = f"https://openlibrary.org{author_id}.json"
-        author_response = requests.get(author_api, timeout=5)
+        author_response = requests.get(author_api, timeout=10)
+        author_response.raise_for_status()
         author_data = author_response.json()
-        print(book_api)
-        print(book_data)
-        print(author_api)
-        print(author_data)
+
         data_to_db(book_data, author_data)
-        # Test stat = 9780439362139 (Harry Potter 1)
         return book_data
 
-    except KeyError:
-        return "Unable to retrieve data. Check the ISBN number."
+    except (KeyError, IndexError, requests.RequestException) as exc:
+        return {"error": f"Unable to retrieve data for ISBN {isbn_value}: {exc}"}
 
-print("input isbn(9780439362139)")
-isbn = input()
-request_book_data(isbn)
+
+if __name__ == "__main__":
+    isbn = input("Input ISBN: ").strip()
+    print(request_book_data(isbn))
