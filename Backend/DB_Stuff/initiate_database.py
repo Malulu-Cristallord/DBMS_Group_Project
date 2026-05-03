@@ -5,16 +5,16 @@ import db_connect
 def initiate_books():
     query = """
     CREATE TABLE IF NOT EXISTS books (
-        Book_ID INT AUTO_INCREMENT PRIMARY KEY,
-        Title VARCHAR(255) NOT NULL,
-        ISBN VARCHAR(18) NOT NULL,
-        Category VARCHAR(255),
-        Publisher VARCHAR(255),
-        Published_Year YEAR,
-        Author VARCHAR(255),
-        Cover VARCHAR(255),
-        Description VARCHAR(255),
-        Rating DECIMAL(3, 1)
+        Book_ID          INT                AUTO_INCREMENT PRIMARY KEY,
+        Title            VARCHAR(255)       NOT NULL,
+        ISBN             VARCHAR(18)        NOT NULL,
+        Category         VARCHAR(255),
+        Publisher        VARCHAR(255),
+        Published_Year   YEAR,
+        Author           VARCHAR(255),
+        Cover            VARCHAR(255),
+        Description      VARCHAR(255),
+        Rating           DECIMAL(3, 1)
     )
     """
     db_connect.execute_query(query)
@@ -23,15 +23,15 @@ def initiate_books():
 def initiate_readers():
     query = """
     CREATE TABLE IF NOT EXISTS readers (
-        Reader_ID INT AUTO_INCREMENT PRIMARY KEY,
-        Name VARCHAR(100) NOT NULL,
-        Email VARCHAR(255) NOT NULL UNIQUE,
-        Password_Hash VARCHAR(255) NOT NULL,
-        Preferred_Category VARCHAR(255),
-        Points INT DEFAULT 0,
-        Receive_Recommendations BOOLEAN DEFAULT TRUE,
-        Show_Reading_History BOOLEAN DEFAULT TRUE,
-        Created_At TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        Reader_ID               INT             AUTO_INCREMENT PRIMARY KEY,
+        Name                    VARCHAR(100)    NOT NULL,
+        Email                   VARCHAR(255)    NOT NULL UNIQUE,
+        Password_Hash           VARCHAR(255)    NOT NULL,
+        Preferred_Category      VARCHAR(255),
+        Points                  INT             DEFAULT 0,
+        Receive_Recommendations BOOLEAN         DEFAULT TRUE,
+        Show_Reading_History    BOOLEAN         DEFAULT TRUE,
+        Created_At              TIMESTAMP       DEFAULT CURRENT_TIMESTAMP
     )
     """
     db_connect.execute_query(query)
@@ -40,13 +40,13 @@ def initiate_readers():
 def initiate_posts():
     query = """
     CREATE TABLE IF NOT EXISTS posts (
-        Post_ID INT AUTO_INCREMENT PRIMARY KEY,
-        Title VARCHAR(255),
-        Reader_ID INT,
-        Book_ID INT,
-        Upvote_count INT DEFAULT 0,
-        Created_Date DATE,
-        Rating SMALLINT,
+        Post_ID             INT             AUTO_INCREMENT PRIMARY KEY,
+        Title               VARCHAR(255),
+        Reader_ID           INT,
+        Book_ID             INT,
+        Upvote_count        INT DEFAULT 0,
+        Created_Date        DATE,
+        Rating              SMALLINT,
         CONSTRAINT fk_posts_reader
             FOREIGN KEY (Reader_ID) REFERENCES readers(Reader_ID),
         CONSTRAINT fk_posts_book
@@ -90,7 +90,7 @@ def main():
         case "C":
             initiate_posts()
         case "N":
-            confirmation_input = input("Type 'affirmative' to drop posts, books, and readers: ").strip()
+            confirmation_input = input("THIS IS NO JOKE! TYPE \'affirmative\' TO CONFIRM DELETION").strip()
             if confirmation_input == "affirmative":
                 del_all()
         case "full":

@@ -9,11 +9,12 @@ def test_env():
 
 def get_connection():
     return mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "root"),
+        host="localhost",
+        user="root",
         password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME", "dbms_group_project"),
+        database="dbms_group_project",
         connection_timeout=5,
+        # From Malu: Do not change this function
     )
 
 
@@ -73,7 +74,3 @@ def clean_table():
     cursor.close()
     conn.close()
 
-test_env()
-test_connection()
-clean_table()
-    return execute_query("TRUNCATE TABLE books")
