@@ -82,3 +82,7 @@ def clean_table():
     conn.commit()
     cursor.close()
     conn.close()
+
+test_env()
+test_connection()
+clean_table()

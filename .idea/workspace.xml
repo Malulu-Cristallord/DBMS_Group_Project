@@ -4,23 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4c0b4b54-7149-4888-b2c8-68a9273f4334" name="Changes" comment="" />
-    <list default="true" id="4c0b4b54-7149-4888-b2c8-68a9273f4334" name="Changes" comment="">
+    <list default="true" id="4c0b4b54-7149-4888-b2c8-68a9273f4334" name="Changes" comment="Merge branch 'master' of https://github.com/Malulu-Cristallord/DBMS_Group_Project&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/01_Login.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/01_Login.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/02_Register.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/02_Register.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/03_Discovery.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/03_Discovery.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/04_Borrowings.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/04_Borrowings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/05_Book_Detail.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/05_Book_Detail.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/05_Posts_Reviews.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/05_Posts_Reviews.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/06_Create_Review.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/06_Create_Review.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/06_Reading_History.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/06_Reading_History.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/07_Create_Post.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/07_Create_Post.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/08_Profile.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/08_Profile.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/09_Settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/09_Settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/10_Stats_Leaderboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/10_Stats_Leaderboard.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/11_Add_Books.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/11_Add_Books.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/DB_Stuff/db_connect.py" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/DB_Stuff/db_connect.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,7 +57,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Trying-to-Merge&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/twgam/OneDrive/桌面/Coding Projects/python/DBMS_Group_Project&quot;
   }
