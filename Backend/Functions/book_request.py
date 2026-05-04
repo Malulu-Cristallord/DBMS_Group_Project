@@ -9,6 +9,7 @@ def format_subjects(book_data):
 
 
 def data_to_db(book_data, author_data):
+    print("data to db")
     title = book_data.get("title", "")
     isbn = book_data.get("isbn_13", [""])[0]
     category = format_subjects(book_data)
@@ -38,6 +39,7 @@ def data_to_db(book_data, author_data):
         publisher,
         published_year if published_year.isdigit() else None,
     )
+    print("values:", values)
 
     return db_connect.insert_book(query, values)
 
@@ -61,7 +63,8 @@ def request_book_data(isbn_value):
     except (KeyError, IndexError, requests.RequestException) as exc:
         return {"error": f"Unable to retrieve data for ISBN {isbn_value}: {exc}"}
 
+def test():
+    print("Test phase, input = 9780141346809")
+    request_book_data("9780141346809")
 
-if __name__ == "__main__":
-    isbn = input("Input ISBN: ").strip()
-    print(request_book_data(isbn))
+test()

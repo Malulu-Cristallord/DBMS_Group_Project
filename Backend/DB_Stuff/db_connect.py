@@ -3,6 +3,7 @@ import os
 import mysql.connector
 
 
+
 def test_env():
     print(os.getenv("DB_PASSWORD"))
 
@@ -27,7 +28,7 @@ def execute_query(query, values=None):
         cursor = connection.cursor()
         cursor.execute(query, values or ())
         connection.commit()
-        return None
+        print("Query committed")
     except mysql.connector.Error as exc:
         if connection:
             connection.rollback()
@@ -47,6 +48,22 @@ def insert_book(query, values=None):
 
 
 def test_connection():
+    query = """
+    CREATE TABLE IF NOT EXISTS books (
+        Book_ID          INT                AUTO_INCREMENT PRIMARY KEY,
+        Title            VARCHAR(255)       NOT NULL,
+        ISBN             VARCHAR(18)        NOT NULL,
+        Category         VARCHAR(255),
+        Publisher        VARCHAR(255),
+        Published_Year   YEAR,
+        Author           VARCHAR(255),
+        Cover            VARCHAR(255),
+        Description      VARCHAR(255),
+        Rating           DECIMAL(3, 1)
+    )
+    """
+    execute_query(query)
+
     query = """
     INSERT INTO books
     (Title, ISBN, Category, Author, Rating, Description, Publisher, Published_Year)
@@ -74,3 +91,5 @@ def clean_table():
     cursor.close()
     conn.close()
 
+test_env()
+print(get_connection())

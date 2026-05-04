@@ -66,36 +66,43 @@ def execute_all_methods():
     initiate_readers()
     initiate_posts()
 
-
-def main():
-    print(
-        "Welcome to LibTrack database setup. Make sure database "
-        "'dbms_group_project' exists before running this script."
-    )
-    print(
-        "Select a setup option:\n"
-        "(A) initiate books table\n"
-        "(B) initiate readers table\n"
-        "(C) initiate posts table\n"
-        "(N) delete all existing tables\n"
-        "(full) initiate all tables\n"
-    )
-    dev_input = input().strip()
-
-    match dev_input:
-        case "A":
-            initiate_books()
-        case "B":
-            initiate_readers()
-        case "C":
-            initiate_posts()
-        case "N":
-            confirmation_input = input("THIS IS NO JOKE! TYPE \'affirmative\' TO CONFIRM DELETION").strip()
-            if confirmation_input == "affirmative":
-                del_all()
-        case "full":
-            execute_all_methods()
+def data_test():
+    query = "CREATE TABLE IF NOT EXISTS test(test int)"
+    db_connect.execute_query(query)
+    query = "INSERT INTO test (test) VALUES (1)"
+    db_connect.execute_query(query)
+    query = "SELECT * FROM test"
+    db_connect.execute_query(query)
 
 
-if __name__ == "__main__":
-    main()
+# Do not use main method
+print(
+    "Welcome to LibTrack database setup. Make sure database "
+    "'dbms_group_project' exists before running this script."
+)
+print(
+    "Select a setup option:\n"
+    "(A) initiate books table\n"
+    "(B) initiate readers table\n"
+    "(C) initiate posts table\n"
+    "(N) delete all existing tables\n"
+    "(full) initiate all tables\n\n"
+    "(z) test"
+)
+dev_input = input()
+
+match dev_input:
+    case "A":
+        initiate_books()
+    case "B":
+        initiate_readers()
+    case "C":
+        initiate_posts()
+    case "N":
+        confirmation_input = input("THIS IS NO JOKE! TYPE \'affirmative\' TO CONFIRM DELETION").strip()
+        if confirmation_input == "affirmative":
+            del_all()
+    case "full":
+        execute_all_methods()
+    case "z":
+        data_test()
