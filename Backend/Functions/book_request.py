@@ -24,7 +24,7 @@ def data_to_db(book_data, author_data):
     published_year = book_data.get("publish_date", "")[-4:]
 
     query = """
-    INSERT INTO books
+    INSERT IGNORE INTO books
     (Title, ISBN, Category, Author, Rating, Description, Publisher, Published_Year)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     """
@@ -66,5 +66,3 @@ def request_book_data(isbn_value):
 def test():
     print("Test phase, input = 9780141346809")
     request_book_data("9780141346809")
-
-test()

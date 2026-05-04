@@ -46,4 +46,4 @@ with center_col:
             if isinstance(result, dict) and result.get("error"):
                 st.error(result["error"])
             else:
-                st.success("Book data imported into the books table.")
+                st.success("Book data imported into our system database.\n Thank you for your contribution!")

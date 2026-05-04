@@ -5,8 +5,7 @@ import db_connect
 def initiate_books():
     query = """
     CREATE TABLE IF NOT EXISTS books (
-        Book_ID          INT                AUTO_INCREMENT PRIMARY KEY,
-        Title            VARCHAR(255)       NOT NULL,
+        Title            VARCHAR(255)       PRIMARY KEY NOT NULL,
         ISBN             VARCHAR(18)        NOT NULL,
         Category         VARCHAR(255),
         Publisher        VARCHAR(255),
@@ -43,14 +42,14 @@ def initiate_posts():
         Post_ID             INT             AUTO_INCREMENT PRIMARY KEY,
         Title               VARCHAR(255),
         Reader_ID           INT,
-        Book_ID             INT,
+        ISBN                INT,
         Upvote_count        INT DEFAULT 0,
         Created_Date        DATE,
         Rating              SMALLINT,
         CONSTRAINT fk_posts_reader
             FOREIGN KEY (Reader_ID) REFERENCES readers(Reader_ID),
         CONSTRAINT fk_posts_book
-            FOREIGN KEY (Book_ID) REFERENCES books(Book_ID)
+            FOREIGN KEY (ISBN) REFERENCES books(ISBN)
     )
     """
     db_connect.execute_query(query)
