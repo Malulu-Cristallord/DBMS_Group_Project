@@ -6,8 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="4c0b4b54-7149-4888-b2c8-68a9273f4334" name="Changes" comment="Merge branch 'master' of https://github.com/Malulu-Cristallord/DBMS_Group_Project&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/Functions/book_request.py" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/Functions/book_request.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/11_Add_Books.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/11_Add_Books.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/DB_Stuff/initiate_database.py" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/DB_Stuff/initiate_database.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

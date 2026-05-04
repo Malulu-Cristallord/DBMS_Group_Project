@@ -42,14 +42,12 @@ def initiate_posts():
         Post_ID             INT             AUTO_INCREMENT PRIMARY KEY,
         Title               VARCHAR(255),
         Reader_ID           INT,
-        ISBN                INT,
+        ISBN                VARCHAR(18) REFERENCES books(ISBN),
         Upvote_count        INT DEFAULT 0,
         Created_Date        DATE,
         Rating              SMALLINT,
         CONSTRAINT fk_posts_reader
-            FOREIGN KEY (Reader_ID) REFERENCES readers(Reader_ID),
-        CONSTRAINT fk_posts_book
-            FOREIGN KEY (ISBN) REFERENCES books(ISBN)
+            FOREIGN KEY (Reader_ID) REFERENCES readers(Reader_ID)
     )
     """
     db_connect.execute_query(query)
