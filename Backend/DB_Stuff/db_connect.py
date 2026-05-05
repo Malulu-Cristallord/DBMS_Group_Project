@@ -90,6 +90,3 @@ def clean_table():
     conn.commit()
     cursor.close()
     conn.close()
-
-test_env()
-print(get_connection())

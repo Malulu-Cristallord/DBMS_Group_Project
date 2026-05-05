@@ -43,7 +43,7 @@ def initiate_posts():
         Title               VARCHAR(255),
         Reader_ID           INT,
         ISBN                VARCHAR(18) REFERENCES books(ISBN),
-        Upvote_count        INT DEFAULT 0,
+        Upvote_Count        INT DEFAULT 0,
         Created_Date        DATE,
         Rating              SMALLINT,
         CONSTRAINT fk_posts_reader
@@ -52,6 +52,14 @@ def initiate_posts():
     """
     db_connect.execute_query(query)
 
+def initiate_badges():
+    query = """
+    CREATE TABLE IF NOT EXISTS badges (
+    Badge_ID           INT              PRIMARY KEY,
+    Badge_Name         VARCHAR(255),
+    Badge_Image        VARCHAR(255),
+    Badge_Description  VARCHAR(255))
+    """
 
 def del_all():
     query = "DROP TABLE IF EXISTS posts, books, readers"
@@ -82,7 +90,8 @@ print(
     "(A) initiate books table\n"
     "(B) initiate readers table\n"
     "(C) initiate posts table\n"
-    "(N) delete all existing tables\n"
+    "(D) initiate badges table\n"
+    "(N) delete all existing tables\n\n"
     "(full) initiate all tables\n\n"
     "(z) test"
 )
@@ -95,6 +104,8 @@ match dev_input:
         initiate_readers()
     case "C":
         initiate_posts()
+    case "D":
+        initiate_badges()
     case "N":
         confirmation_input = input("THIS IS NO JOKE! TYPE \'affirmative\' TO CONFIRM DELETION").strip()
         if confirmation_input == "affirmative":

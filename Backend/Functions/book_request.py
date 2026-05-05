@@ -1,4 +1,5 @@
 import requests
+from requests import RequestException
 
 from Backend.DB_Stuff import db_connect
 
@@ -57,11 +58,20 @@ def request_book_data(isbn_value):
         author_response.raise_for_status()
         author_data = author_response.json()
 
+        if book_data is None:
+            print("Failed to fetch data, trying to fetch from backup online database")
+
+
         data_to_db(book_data, author_data)
         return book_data
 
-    except (KeyError, IndexError, requests.RequestException) as exc:
+    except KeyError as exc:
         return {"error": f"Unable to retrieve data for ISBN {isbn_value}: {exc}"}
+
+
+def request_book_data_alt(isbn_value):
+    return None
+
 
 def test():
     print("Test phase, input = 9780141346809")
