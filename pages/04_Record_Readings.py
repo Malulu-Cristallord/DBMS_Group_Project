@@ -10,19 +10,19 @@ from components.ui_helpers import inject_global_css, page_spacer, render_navbar,
 
 
 st.set_page_config(
-    page_title="Borrowings | LibTrack",
+    page_title="Record Readings | LibTrack",
     page_icon="LT",
     layout="wide",
 )
 
 inject_global_css()
-render_navbar(active_page="borrowings")
+render_navbar(active_page="Record Readings")
 page_spacer(20)
 
 
 current_reader = get_reader_from_session(st.session_state)
 if current_reader is None:
-    st.warning("Please sign in to view reader borrowings.")
+    st.warning("Please sign in to record readings.")
     if st.button("Go to Login", type="primary"):
         st.switch_page("pages/01_Login.py")
     st.stop()

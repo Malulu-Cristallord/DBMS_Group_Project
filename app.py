@@ -139,6 +139,8 @@ st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 if st.button("Find books", type="primary"):
     st.switch_page("pages/03_Discovery.py")
+if st.button("Record Readings", type="primary"):
+    st.switch_page("pages/04_Record_Readings.py")
 
 
 section_title("Popular this week")

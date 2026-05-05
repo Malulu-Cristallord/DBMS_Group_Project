@@ -53,8 +53,8 @@ with sidebar_col:
         if st.button(item, key=f"posts_nav_{item}", use_container_width=True):
             if item == "My profile":
                 st.switch_page("pages/08_Profile.py")
-            elif item == "My borrowings":
-                st.switch_page("pages/04_Borrowings.py")
+            elif item == "Record readings":
+                st.switch_page("pages/04_Record_Readings.py")
             elif item == "History":
                 st.switch_page("pages/06_Reading_History.py")
 

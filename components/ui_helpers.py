@@ -312,7 +312,7 @@ def render_navbar(active_page: str = ""):
             </div>
             <div class="nav-links">
                 <span class="{nav_class("discover")}">Discover</span>
-                <span class="{nav_class("borrowings")}">Borrowings</span>
+                <span class="{nav_class("Record Readings")}">Record Readings</span>
                 <span class="{nav_class("my_library")}">My library</span>
             </div>
             <div style="display:flex; align-items:center; gap:16px;">
