@@ -415,20 +415,18 @@ def get_posts(
         SELECT
             p.Post_ID AS post_id,
             p.Reader_ID AS reader_id,
-            p.Book_ID AS book_id,
-            p.Title AS content,
-            p.Rating AS rating,
-            p.Upvote_count AS upvote_count,
-            p.Created_Date AS created_at,
+            p.ISBN AS isbn,
+            p.Content AS content,
+            p.Created_At AS created_at,
             r.Name AS reader_name,
             b.Title AS book_title,
             b.Author AS author,
             b.Cover AS cover
         FROM posts p
         LEFT JOIN readers r ON p.Reader_ID = r.Reader_ID
-        LEFT JOIN books b ON p.Book_ID = b.Book_ID
+        LEFT JOIN books b ON p.ISBN = b.ISBN
         {where_clause}
-        ORDER BY p.Created_Date DESC, p.Post_ID DESC
+        ORDER BY p.Created_At DESC, p.Post_ID DESC
         {limit_clause}
         """,
         tuple(params),
@@ -439,9 +437,8 @@ def get_posts(
 
 def create_post(
     reader_id: int | str,
-    book_id: int | str | None,
+    isbn: str | None,
     content: str,
-    rating: int | None = None,
 ) -> tuple[bool, str]:
     if not table_exists("posts"):
         return False, "The posts table does not exist yet. Run the database setup first."
@@ -453,24 +450,56 @@ def create_post(
     return execute_write(
         """
         INSERT INTO posts (
-            Title,
+            Content,
             Reader_ID,
-            Book_ID,
-            Upvote_count,
-            Created_Date,
-            Rating
+            ISBN,
+            Created_At
         )
-        VALUES (%s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s)
         """,
         (
             clean_content[:255],
             reader_id,
-            book_id,
-            0,
+            isbn,
             date.today(),
-            rating,
+            
         ),
     )
+
+def create_review(
+    reader_id: int | str,
+    isbn: str,
+    content: str,
+    rating: int,
+) -> tuple[bool, str]:
+
+    if not table_exists("reviews"):
+        return False, "The reviews table does not exist yet."
+
+    clean_content = content.strip()
+    if not clean_content:
+        return False, "Please write a review."
+
+    return execute_write(
+        """
+        INSERT INTO reviews (
+            Reader_ID,
+            ISBN,
+            Content,
+            Rating,
+            Created_at
+        )
+        VALUES (%s, %s, %s, %s, %s)
+        """,
+        (
+            reader_id,
+            isbn,
+            clean_content,
+            rating,
+            date.today(),
+        ),
+    )
+
 
 
 def get_reader_stats(reader_id: int | str) -> dict[str, Any]:
@@ -581,4 +610,4 @@ def get_books_by_title(keyword): #it works now.
 
 def get_book_by_isbn(isbn): #it doesnot work now
     query = "SELECT * FROM books WHERE ISBN = %s"
-    return fetch_all(query, (f"%{isbn}%",))
+    return fetch_all(query, (isbn,))
