@@ -28,6 +28,7 @@ def initiate_readers():
         Password_Hash           VARCHAR(255)    NOT NULL,
         Preferred_Category      VARCHAR(255),
         Points                  INT             DEFAULT 0,
+        Books_Read              INT             DEFAULT 0,
         Receive_Recommendations BOOLEAN         DEFAULT TRUE,
         Show_Reading_History    BOOLEAN         DEFAULT TRUE,
         Created_At              TIMESTAMP       DEFAULT CURRENT_TIMESTAMP
@@ -57,9 +58,11 @@ def initiate_badges():
     CREATE TABLE IF NOT EXISTS badges (
     Badge_ID           INT              PRIMARY KEY,
     Badge_Name         VARCHAR(255),
-    Badge_Image        VARCHAR(255),
-    Badge_Description  VARCHAR(255))
+    Badge_Image_Path   VARCHAR(255),
+    Badge_Description  VARCHAR(255), 
+    Badge_Points       INT)
     """
+    db_connect.execute_query(query)
 
 def del_all():
     query = "DROP TABLE IF EXISTS posts, books, readers"
@@ -80,7 +83,6 @@ def data_test():
     db_connect.execute_query(query)
 
 
-# Do not use main method
 print(
     "Welcome to LibTrack database setup. Make sure database "
     "'dbms_group_project' exists before running this script."

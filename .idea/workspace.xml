@@ -6,10 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="4c0b4b54-7149-4888-b2c8-68a9273f4334" name="Changes" comment="Merge branch 'master' of https://github.com/Malulu-Cristallord/DBMS_Group_Project&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/DB_Stuff/db_connect.py" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/DB_Stuff/db_connect.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Backend/DB_Stuff/initiate_database.py" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/DB_Stuff/initiate_database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/Functions/book_request.py" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/Functions/book_request.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TODO.txt" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Resources/4.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Resources/5.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Resources/6.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Resources/Badge_Read01.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Resources/Badge_Read02.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Resources/Badge_Read03.jpg" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,22 +52,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.app.executor": "Run",
-    "Python.book_request.executor": "Run",
-    "Python.db_connect.executor": "Run",
-    "Python.initiate_database.executor": "Run",
-    "Python.test.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/twgam/OneDrive/桌面/Coding Projects/python/DBMS_Group_Project"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.app.executor&quot;: &quot;Run&quot;,
+    &quot;Python.book_request.executor&quot;: &quot;Run&quot;,
+    &quot;Python.db_connect.executor&quot;: &quot;Run&quot;,
+    &quot;Python.initiate_database.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/twgam/OneDrive/桌面/Coding Projects/python/DBMS_Group_Project&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\twgam\OneDrive\桌面\Coding Projects\python\DBMS_Group_Project" />
