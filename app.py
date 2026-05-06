@@ -137,10 +137,13 @@ else:
 page_spacer(20)
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
+st.markdown('<body>This is a debug zone</body>', unsafe_allow_html=True)
 if st.button("Find books", type="primary"):
     st.switch_page("pages/03_Discovery.py")
 if st.button("Record Readings", type="primary"):
     st.switch_page("pages/04_Record_Readings.py")
+if st.button("Add Books", type="primary"):
+    st.switch_page("pages/11_Add_Books.py")
 
 
 section_title("Popular this week")
