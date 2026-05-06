@@ -5,8 +5,8 @@ import db_connect
 def initiate_books():
     query = """
     CREATE TABLE IF NOT EXISTS books (
-        Title            VARCHAR(255)       PRIMARY KEY NOT NULL,
-        ISBN             VARCHAR(18)        NOT NULL,
+        ISBN             VARCHAR(18)        PRIMARY KEY NOT NULL,
+        Title            VARCHAR(255)       NOT NULL,
         Category         VARCHAR(255),
         Publisher        VARCHAR(255),
         Published_Year   YEAR,
@@ -41,14 +41,57 @@ def initiate_posts():
     query = """
     CREATE TABLE IF NOT EXISTS posts (
         Post_ID             INT             AUTO_INCREMENT PRIMARY KEY,
-        Title               VARCHAR(255),
+        Content             VARCHAR(255),
         Reader_ID           INT,
         ISBN                VARCHAR(18) REFERENCES books(ISBN),
-        Upvote_Count        INT DEFAULT 0,
-        Created_Date        DATE,
-        Rating              SMALLINT,
+        Created_At          TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT fk_posts_reader
             FOREIGN KEY (Reader_ID) REFERENCES readers(Reader_ID)
+    )
+    """
+    db_connect.execute_query(query)
+
+def initiate_reviews():
+    query = """
+    CREATE TABLE IF NOT EXISTS reviews (
+        Review_ID           INT             AUTO_INCREMENT PRIMARY KEY,
+        Reader_ID           INT,
+        ISBN                VARCHAR(18) REFERENCES books(ISBN),
+        Rating              SMALLINT,
+        Content             VARCHAR(255),
+        Created_At          TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT fk_reviews_reader
+            FOREIGN KEY (Reader_ID) REFERENCES readers(Reader_ID)
+    )
+    """
+    db_connect.execute_query(query)
+
+def inititate_likes():
+    query = """
+    CREATE TABLE IF NOT EXISTS likes (
+        Like_ID             INT             AUTO_INCREMENT PRIMARY KEY,
+        Reader_ID           INT,
+        Post_ID             INT,
+        CONSTRAINT fk_likes_reader
+            FOREIGN KEY (Reader_ID) REFERENCES readers(Reader_ID),
+        CONSTRAINT fk_likes_post
+            FOREIGN KEY (Post_ID) REFERENCES posts(Post_ID)
+    )
+    """
+    db_connect.execute_query(query)
+
+def initiate_comments():
+    query = """
+    CREATE TABLE IF NOT EXISTS comments (
+        Comment_ID          INT             AUTO_INCREMENT PRIMARY KEY,
+        Reader_ID           INT,
+        Post_ID             INT,
+        Content             VARCHAR(255),
+        Created_At          TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT fk_comments_reader
+            FOREIGN KEY (Reader_ID) REFERENCES readers(Reader_ID),
+        CONSTRAINT fk_comments_post
+            FOREIGN KEY (Post_ID) REFERENCES posts(Post_ID)
     )
     """
     db_connect.execute_query(query)
