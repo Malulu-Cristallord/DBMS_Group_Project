@@ -6,7 +6,7 @@ import streamlit as st
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from Backend.Functions.library_data import get_books, get_genres
+from Backend.Functions.library_data import get_books, get_genres, increment_book_clicked
 from components.ui_helpers import (
     COLORS,
     inject_global_css,
@@ -138,6 +138,7 @@ with main_col:
             with cols[3]:
                 page_spacer(8)
                 if st.button("Details", key=f"disc_detail_{book['id']}"):
+                    increment_book_clicked(book["id"])
                     st.session_state["selected_book_id"] = book["id"]
                     st.switch_page("pages/05_Book_Detail.py")
 

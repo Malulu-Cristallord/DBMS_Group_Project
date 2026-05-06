@@ -13,7 +13,10 @@ def initiate_books():
         Author           VARCHAR(255),
         Cover            VARCHAR(255),
         Description      VARCHAR(255),
-        Rating           DECIMAL(3, 1)
+        Rating           DECIMAL(3, 1)      DEFAULT 0,
+        Average_Rating   DECIMAL(3, 1)      DEFAULT 0,
+        Clicked          INT                DEFAULT 0,
+        Saved            INT                DEFAULT 0
     )
     """
     db_connect.execute_query(query)
@@ -41,32 +44,61 @@ def initiate_posts():
     query = """
     CREATE TABLE IF NOT EXISTS posts (
         Post_ID             INT             AUTO_INCREMENT PRIMARY KEY,
-        Content             VARCHAR(255),
-        Reader_ID           INT,
-        ISBN                VARCHAR(18) REFERENCES books(ISBN),
-        Created_At          TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+        Review              VARCHAR(255),
+        Rating              SMALLINT,
+        Created_Date        TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+        Upvote_Count        INT             DEFAULT 0,
+        Reader_ID           INT             NOT NULL,
+        ISBN                VARCHAR(18),
         CONSTRAINT fk_posts_reader
-            FOREIGN KEY (Reader_ID) REFERENCES readers(Reader_ID)
+            FOREIGN KEY (Reader_ID) REFERENCES readers(Reader_ID),
+        CONSTRAINT fk_posts_book
+            FOREIGN KEY (ISBN) REFERENCES books(ISBN)
     )
     """
     db_connect.execute_query(query)
+
 
 def initiate_reviews():
     query = """
     CREATE TABLE IF NOT EXISTS reviews (
         Review_ID           INT             AUTO_INCREMENT PRIMARY KEY,
         Reader_ID           INT,
-        ISBN                VARCHAR(18) REFERENCES books(ISBN),
+        ISBN                VARCHAR(18),
         Rating              SMALLINT,
         Content             VARCHAR(255),
         Created_At          TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT fk_reviews_reader
-            FOREIGN KEY (Reader_ID) REFERENCES readers(Reader_ID)
+            FOREIGN KEY (Reader_ID) REFERENCES readers(Reader_ID),
+        CONSTRAINT fk_reviews_book
+            FOREIGN KEY (ISBN) REFERENCES books(ISBN)
     )
     """
     db_connect.execute_query(query)
 
-def inititate_likes():
+
+def initiate_recommendations():
+    query = """
+    CREATE TABLE IF NOT EXISTS recommendations (
+        Recommendation_ID    INT             AUTO_INCREMENT PRIMARY KEY,
+        Reader_ID            INT             NOT NULL,
+        ISBN                 VARCHAR(18)     NOT NULL,
+        Score                DECIMAL(6, 4)   DEFAULT 0,
+        Reason               VARCHAR(255),
+        Generated_At         TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+        Status               VARCHAR(50)     DEFAULT 'unread',
+        CONSTRAINT fk_recommendations_reader
+            FOREIGN KEY (Reader_ID) REFERENCES readers(Reader_ID),
+        CONSTRAINT fk_recommendations_book
+            FOREIGN KEY (ISBN) REFERENCES books(ISBN),
+        CONSTRAINT uq_recommendations_reader_book
+            UNIQUE (Reader_ID, ISBN)
+    )
+    """
+    db_connect.execute_query(query)
+
+
+def initiate_likes():
     query = """
     CREATE TABLE IF NOT EXISTS likes (
         Like_ID             INT             AUTO_INCREMENT PRIMARY KEY,
@@ -79,6 +111,11 @@ def inititate_likes():
     )
     """
     db_connect.execute_query(query)
+
+
+def inititate_likes():
+    initiate_likes()
+
 
 def initiate_comments():
     query = """
@@ -96,6 +133,20 @@ def initiate_comments():
     """
     db_connect.execute_query(query)
 
+
+def initiate_rewards():
+    query = """
+    CREATE TABLE IF NOT EXISTS rewards (
+        Reward_ID           INT             AUTO_INCREMENT PRIMARY KEY,
+        Reward_Name         VARCHAR(255),
+        Description         VARCHAR(255),
+        Reward_Type         VARCHAR(100),
+        Points_Required     INT             DEFAULT 0
+    )
+    """
+    db_connect.execute_query(query)
+
+
 def initiate_badges():
     query = """
     CREATE TABLE IF NOT EXISTS badges (
@@ -107,8 +158,20 @@ def initiate_badges():
     """
     db_connect.execute_query(query)
 
+
 def del_all():
-    query = "DROP TABLE IF EXISTS posts, books, readers"
+    query = """
+    DROP TABLE IF EXISTS
+        recommendations,
+        comments,
+        likes,
+        reviews,
+        posts,
+        rewards,
+        badges,
+        books,
+        readers
+    """
     db_connect.execute_query(query)
 
 
@@ -116,6 +179,12 @@ def execute_all_methods():
     initiate_books()
     initiate_readers()
     initiate_posts()
+    initiate_reviews()
+    initiate_recommendations()
+    initiate_likes()
+    initiate_comments()
+    initiate_rewards()
+    initiate_badges()
 
 def data_test():
     query = "CREATE TABLE IF NOT EXISTS test(test int)"
@@ -135,7 +204,8 @@ print(
     "(A) initiate books table\n"
     "(B) initiate readers table\n"
     "(C) initiate posts table\n"
-    "(D) initiate badges table\n"
+    "(D) initiate rewards/badges table\n"
+    "(R) initiate recommendations table\n"
     "(N) delete all existing tables\n\n"
     "(full) initiate all tables\n\n"
     "(z) test"
@@ -150,7 +220,10 @@ match dev_input:
     case "C":
         initiate_posts()
     case "D":
+        initiate_rewards()
         initiate_badges()
+    case "R":
+        initiate_recommendations()
     case "N":
         confirmation_input = input("THIS IS NO JOKE! TYPE \'affirmative\' TO CONFIRM DELETION").strip()
         if confirmation_input == "affirmative":

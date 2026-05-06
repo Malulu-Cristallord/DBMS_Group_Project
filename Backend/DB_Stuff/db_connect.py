@@ -50,16 +50,18 @@ def insert_book(query, values=None):
 def test_connection():
     query = """
     CREATE TABLE IF NOT EXISTS books (
-        Book_ID          INT                AUTO_INCREMENT PRIMARY KEY,
+        ISBN             VARCHAR(18)        PRIMARY KEY NOT NULL,
         Title            VARCHAR(255)       NOT NULL,
-        ISBN             VARCHAR(18)        NOT NULL,
         Category         VARCHAR(255),
         Publisher        VARCHAR(255),
         Published_Year   YEAR,
         Author           VARCHAR(255),
         Cover            VARCHAR(255),
         Description      VARCHAR(255),
-        Rating           DECIMAL(3, 1)
+        Rating           DECIMAL(3, 1)      DEFAULT 0,
+        Average_Rating   DECIMAL(3, 1)      DEFAULT 0,
+        Clicked          INT                DEFAULT 0,
+        Saved            INT                DEFAULT 0
     )
     """
     execute_query(query)
