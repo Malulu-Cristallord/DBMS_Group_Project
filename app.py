@@ -12,7 +12,9 @@ from Backend.Functions.library_data import (
     get_posts,
     get_reader_from_session,
     get_recommended_books,
+    increment_book_clicked,
     reader_initials,
+    update_recommendation_status,
 )
 from components.ui_helpers import (
     COLORS,
@@ -130,6 +132,8 @@ else:
             )
 
             if st.button("View", key=f"rec_{book['id']}", use_container_width=True):
+                increment_book_clicked(book["id"])
+                update_recommendation_status(current_reader["Reader_ID"], book["id"], "clicked")
                 st.session_state["selected_book_id"] = book["id"]
                 st.switch_page("pages/05_Book_Detail.py")
 
@@ -216,6 +220,7 @@ else:
             if st.button("Details", key=f"feed_detail_{post['post_id']}"):
                 selected_book = get_book_by_id(post.get("book_id"))
                 if selected_book:
+                    increment_book_clicked(selected_book["id"])
                     st.session_state["selected_book_id"] = selected_book["id"]
                     st.switch_page("pages/05_Book_Detail.py")
                 else:

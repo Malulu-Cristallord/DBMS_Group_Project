@@ -77,7 +77,17 @@ def execute_write(query: str, params: tuple[Any, ...] | None = None) -> tuple[bo
 
 
 def table_exists(table_name: str) -> bool:
-    allowed_tables = {"books", "readers", "posts"}
+    allowed_tables = {
+        "books",
+        "readers",
+        "posts",
+        "reviews",
+        "recommendations",
+        "likes",
+        "comments",
+        "badges",
+        "rewards",
+    }
     if table_name not in allowed_tables:
         return False
 
@@ -122,7 +132,7 @@ def get_reader_by_id(reader_id: int | str | None) -> dict[str, Any] | None:
     if not reader_id:
         return None
 
-    return fetch_one(
+    reader = fetch_one(
         """
         SELECT
             Reader_ID,
@@ -138,6 +148,15 @@ def get_reader_by_id(reader_id: int | str | None) -> dict[str, Any] | None:
         """,
         (reader_id,),
     )
+
+    if reader:
+        reader["reader_id"] = reader.get("Reader_ID")
+        reader["name"] = reader.get("Name")
+        reader["email"] = reader.get("Email")
+        reader["preferred_category"] = reader.get("Preferred_Category")
+        reader["point"] = reader.get("Points")
+
+    return reader
 
 
 def get_reader_from_session(session_state: Any) -> dict[str, Any] | None:
@@ -202,7 +221,7 @@ def get_genres(include_all: bool = True) -> list[str]:
 def normalize_book(row: dict[str, Any]) -> dict[str, Any]:
     rating = to_float(row.get("avg_rating"))
     return {
-        "id": row.get("id"),
+        "id": row.get("id") or row.get("isbn"),
         "title": row.get("title") or "Untitled",
         "isbn": row.get("isbn") or "",
         "category": row.get("category") or "Uncategorized",
@@ -212,7 +231,14 @@ def normalize_book(row: dict[str, Any]) -> dict[str, Any]:
         "cover": row.get("cover") or "#3E7255",
         "description": row.get("description") or "No description has been added yet.",
         "avg_rating": rating,
+        "rating": rating,
+        "clicked": int(row.get("clicked") or 0),
+        "saved": int(row.get("saved") or 0),
         "review_count": int(row.get("review_count") or 0),
+        "score": to_float(row.get("score")),
+        "reason": row.get("reason") or "",
+        "recommendation_status": row.get("recommendation_status") or row.get("status") or "",
+        "generated_at": row.get("generated_at"),
         "formats": ["Physical"],
     }
 
@@ -252,7 +278,7 @@ def get_books(
         rows = fetch_all(
             f"""
             SELECT
-                b.Book_ID AS id,
+                b.ISBN AS id,
                 b.Title AS title,
                 b.ISBN AS isbn,
                 b.Category AS category,
@@ -261,13 +287,14 @@ def get_books(
                 b.Author AS author,
                 b.Cover AS cover,
                 b.Description AS description,
-                b.Rating AS avg_rating,
+                COALESCE(NULLIF(b.Average_Rating, 0), b.Rating, 0) AS avg_rating,
+                b.Clicked AS clicked,
+                b.Saved AS saved,
                 COUNT(p.Post_ID) AS review_count
             FROM books b
-            LEFT JOIN posts p ON p.Book_ID = b.Book_ID
+            LEFT JOIN posts p ON p.ISBN = b.ISBN
             {where_clause}
             GROUP BY
-                b.Book_ID,
                 b.Title,
                 b.ISBN,
                 b.Category,
@@ -276,7 +303,10 @@ def get_books(
                 b.Author,
                 b.Cover,
                 b.Description,
-                b.Rating
+                b.Rating,
+                b.Average_Rating,
+                b.Clicked,
+                b.Saved
             ORDER BY {order_by}
             {limit_clause}
             """,
@@ -286,7 +316,7 @@ def get_books(
         rows = fetch_all(
             f"""
             SELECT
-                b.Book_ID AS id,
+                b.ISBN AS id,
                 b.Title AS title,
                 b.ISBN AS isbn,
                 b.Category AS category,
@@ -295,7 +325,9 @@ def get_books(
                 b.Author AS author,
                 b.Cover AS cover,
                 b.Description AS description,
-                b.Rating AS avg_rating,
+                COALESCE(NULLIF(b.Average_Rating, 0), b.Rating, 0) AS avg_rating,
+                b.Clicked AS clicked,
+                b.Saved AS saved,
                 0 AS review_count
             FROM books b
             {where_clause}
@@ -317,7 +349,7 @@ def get_book_by_id(book_id: int | str | None) -> dict[str, Any] | None:
         row = fetch_one(
             """
             SELECT
-                b.Book_ID AS id,
+                b.ISBN AS id,
                 b.Title AS title,
                 b.ISBN AS isbn,
                 b.Category AS category,
@@ -326,13 +358,14 @@ def get_book_by_id(book_id: int | str | None) -> dict[str, Any] | None:
                 b.Author AS author,
                 b.Cover AS cover,
                 b.Description AS description,
-                b.Rating AS avg_rating,
+                COALESCE(NULLIF(b.Average_Rating, 0), b.Rating, 0) AS avg_rating,
+                b.Clicked AS clicked,
+                b.Saved AS saved,
                 COUNT(p.Post_ID) AS review_count
             FROM books b
-            LEFT JOIN posts p ON p.Book_ID = b.Book_ID
-            WHERE b.Book_ID = %s
+            LEFT JOIN posts p ON p.ISBN = b.ISBN
+            WHERE b.ISBN = %s
             GROUP BY
-                b.Book_ID,
                 b.Title,
                 b.ISBN,
                 b.Category,
@@ -341,7 +374,10 @@ def get_book_by_id(book_id: int | str | None) -> dict[str, Any] | None:
                 b.Author,
                 b.Cover,
                 b.Description,
-                b.Rating
+                b.Rating,
+                b.Average_Rating,
+                b.Clicked,
+                b.Saved
             """,
             (book_id,),
         )
@@ -349,7 +385,7 @@ def get_book_by_id(book_id: int | str | None) -> dict[str, Any] | None:
         row = fetch_one(
             """
             SELECT
-                b.Book_ID AS id,
+                b.ISBN AS id,
                 b.Title AS title,
                 b.ISBN AS isbn,
                 b.Category AS category,
@@ -358,10 +394,12 @@ def get_book_by_id(book_id: int | str | None) -> dict[str, Any] | None:
                 b.Author AS author,
                 b.Cover AS cover,
                 b.Description AS description,
-                b.Rating AS avg_rating,
+                COALESCE(NULLIF(b.Average_Rating, 0), b.Rating, 0) AS avg_rating,
+                b.Clicked AS clicked,
+                b.Saved AS saved,
                 0 AS review_count
             FROM books b
-            WHERE b.Book_ID = %s
+            WHERE b.ISBN = %s
             """,
             (book_id,),
         )
@@ -373,15 +411,228 @@ def get_book_by_id(book_id: int | str | None) -> dict[str, Any] | None:
     return books[0] if books else None
 
 
-def get_recommended_books(reader: dict[str, Any] | None, limit: int = 4) -> list[dict[str, Any]]:
-    genres = get_reader_genres(reader)
+def _category_matches(book_category: str | None, reader: dict[str, Any] | None) -> bool:
+    preferred_categories = {genre.casefold() for genre in get_reader_genres(reader)}
+    if not preferred_categories:
+        return False
 
-    if not genres:
+    return (book_category or "").strip().casefold() in preferred_categories
+
+
+def _recommendation_reason(book: dict[str, Any], reader: dict[str, Any] | None) -> str:
+    if _category_matches(book.get("category"), reader) and int(book.get("saved") or 0) > 0:
+        return "Recommended because it matches your preferred category and has strong reader engagement."
+    if _category_matches(book.get("category"), reader):
+        return f"Recommended because this book matches your preferred category: {book.get('category')}."
+    if to_float(book.get("rating")) >= 4:
+        return "Recommended because it has a high rating and many readers saved it."
+    return "Recommended because it has a strong overall recommendation score."
+
+
+def get_books_for_recommendation() -> list[dict[str, Any]]:
+    rows = fetch_all(
+        """
+        SELECT
+            b.ISBN AS id,
+            b.ISBN AS isbn,
+            b.Title AS title,
+            b.Author AS author,
+            b.Category AS category,
+            b.Description AS description,
+            COALESCE(NULLIF(b.Average_Rating, 0), b.Rating, 0) AS avg_rating,
+            COALESCE(NULLIF(b.Average_Rating, 0), b.Rating, 0) AS rating,
+            b.Clicked AS clicked,
+            b.Saved AS saved,
+            b.Publisher AS publisher,
+            b.Published_Year AS year,
+            b.Cover AS cover,
+            0 AS review_count
+        FROM books b
+        """
+    )
+
+    books = [normalize_book(row) for row in rows]
+    max_clicked = max([book["clicked"] for book in books], default=0)
+    max_saved = max([book["saved"] for book in books], default=0)
+
+    for book in books:
+        book["_max_clicked"] = max_clicked
+        book["_max_saved"] = max_saved
+
+    return books
+
+
+def calculate_recommendation_score(book: dict[str, Any], reader: dict[str, Any] | None) -> float:
+    rating_weight = 0.4
+    clicked_weight = 0.2
+    saved_weight = 0.2
+    category_weight = 0.2
+
+    normalized_rating = max(0.0, min(1.0, to_float(book.get("rating")) / 5))
+
+    max_clicked = int(book.get("_max_clicked") or 0)
+    normalized_clicked = (int(book.get("clicked") or 0) / max_clicked) if max_clicked else 0.0
+
+    max_saved = int(book.get("_max_saved") or 0)
+    normalized_saved = (int(book.get("saved") or 0) / max_saved) if max_saved else 0.0
+
+    category_match = 1.0 if _category_matches(book.get("category"), reader) else 0.0
+
+    score = (
+        rating_weight * normalized_rating
+        + clicked_weight * normalized_clicked
+        + saved_weight * normalized_saved
+        + category_weight * category_match
+    )
+    return round(score, 4)
+
+
+def _rank_recommendation_candidates(
+    books: list[dict[str, Any]],
+    reader: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    for book in books:
+        book["score"] = calculate_recommendation_score(book, reader)
+        book["reason"] = _recommendation_reason(book, reader)
+
+    preferred_books = [book for book in books if _category_matches(book.get("category"), reader)]
+    other_books = [book for book in books if not _category_matches(book.get("category"), reader)]
+
+    preferred_books.sort(key=lambda book: (book["score"], to_float(book.get("rating"))), reverse=True)
+    other_books.sort(key=lambda book: (book["score"], to_float(book.get("rating"))), reverse=True)
+
+    return preferred_books + other_books
+
+
+def generate_recommendations_for_reader(reader_id: int | str, limit: int = 10) -> list[dict[str, Any]]:
+    if not table_exists("recommendations"):
+        return []
+
+    reader = get_reader_by_id(reader_id)
+    if not reader:
+        return []
+
+    books = get_books_for_recommendation()
+    candidates = _rank_recommendation_candidates(books, reader)[:limit]
+
+    for book in candidates:
+        execute_write(
+            """
+            INSERT IGNORE INTO recommendations (
+                Reader_ID,
+                ISBN,
+                Score,
+                Reason,
+                Generated_At,
+                Status
+            )
+            VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP, 'unread')
+            """,
+            (
+                reader_id,
+                book["isbn"],
+                book["score"],
+                book["reason"],
+            ),
+        )
+
+    return get_recommendations_for_reader(reader_id, limit=limit)
+
+
+def get_recommendations_for_reader(
+    reader_id: int | str,
+    limit: int | None = None,
+) -> list[dict[str, Any]]:
+    if not table_exists("recommendations"):
+        return []
+
+    params: list[Any] = [reader_id]
+    limit_clause = ""
+    if limit is not None:
+        limit_clause = "LIMIT %s"
+        params.append(limit)
+
+    rows = fetch_all(
+        f"""
+        SELECT
+            rec.Recommendation_ID AS recommendation_id,
+            rec.ISBN AS id,
+            rec.ISBN AS isbn,
+            rec.Score AS score,
+            rec.Reason AS reason,
+            rec.Generated_At AS generated_at,
+            rec.Status AS recommendation_status,
+            b.Title AS title,
+            b.Author AS author,
+            b.Category AS category,
+            b.Description AS description,
+            b.Publisher AS publisher,
+            b.Published_Year AS year,
+            b.Cover AS cover,
+            COALESCE(NULLIF(b.Average_Rating, 0), b.Rating, 0) AS avg_rating,
+            b.Clicked AS clicked,
+            b.Saved AS saved,
+            0 AS review_count
+        FROM recommendations rec
+        JOIN books b ON rec.ISBN = b.ISBN
+        WHERE rec.Reader_ID = %s
+        ORDER BY rec.Score DESC, rec.Generated_At DESC
+        {limit_clause}
+        """,
+        tuple(params),
+    )
+
+    return [normalize_book(row) | {"recommendation_id": row.get("recommendation_id")} for row in rows]
+
+
+def update_recommendation_status(
+    reader_id: int | str,
+    book_id: int | str,
+    status: str,
+) -> tuple[bool, str]:
+    allowed_statuses = {"unread", "clicked", "saved"}
+    if status not in allowed_statuses:
+        return False, "Invalid recommendation status."
+
+    return execute_write(
+        """
+        UPDATE recommendations
+        SET Status = %s
+        WHERE Reader_ID = %s
+          AND ISBN = %s
+        """,
+        (status, reader_id, book_id),
+    )
+
+
+def increment_book_clicked(book_id: int | str) -> tuple[bool, str]:
+    return execute_write(
+        """
+        UPDATE books
+        SET Clicked = COALESCE(Clicked, 0) + 1
+        WHERE ISBN = %s
+        """,
+        (book_id,),
+    )
+
+
+def increment_book_saved(book_id: int | str) -> tuple[bool, str]:
+    return execute_write(
+        """
+        UPDATE books
+        SET Saved = COALESCE(Saved, 0) + 1
+        WHERE ISBN = %s
+        """,
+        (book_id,),
+    )
+
+
+def get_recommended_books(reader: dict[str, Any] | None, limit: int = 4) -> list[dict[str, Any]]:
+    books = get_books_for_recommendation()
+    if not books:
         return get_books(sort_option="rating", limit=limit)
 
-    books = get_books(sort_option="rating")
-    matched_books = [book for book in books if book["category"] in genres][:limit]
-    return matched_books or get_books(sort_option="rating", limit=limit)
+    return _rank_recommendation_candidates(books, reader)[:limit]
 
 
 def get_posts(
@@ -400,7 +651,7 @@ def get_posts(
         params.append(reader_id)
 
     if book_id:
-        conditions.append("p.Book_ID = %s")
+        conditions.append("p.ISBN = %s")
         params.append(book_id)
 
     where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
@@ -415,9 +666,12 @@ def get_posts(
         SELECT
             p.Post_ID AS post_id,
             p.Reader_ID AS reader_id,
+            p.ISBN AS book_id,
             p.ISBN AS isbn,
-            p.Content AS content,
-            p.Created_At AS created_at,
+            p.Review AS content,
+            p.Rating AS rating,
+            p.Created_Date AS created_at,
+            p.Upvote_Count AS upvote_count,
             r.Name AS reader_name,
             b.Title AS book_title,
             b.Author AS author,
@@ -426,7 +680,7 @@ def get_posts(
         LEFT JOIN readers r ON p.Reader_ID = r.Reader_ID
         LEFT JOIN books b ON p.ISBN = b.ISBN
         {where_clause}
-        ORDER BY p.Created_At DESC, p.Post_ID DESC
+        ORDER BY p.Created_Date DESC, p.Post_ID DESC
         {limit_clause}
         """,
         tuple(params),
@@ -437,11 +691,16 @@ def get_posts(
 
 def create_post(
     reader_id: int | str,
-    isbn: str | None,
-    content: str,
+    isbn: str | None = None,
+    content: str = "",
+    rating: int | None = None,
+    book_id: int | str | None = None,
 ) -> tuple[bool, str]:
     if not table_exists("posts"):
         return False, "The posts table does not exist yet. Run the database setup first."
+
+    if isbn is None and book_id is not None:
+        isbn = str(book_id)
 
     clean_content = content.strip()
     if not clean_content:
@@ -450,19 +709,20 @@ def create_post(
     return execute_write(
         """
         INSERT INTO posts (
-            Content,
+            Review,
+            Rating,
+            Created_Date,
+            Upvote_Count,
             Reader_ID,
-            ISBN,
-            Created_At
+            ISBN
         )
-        VALUES (%s, %s, %s, %s)
+        VALUES (%s, %s, CURRENT_TIMESTAMP, 0, %s, %s)
         """,
         (
             clean_content[:255],
+            rating,
             reader_id,
             isbn,
-            date.today(),
-            
         ),
     )
 
@@ -472,33 +732,7 @@ def create_review(
     content: str,
     rating: int,
 ) -> tuple[bool, str]:
-
-    if not table_exists("reviews"):
-        return False, "The reviews table does not exist yet."
-
-    clean_content = content.strip()
-    if not clean_content:
-        return False, "Please write a review."
-
-    return execute_write(
-        """
-        INSERT INTO reviews (
-            Reader_ID,
-            ISBN,
-            Content,
-            Rating,
-            Created_at
-        )
-        VALUES (%s, %s, %s, %s, %s)
-        """,
-        (
-            reader_id,
-            isbn,
-            clean_content,
-            rating,
-            date.today(),
-        ),
-    )
+    return create_post(reader_id=reader_id, isbn=isbn, content=content, rating=rating)
 
 
 
@@ -605,9 +839,35 @@ def get_reader_badges(reader: dict[str, Any] | None, posts_published: int = 0) -
 #if title is given, we can search for books with similar title, 
 
 def get_books_by_title(keyword): #it works now.
-    query = "SELECT * FROM books WHERE title LIKE %s"
+    query = """
+    SELECT
+        ISBN AS Book_ID,
+        ISBN,
+        Title,
+        Author,
+        Category,
+        Rating,
+        Description,
+        Clicked,
+        Saved
+    FROM books
+    WHERE Title LIKE %s
+    """
     return fetch_all(query, (f"%{keyword}%",))
 
 def get_book_by_isbn(isbn): #it doesnot work now
-    query = "SELECT * FROM books WHERE ISBN = %s"
+    query = """
+    SELECT
+        ISBN AS Book_ID,
+        ISBN,
+        Title,
+        Author,
+        Category,
+        Rating,
+        Description,
+        Clicked,
+        Saved
+    FROM books
+    WHERE ISBN = %s
+    """
     return fetch_all(query, (isbn,))
