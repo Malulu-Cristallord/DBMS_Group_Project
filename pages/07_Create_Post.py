@@ -80,9 +80,6 @@ with center_col:
     st.write(books)
     book_options.update({f'{b["Title"]} - {b["Author"]}': b["Book_ID"] for b in books})
     linked_book = st.selectbox("Select book", list(book_options.keys()))
-    rating = None
-    if book_options[linked_book] is not None:
-       rating = st.slider("Rate this book", 1, 5)
 
     page_spacer(12)
 
@@ -94,7 +91,7 @@ with center_col:
                 reader_id=current_reader["Reader_ID"],
                 book_id=book_options[linked_book],
                 content=post_content,
-                rating=rating
+                
             )
             if success:
                 st.success("Your post has been published to the community feed.")

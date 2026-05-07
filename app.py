@@ -86,6 +86,8 @@ with col_action:
     page_spacer(10)
     if st.button("Create a post", type="primary", use_container_width=True):
         st.switch_page("pages/07_Create_Post.py")
+    if st.button("My posts", use_container_width=True):
+        st.switch_page("pages/13_My_Posts.py")
 
 
 page_spacer(10)

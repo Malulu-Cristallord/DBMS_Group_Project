@@ -4,7 +4,7 @@ from datetime import date
 from decimal import Decimal
 from typing import Any
 
-from Backend.DB_Stuff.db_connect import get_connection
+from Backend.DB_Stuff.db_connect import execute_query, get_connection
 
 
 DEFAULT_GENRES = [
@@ -668,10 +668,8 @@ def get_posts(
             p.Reader_ID AS reader_id,
             p.ISBN AS book_id,
             p.ISBN AS isbn,
-            p.Review AS content,
-            p.Rating AS rating,
+            p.Content AS content,
             p.Created_Date AS created_at,
-            p.Upvote_Count AS upvote_count,
             r.Name AS reader_name,
             b.Title AS book_title,
             b.Author AS author,
@@ -693,7 +691,6 @@ def create_post(
     reader_id: int | str,
     isbn: str | None = None,
     content: str = "",
-    rating: int | None = None,
     book_id: int | str | None = None,
 ) -> tuple[bool, str]:
     if not table_exists("posts"):
@@ -709,18 +706,15 @@ def create_post(
     return execute_write(
         """
         INSERT INTO posts (
-            Review,
-            Rating,
+            Content,
             Created_Date,
-            Upvote_Count,
             Reader_ID,
             ISBN
         )
-        VALUES (%s, %s, CURRENT_TIMESTAMP, 0, %s, %s)
+        VALUES (%s, CURRENT_TIMESTAMP, %s, %s)
         """,
         (
             clean_content[:255],
-            rating,
             reader_id,
             isbn,
         ),
@@ -871,3 +865,36 @@ def get_book_by_isbn(isbn): #it doesnot work now
     WHERE ISBN = %s
     """
     return fetch_all(query, (isbn,))
+
+def get_posts_by_reader(reader_id):
+
+    query = """
+    SELECT
+        p.Post_ID,
+        p.Content,
+        p.Created_Date,
+
+        b.Title
+
+    FROM posts p
+
+    LEFT JOIN books b
+        ON p.ISBN = b.ISBN
+
+    WHERE p.Reader_ID = %s
+
+    ORDER BY p.Created_Date DESC
+    """
+
+    return fetch_all(query, (reader_id,))
+
+def delete_post(post_id):
+
+    query = """
+    DELETE FROM posts
+    WHERE Post_ID = %s
+    """
+
+    execute_query(query, (post_id,))
+
+    return True, "Post deleted successfully."

@@ -44,10 +44,8 @@ def initiate_posts():
     query = """
     CREATE TABLE IF NOT EXISTS posts (
         Post_ID             INT             AUTO_INCREMENT PRIMARY KEY,
-        Review              VARCHAR(255),
-        Rating              SMALLINT,
+        Content             VARCHAR(255),
         Created_Date        TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
-        Upvote_Count        INT             DEFAULT 0,
         Reader_ID           INT             NOT NULL,
         ISBN                VARCHAR(18),
         CONSTRAINT fk_posts_reader
