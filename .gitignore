@@ -1,0 +1,9 @@
+# Local agent skills
+.agents/skills/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# macOS
+.DS_Store
