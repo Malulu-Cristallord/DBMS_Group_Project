@@ -30,10 +30,11 @@ inject_global_css()
 render_navbar(active_page="discover")
 page_spacer(20)
 
+current_isbn = "9780439362139"
 
 #book = get_book_by_id(st.session_state.get("selected_book_id"))
 
-book = get_book_by_isbn("9780439362139")
+book = get_book_by_isbn(current_isbn)
 
 if not book:
     st.warning("No books are available in the database yet.")
@@ -42,7 +43,8 @@ if not book:
     st.stop()
 
 
-book_reviews = get_reviews(isbn=book["id"], limit=20)
+
+#book_reviews = get_reviews(isbn=book["id"], limit=20)
 
 if st.button("Back to Discovery"):
     st.switch_page("pages/03_Discovery.py")
@@ -55,8 +57,11 @@ main_col, meta_col = st.columns([3, 1])
 with main_col:
     header_cols = st.columns([1, 4])
 
+    # The cover uses API from open library, which fetches images directly from their db
+    # However, a default cover is needed in future updates
     with header_cols[0]:
-        st.markdown(render_book_cover(book["cover"], "large"), unsafe_allow_html=True)
+        image_url = book["Cover"]
+        st.image(image_url)
 
     with header_cols[1]:
         st.markdown(
@@ -131,7 +136,7 @@ page_spacer(20)
 st.markdown("<hr>", unsafe_allow_html=True)
 
 section_title("Community reviews")
-
+'''
 if book_reviews:
     for review in book_reviews:
         reader_name = review.get("reader_name") or "Unknown reader"
@@ -157,3 +162,4 @@ else:
         '<p class="muted">No reviews yet. Be the first reader to share your thoughts.</p>',
         unsafe_allow_html=True,
     )
+'''

@@ -140,7 +140,7 @@ with main_col:
                 if st.button("Details", key=f"disc_detail_{book['id']}"):
                     increment_book_clicked(book["id"])
                     st.session_state["selected_book_id"] = book["id"]
-                    st.switch_page("pages/05_Book_Detail.py")
+                    st.switch_page("pages/15_Book_Detail.py")
 
                 if st.button("Review", key=f"disc_review_{book['id']}"):
                     st.session_state["review_book_id"] = book["id"]

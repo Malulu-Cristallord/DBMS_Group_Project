@@ -1,8 +1,7 @@
-from Backend.Functions.library_data import get_book_by_isbn
+from Backend.Functions.library_data import *
+from Backend.Functions.book_request import *
 
-books = get_book_by_isbn("9780439362139")
-for book in books:
-    print(book["Title"])
-    print(book["ISBN"])
-    print(book["Description"])
-    print(book["Author"])
+isbn = "9780439362139"
+get_book_by_isbn(isbn)
+cover_url = get_book_cover(isbn)
+print(cover_url)

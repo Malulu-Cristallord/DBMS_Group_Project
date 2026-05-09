@@ -116,9 +116,21 @@ def request_book_data(isbn_value):
 def request_book_data_alt(isbn_value):
     return None
 
+def get_book_cover(isbn_value):
+    try:
+        print("requesting book image")
+        query = """SELECT Cover FROM books
+        WHERE ISBN = %s"""
+        values = (isbn_value,)
+        result = db_connect.execute_query_fetch(query, values)
+
+        if result and len(result) > 0:
+            return result[0]["Cover"]  # extract actual image
+        return None
+
+    except Exception as e:
+        print(f"Exception: {e}")
 
 def test():
     print("Test phase, input = 978043936213")
     request_book_data("9780439362139")
-
-test()

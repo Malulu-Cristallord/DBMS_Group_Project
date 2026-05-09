@@ -960,13 +960,34 @@ def get_books_by_title(keyword):
     """
     return fetch_all(query, (f"%{keyword}%",))
 
-def get_book_by_isbn(isbn): 
+
+def get_book_by_isbn(isbn):
     query = """
-    SELECT Title, ISBN, Publisher, Published_Year, Author, Description
+    SELECT Title, ISBN, Publisher, Published_Year, Author, Description, Cover
     FROM books
     WHERE ISBN = %s
     """
-    return fetch_all(query, (isbn,))
+    rows = fetch_all(query, (isbn,))
+
+    if not rows:
+        return None
+
+    row = rows[0]
+
+    rows = fetch_all(query, (isbn,))
+    print("DEBUG ROWS:", rows)
+    print("TYPE:", type(rows))
+
+    return {
+        "title": row["Title"],
+        "isbn": row["ISBN"],
+        "publisher": row["Publisher"],
+        "year": row["Published_Year"],
+        "author": row["Author"],
+        "description": row["Description"],
+        "cover": row["Cover"],
+    }
+
 
 
 def get_posts_by_reader(reader_id):

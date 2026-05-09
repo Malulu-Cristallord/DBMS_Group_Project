@@ -145,4 +145,4 @@ with center_col:
 
     with cancel_col:
         if st.button("Cancel", use_container_width=True, key="cr_cancel"):
-            st.switch_page("pages/05_Book_Detail.py")
+            st.switch_page("pages/15_Book_Detail.py")
