@@ -726,8 +726,120 @@ def create_review(
     content: str,
     rating: int,
 ) -> tuple[bool, str]:
-    return create_post(reader_id=reader_id, isbn=isbn, content=content, rating=rating)
+    if not table_exists("reviews"):
+        return False, "The reviews table does not exist yet. Run the database setup first."
 
+    clean_content = content.strip()
+
+    if not clean_content:
+        return False, "Please write something before publishing."
+
+    # 先找有沒有評論過
+    check_query = """
+    SELECT review_id
+    FROM reviews
+    WHERE reader_id = %s AND isbn = %s
+    """
+
+    existing = fetch_one(check_query, (reader_id, isbn))
+
+    # 已存在 -> UPDATE
+    if existing:
+        update_query = """
+        UPDATE reviews
+        SET content = %s,
+            rating = %s
+        WHERE review_id = %s
+        """
+
+        execute_query(
+            update_query,
+            (clean_content, rating, existing["review_id"])
+        )
+
+        return True, "Your review has been updated."
+
+    # 不存在 -> INSERT
+    insert_query = """
+    INSERT INTO reviews (
+        reader_id,
+        isbn,
+        content,
+        rating
+    )
+    VALUES (%s, %s, %s, %s)
+    """
+
+    execute_query(
+        insert_query,
+        (reader_id, isbn, clean_content, rating)
+    )
+
+    return True, "Review published successfully."
+
+
+def get_reviews(
+    reader_id: int | str | None = None,
+    isbn: int | str | None = None,
+    limit: int | None = None,
+) -> list[dict[str, Any]]:
+    if not table_exists("reviews"):
+        return []
+
+    conditions: list[str] = []
+    params: list[Any] = []
+
+    if reader_id:
+        conditions.append("r.Reader_ID = %s")
+        params.append(reader_id)
+
+    if isbn:
+        conditions.append("r.ISBN = %s")
+        params.append(isbn)
+
+    where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+
+    limit_clause = ""
+    if limit is not None:
+        limit_clause = "LIMIT %s"
+        params.append(limit)
+
+    rows = fetch_all(
+        f"""
+        SELECT
+            r.Review_ID AS review_id,
+            r.Reader_ID AS reader_id,
+            r.ISBN AS isbn,
+            r.Content AS content,
+            r.Rating AS rating,
+            r.Created_At AS created_at,
+            rd.Name AS reader_name,
+            b.Title AS book_title,
+            b.Author AS author,
+            b.Cover AS cover
+        FROM reviews r
+        LEFT JOIN readers rd ON r.Reader_ID = rd.Reader_ID
+        LEFT JOIN books b ON r.ISBN = b.ISBN
+        {where_clause}
+        ORDER BY r.Created_At DESC, r.Review_ID DESC
+        {limit_clause}
+        """,
+        tuple(params),
+    )
+
+    return rows
+
+
+def get_review_by_reader_and_book(reader_id, isbn):
+
+    query = """
+    SELECT *
+    FROM reviews
+    WHERE Reader_ID = %s
+    AND ISBN = %s
+    """
+
+    return fetch_one(query, (reader_id, isbn))
 
 
 def get_reader_stats(reader_id: int | str) -> dict[str, Any]:
@@ -740,9 +852,9 @@ def get_reader_stats(reader_id: int | str) -> dict[str, Any]:
     row = fetch_one(
         """
         SELECT
-            COUNT(Post_ID) AS posts_published,
+            COUNT(Review_ID) AS posts_published,
             AVG(Rating) AS avg_rating
-        FROM posts
+        FROM reviews
         WHERE Reader_ID = %s
         """,
         (reader_id,),
@@ -757,12 +869,12 @@ def get_reader_stats(reader_id: int | str) -> dict[str, Any]:
 def get_platform_stats() -> dict[str, int]:
     readers = fetch_one("SELECT COUNT(*) AS total FROM readers") or {}
     books = fetch_one("SELECT COUNT(*) AS total FROM books") or {}
-    posts = fetch_one("SELECT COUNT(*) AS total FROM posts") if table_exists("posts") else {}
+    reviews = fetch_one("SELECT COUNT(*) AS total FROM reviews") if table_exists("reviews") else {}
 
     return {
         "active_readers": int(readers.get("total") or 0),
         "borrowings_this_month": 0,
-        "reviews_published": int(posts.get("total") or 0),
+        "reviews_published": int(reviews.get("total") or 0),
         "available_titles": int(books.get("total") or 0),
     }
 
@@ -824,15 +936,12 @@ def get_reader_badges(reader: dict[str, Any] | None, posts_published: int = 0) -
             "progress": min(100, int((len(genres) / 3) * 100)) if genres else 0,
         },
     ]
-    if not table_exists("posts"):
-        return False, "The posts table does not exist yet. Run the database setup first."
+    if not table_exists("reviews"):
+        return False, "The reviews table does not exist yet. Run the database setup first."
 
 
-#for post request, we can search by title or isbn, 
-#if isbn is given, if we need to get the book data and insert into db?, 
-#if title is given, we can search for books with similar title, 
 
-def get_books_by_title(keyword): #it works now.
+def get_books_by_title(keyword): 
     query = """
     SELECT
         ISBN AS Book_ID,
@@ -849,7 +958,7 @@ def get_books_by_title(keyword): #it works now.
     """
     return fetch_all(query, (f"%{keyword}%",))
 
-def get_book_by_isbn(isbn): #it doesnot work now
+def get_book_by_isbn(isbn): 
     query = """
     SELECT
         ISBN AS Book_ID,

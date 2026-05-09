@@ -6,7 +6,7 @@ import streamlit as st
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from Backend.Functions.library_data import get_book_by_id, get_posts, reader_initials
+from Backend.Functions.library_data import get_book_by_id, get_reviews, reader_initials
 from components.ui_helpers import (
     COLORS,
     inject_global_css,
@@ -40,7 +40,7 @@ if not book:
     st.stop()
 
 
-book_reviews = get_posts(book_id=book["id"], limit=20)
+book_reviews = get_reviews(isbn=book["id"], limit=20)
 
 if st.button("Back to Discovery"):
     st.switch_page("pages/03_Discovery.py")
@@ -68,7 +68,7 @@ with main_col:
         )
         st.markdown(
             f'{render_stars(book["avg_rating"])} '
-            f'<span class="muted">- {book["review_count"]} posts</span>',
+            f'<span class="muted">- {book["review_count"]} reviews</span>',
             unsafe_allow_html=True,
         )
 
@@ -82,7 +82,7 @@ with main_col:
         page_spacer(14)
         btn_cols = st.columns(2)
         with btn_cols[0]:
-            if st.button("Write a review", type="primary", key="write_review_top"):
+            if st.button("Write / Edit review", type="primary", key="write_review_top"):
                 st.session_state["review_book_id"] = book["id"]
                 st.switch_page("pages/06_Create_Review.py")
 
