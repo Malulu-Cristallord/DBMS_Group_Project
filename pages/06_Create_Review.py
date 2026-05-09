@@ -6,7 +6,12 @@ import streamlit as st
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from Backend.Functions.library_data import create_post, get_books, get_reader_from_session
+from Backend.Functions.library_data import (
+    create_review, 
+    get_books, 
+    get_reader_from_session,
+    get_review_by_reader_and_book
+    )
 from components.ui_helpers import (
     COLORS,
     inject_global_css,
@@ -47,13 +52,13 @@ _, center_col, _ = st.columns([0.5, 3, 0.5])
 with center_col:
     section_title("Write a review")
     st.markdown(
-        '<p class="muted">Share your thoughts with the LibTrack community.</p>',
+        '<p class="muted">You can only write a review or update an existing one.</p>',
         unsafe_allow_html=True,
     )
     page_spacer(8)
 
     default_book_id = st.session_state.get("review_book_id")
-    book_options = {f'{book["title"]} - {book["author"]}': book["id"] for book in books}
+    book_options = {f'{book["title"]} - {book["author"]}': book["isbn"] for book in books}
     option_labels = list(book_options.keys())
     default_index = 0
 
@@ -71,7 +76,11 @@ with center_col:
     )
 
     selected_book_id = book_options[selected_label]
-    selected_book = next(book for book in books if str(book["id"]) == str(selected_book_id))
+    selected_book = next(book for book in books if str(book["isbn"]) == str(selected_book_id))
+    existing_review = get_review_by_reader_and_book(
+    current_reader["Reader_ID"],
+    selected_book_id,
+)
 
     mini_col1, mini_col2 = st.columns([0.4, 4])
     with mini_col1:
@@ -90,35 +99,30 @@ with center_col:
     star_rating = st.select_slider(
         "Your rating",
         options=[1, 2, 3, 4, 5],
-        value=4,
+        value=existing_review["Rating"] if existing_review else 4,
         format_func=lambda value: f"{value}/5",
         key="cr_stars",
     )
 
     page_spacer(8)
 
-    review_title = st.text_input(
-        "Review title",
-        placeholder="Give your review a short title...",
-        key="cr_title",
-    )
-
     review_text = st.text_area(
         "Your review",
         placeholder="What did you think?",
         height=200,
+        value=existing_review["Content"] if existing_review else "",
         key="cr_text",
     )
 
     page_spacer(16)
 
+    submit_label = "Update Review" if existing_review else "Submit Review"
+
     submit_col, cancel_col = st.columns([3, 1])
 
     with submit_col:
-        if st.button("Submit review", type="primary", use_container_width=True, key="cr_submit"):
+        if st.button(submit_label, type="primary", use_container_width=True, key="cr_submit"):
             errors = []
-            if not review_title.strip():
-                errors.append("Please add a short title to your review.")
             if not review_text.strip():
                 errors.append("Please write your review before submitting.")
 
@@ -126,10 +130,11 @@ with center_col:
                 for error in errors:
                     st.error(error)
             else:
-                content = f"{review_title.strip()}: {review_text.strip()}"
-                success, message = create_post(
+                existing_review = get_review_by_reader_and_book(current_reader["Reader_ID"], selected_book_id)
+                content = f"{review_text.strip()}"
+                success, message = create_review(
                     reader_id=current_reader["Reader_ID"],
-                    book_id=selected_book_id,
+                    isbn=selected_book_id,
                     content=content,
                     rating=star_rating,
                 )
