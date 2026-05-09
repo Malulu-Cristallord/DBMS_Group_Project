@@ -11,7 +11,13 @@ from Backend.Functions.library_data import (
     get_reader_genres,
     update_reader_profile,
 )
-from components.ui_helpers import inject_global_css, page_spacer, render_navbar, section_title
+from components.ui_helpers import (
+    inject_global_css,
+    page_spacer,
+    render_login_required,
+    render_navbar,
+    section_title,
+)
 
 
 st.set_page_config(
@@ -27,9 +33,7 @@ page_spacer(24)
 
 current_reader = get_reader_from_session(st.session_state)
 if current_reader is None:
-    st.warning("Please sign in to manage reader settings.")
-    if st.button("Go to Login", type="primary"):
-        st.switch_page("pages/01_Login.py")
+    render_login_required("Please sign in to manage reader settings.")
     st.stop()
 
 

@@ -22,6 +22,7 @@ from components.ui_helpers import (
     render_avatar,
     render_badge,
     render_progress_bar,
+    render_login_required,
     render_navbar,
     section_title,
 )
@@ -40,9 +41,7 @@ page_spacer(20)
 
 current_reader = get_reader_from_session(st.session_state)
 if current_reader is None:
-    st.warning("Please sign in to view your reader profile.")
-    if st.button("Go to Login", type="primary"):
-        st.switch_page("pages/01_Login.py")
+    render_login_required("Please sign in to view your reader profile.")
     st.stop()
 
 

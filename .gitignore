@@ -4,6 +4,7 @@
 # Python cache files
 __pycache__/
 *.py[cod]
+.venv/
 
 # macOS
 .DS_Store
