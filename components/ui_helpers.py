@@ -30,13 +30,14 @@ def inject_global_css():
             font-family: 'Source Serif 4', Georgia, serif !important;
         }}
 
-        #MainMenu, footer, header {{
-            visibility: hidden;
+        #MainMenu, footer, header, [data-testid="stHeader"] {{
+            display: none !important;
+            visibility: hidden !important;
         }}
 
         .block-container {{
             max-width: 1120px !important;
-            padding-top: 0rem !important;
+            padding-top: 0 !important;
             padding-bottom: 2rem !important;
         }}
 
@@ -47,6 +48,7 @@ def inject_global_css():
             display: flex;
             justify-content: space-between;
             margin-bottom: 0;
+            margin-top: 0;
             padding: 14px 32px;
             position: sticky;
             top: 0;
@@ -119,9 +121,47 @@ def inject_global_css():
         }}
 
         .stButton > button {{
+            background: {COLORS["white"]} !important;
+            border: 1px solid {COLORS["mid_green"]} !important;
             border-radius: 8px !important;
+            box-shadow: 0 2px 8px rgba(31, 63, 46, 0.08) !important;
+            color: {COLORS["dark_green"]} !important;
             font-family: 'Source Serif 4', Georgia, serif !important;
             font-size: 0.9rem !important;
+            font-weight: 600 !important;
+            transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease,
+                box-shadow 120ms ease, transform 120ms ease !important;
+        }}
+
+        .stButton > button:hover {{
+            background: {COLORS["light_green"]} !important;
+            border-color: {COLORS["gold"]} !important;
+            color: {COLORS["dark_green"]} !important;
+            box-shadow: 0 4px 12px rgba(31, 63, 46, 0.14) !important;
+            transform: translateY(-1px);
+        }}
+
+        .stButton > button:active {{
+            box-shadow: 0 1px 4px rgba(31, 63, 46, 0.16) !important;
+            transform: translateY(0);
+        }}
+
+        .stButton > button:focus:not(:active) {{
+            border-color: {COLORS["gold"]} !important;
+            box-shadow: 0 0 0 3px rgba(210, 179, 84, 0.24) !important;
+            color: {COLORS["dark_green"]} !important;
+        }}
+
+        .stButton > button[kind="primary"] {{
+            background: {COLORS["dark_green"]} !important;
+            border-color: {COLORS["dark_green"]} !important;
+            color: {COLORS["white"]} !important;
+        }}
+
+        .stButton > button[kind="primary"]:hover {{
+            background: {COLORS["mid_green"]} !important;
+            border-color: {COLORS["gold"]} !important;
+            color: {COLORS["white"]} !important;
         }}
 
         .badge {{
@@ -188,6 +228,80 @@ def inject_global_css():
             border-radius: 8px;
             margin-bottom: 16px;
             padding: 16px 20px;
+        }}
+
+        .login-required-panel {{
+            align-items: center;
+            background: linear-gradient(135deg, {COLORS["white"]} 0%, #F6FBF4 100%);
+            border: 1px solid rgba(62, 114, 85, 0.24);
+            border-radius: 8px;
+            box-shadow: 0 12px 30px rgba(31, 63, 46, 0.10);
+            display: flex;
+            gap: 18px;
+            margin: 24px auto 18px auto;
+            max-width: 760px;
+            padding: 26px 30px;
+        }}
+
+        .login-required-icon {{
+            align-items: center;
+            background: {COLORS["gold"]};
+            border-radius: 8px;
+            color: {COLORS["brown"]};
+            display: inline-flex;
+            flex-shrink: 0;
+            font-size: 1.35rem;
+            font-weight: 700;
+            height: 56px;
+            justify-content: center;
+            width: 56px;
+        }}
+
+        .login-required-title {{
+            color: {COLORS["dark_green"]};
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.45rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin: 0 0 6px 0;
+        }}
+
+        .login-required-message {{
+            color: {COLORS["text_secondary"]};
+            font-size: 0.98rem;
+            line-height: 1.55;
+            margin: 0;
+        }}
+
+        .login-required-actions {{
+            margin: 0 auto;
+            max-width: 360px;
+        }}
+
+        @media (max-width: 700px) {{
+            .libtrack-navbar {{
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 12px;
+                padding: 14px 18px;
+            }}
+
+            .nav-links {{
+                flex-wrap: wrap;
+                gap: 14px;
+            }}
+
+            .nav-search {{
+                min-width: 0;
+                width: 100%;
+            }}
+
+            .login-required-panel {{
+                align-items: flex-start;
+                flex-direction: column;
+                margin-top: 18px;
+                padding: 22px;
+            }}
         }}
 
         .avatar, .avatar-lg {{
@@ -325,6 +439,32 @@ def render_navbar(active_page: str = ""):
         unsafe_allow_html=True,
     )
 
+
+def render_login_required(
+    message: str = "Please sign in to continue.",
+    title: str = "Sign in required",
+    button_label: str = "Go to Login",
+    clear_session: bool = False,
+):
+    st.markdown(
+        f"""
+        <div class="login-required-panel">
+            <div class="login-required-icon">LT</div>
+            <div>
+                <div class="login-required-title">{escape(str(title))}</div>
+                <p class="login-required-message">{escape(str(message))}</p>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    _, action_col, _ = st.columns([1, 1.2, 1])
+    with action_col:
+        if st.button(button_label, type="primary", use_container_width=True):
+            if clear_session:
+                st.session_state.clear()
+            st.switch_page("pages/01_Login.py")
 
 
 def render_book_cover(cover: str | None, size: str = "normal") -> str:
