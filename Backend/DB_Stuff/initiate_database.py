@@ -7,7 +7,6 @@ def initiate_books():
     CREATE TABLE IF NOT EXISTS books (
         ISBN             VARCHAR(18)        PRIMARY KEY NOT NULL,
         Title            VARCHAR(255)       NOT NULL,
-        Category         VARCHAR(255),
         Publisher        VARCHAR(255),
         Published_Year   YEAR,
         Author           VARCHAR(255),
@@ -18,6 +17,15 @@ def initiate_books():
         Clicked          INT                DEFAULT 0,
         Saved            INT                DEFAULT 0
     )
+    """
+    db_connect.execute_query(query)
+def initiate_book_categories():
+    query = """
+    CREATE TABLE IF NOT EXISTS book_categories (
+        Category_ID      INT AUTO_INCREMENT PRIMARY KEY,
+        ISBN             VARCHAR(18) REFERENCES Books(ISBN),
+        Category         VARCHAR(255)
+        )
     """
     db_connect.execute_query(query)
 
@@ -111,9 +119,6 @@ def initiate_likes():
     db_connect.execute_query(query)
 
 
-def inititate_likes():
-    initiate_likes()
-
 
 def initiate_comments():
     query = """
@@ -183,6 +188,7 @@ def execute_all_methods():
     initiate_comments()
     initiate_rewards()
     initiate_badges()
+    initiate_book_categories()
 
 def data_test():
     query = "CREATE TABLE IF NOT EXISTS test(test int)"
@@ -200,6 +206,7 @@ print(
 print(
     "Select a setup option:\n"
     "(A) initiate books table\n"
+    "(Aa)initiate books category table\n"
     "(B) initiate readers table\n"
     "(C) initiate posts table\n"
     "(D) initiate rewards/badges table\n"
@@ -213,6 +220,8 @@ dev_input = input()
 match dev_input:
     case "A":
         initiate_books()
+    case "Aa":
+        initiate_book_categories()
     case "B":
         initiate_readers()
     case "C":

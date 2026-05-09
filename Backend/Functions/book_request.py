@@ -5,9 +5,15 @@ from requests import RequestException
 from Backend.DB_Stuff import db_connect
 
 
-def format_subjects(book_data):
-    subjects = book_data.get("subjects", [])
-    return " / ".join(subjects) if subjects else "None"
+def extract_categories(book_data):
+    raw_subjects = book_data.get("subjects", [])
+
+    # clean categories (remove "-- Juvenile fiction" suffix)
+    cleaned = []
+    for s in raw_subjects:
+        cleaned.append(s.split(" -- ")[0].strip())
+
+    return cleaned
 
 headers = {
     'User-Agent': 'LibTrack(malucristallord@gmail.com)'
@@ -16,11 +22,12 @@ headers = {
 def data_to_db(book_data, author_data):
     print("data to db")
 
+    # Data extraction
     try:
 
         title = book_data.get("title", "")
         isbn = book_data.get("isbn_13", [""])[0]
-        category = format_subjects(book_data)
+        category = extract_categories(book_data)
         author_name = author_data.get("personal_name", "Unknown")
         rating = 0
 
@@ -33,14 +40,13 @@ def data_to_db(book_data, author_data):
 
         query = """
         INSERT IGNORE INTO books
-        (Title, ISBN, Category, Author, Rating, Description, Publisher, Published_Year)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        (Title, ISBN, Author, Rating, Description, Publisher, Published_Year)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
 
         values = (
             title,
             isbn,
-            category,
             author_name,
             rating,
             description[:255] if description else "",
@@ -49,7 +55,17 @@ def data_to_db(book_data, author_data):
         )
         print("values:", values)
 
-        return db_connect.insert_book(query, values)
+        db_connect.insert_book(query, values)
+
+        category_query = """
+        INSERT INTO  book_categories (ISBN, Category)
+        VALUES (%s, %s)
+        """
+        print("category_query:", category_query)
+        for category in category:
+            db_connect.execute_query(category_query, (isbn, category))
+
+        print("insertion complete")
 
     except IntegrityError as e:
         print(f"IntegrityError: {e}")
@@ -94,7 +110,7 @@ def request_book_data_alt(isbn_value):
 
 
 def test():
-    print("Test phase, input = 9780141321288")
-    request_book_data("9780141321288")
+    print("Test phase, input = 9780439362139")
+    request_book_data("9780439362139")
 
 test()
