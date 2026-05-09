@@ -4,6 +4,7 @@ from datetime import date
 from decimal import Decimal
 from typing import Any
 
+from Backend.DB_Stuff import db_connect
 from Backend.DB_Stuff.db_connect import execute_query, get_connection
 
 
@@ -344,6 +345,7 @@ def get_book_by_id(book_id: int | str | None) -> dict[str, Any] | None:
     if not book_id:
         books = get_books(limit=1)
         return books[0] if books else None
+
 
     if table_exists("posts"):
         row = fetch_one(
@@ -960,20 +962,12 @@ def get_books_by_title(keyword):
 
 def get_book_by_isbn(isbn): 
     query = """
-    SELECT
-        ISBN AS Book_ID,
-        ISBN,
-        Title,
-        Author,
-        Category,
-        Rating,
-        Description,
-        Clicked,
-        Saved
+    SELECT Title, ISBN, Publisher, Published_Year, Author, Description
     FROM books
     WHERE ISBN = %s
     """
     return fetch_all(query, (isbn,))
+
 
 def get_posts_by_reader(reader_id):
 

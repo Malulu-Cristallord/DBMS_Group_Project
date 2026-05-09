@@ -6,7 +6,7 @@ import streamlit as st
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from Backend.Functions.library_data import get_book_by_id, get_reviews, reader_initials
+from Backend.Functions.library_data import get_book_by_id, get_reviews, reader_initials, get_book_by_isbn
 from components.ui_helpers import (
     COLORS,
     inject_global_css,
@@ -31,7 +31,9 @@ render_navbar(active_page="discover")
 page_spacer(20)
 
 
-book = get_book_by_id(st.session_state.get("selected_book_id"))
+#book = get_book_by_id(st.session_state.get("selected_book_id"))
+
+book = get_book_by_isbn("9780439362139")
 
 if not book:
     st.warning("No books are available in the database yet.")

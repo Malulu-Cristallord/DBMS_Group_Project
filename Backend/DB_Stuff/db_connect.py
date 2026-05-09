@@ -29,10 +29,13 @@ def execute_query(query, values=None):
         cursor.execute(query, values or ())
         connection.commit()
         print("Query committed")
-    except mysql.connector.Error as exc:
+        return None
+
+    except mysql.connector.Error as e:
         if connection:
             connection.rollback()
-        return f"DB Error: {exc}"
+        return f"DB Error: {e}"
+
     finally:
         if cursor:
             cursor.close()
@@ -45,6 +48,59 @@ def insert_book(query, values=None):
     if error:
         return error
     return None
+
+
+def fetch_one(query, values=None):
+    connection = None
+    cursor = None
+
+    try:
+        connection = get_connection()
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute(query, values or ())
+        result = cursor.fetchone()
+        return result
+
+    except mysql.connector.Error as exc:
+        return f"DB Error: {exc}"
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+def fetch_all(query, values=None):
+    connection = None
+    cursor = None
+
+    try:
+        connection = get_connection()
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute(query, values or ())
+        result = cursor.fetchall()
+
+        return result
+
+    except mysql.connector.Error as e:
+        return f"DB Error: {e}"
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+
+
+
+
+
+
+
+
 
 
 def test_connection():

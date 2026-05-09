@@ -173,6 +173,7 @@ def del_all():
         rewards,
         badges,
         books,
+        book_categories,
         readers
     """
     db_connect.execute_query(query)

@@ -29,6 +29,13 @@ def data_to_db(book_data, author_data):
         isbn = book_data.get("isbn_13", [""])[0]
         category = extract_categories(book_data)
         author_name = author_data.get("personal_name", "Unknown")
+
+        cover_data = book_data.get("covers", [])
+        cover = (
+            f"https://covers.openlibrary.org/b/id/{cover_data[0]}-L.jpg"
+            if cover_data
+            else None
+        )
         rating = 0
 
         description = book_data.get("description", "")
@@ -40,8 +47,8 @@ def data_to_db(book_data, author_data):
 
         query = """
         INSERT IGNORE INTO books
-        (Title, ISBN, Author, Rating, Description, Publisher, Published_Year)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        (Title, ISBN, Author, Rating, Description, Publisher, Published_Year, cover)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """
 
         values = (
@@ -52,6 +59,7 @@ def data_to_db(book_data, author_data):
             description[:255] if description else "",
             publisher,
             published_year if published_year.isdigit() else None,
+            cover
         )
         print("values:", values)
 
@@ -110,7 +118,7 @@ def request_book_data_alt(isbn_value):
 
 
 def test():
-    print("Test phase, input = 9780439362139")
+    print("Test phase, input = 978043936213")
     request_book_data("9780439362139")
 
 test()
