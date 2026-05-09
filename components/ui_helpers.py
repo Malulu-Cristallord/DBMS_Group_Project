@@ -282,6 +282,7 @@ def inject_global_css():
             border: none;
             border-top: 1px solid #EBEBEB;
         }}
+        
         </style>
         """,
         unsafe_allow_html=True,
@@ -311,9 +312,9 @@ def render_navbar(active_page: str = ""):
                 LibTrack
             </div>
             <div class="nav-links">
-                <span class="{nav_class("discover")}">Discover</span>
-                <span class="{nav_class("Record Readings")}">Record Readings</span>
-                <span class="{nav_class("my_library")}">My library</span>
+                <a href="pages/03_Discovery.py" class="{nav_class('discover')}">Discover</a>
+                <a href="pages/04/Record_Readings.py" class="{nav_class("Record Readings")}">Record Readings</q>
+                <a href="pages/05Book_Detail.py" class="{nav_class("my_library")}">My library</q>
             </div>
             <div style="display:flex; align-items:center; gap:16px;">
                 <div class="nav-search">Search for a book...</div>
@@ -323,6 +324,7 @@ def render_navbar(active_page: str = ""):
         """,
         unsafe_allow_html=True,
     )
+
 
 
 def render_book_cover(cover: str | None, size: str = "normal") -> str:
