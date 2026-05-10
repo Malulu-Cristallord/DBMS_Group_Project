@@ -962,21 +962,28 @@ def get_books_by_title(keyword):
 
 
 def get_book_by_isbn(isbn):
-    query = """
+    book_query = """
     SELECT Title, ISBN, Publisher, Published_Year, Author, Description, Cover
     FROM books
     WHERE ISBN = %s
     """
-    rows = fetch_all(query, (isbn,))
+
+    category_query = """
+    SELECT Category
+    FROM book_categories
+    WHERE ISBN = %s
+    """
+
+    rows = fetch_all(book_query, (isbn,))
+    print("DEBUG ROWS:", rows)
 
     if not rows:
         return None
 
     row = rows[0]
 
-    rows = fetch_all(query, (isbn,))
-    print("DEBUG ROWS:", rows)
-    print("TYPE:", type(rows))
+    category_rows = fetch_all(category_query, (isbn,))
+    categories = [c["Category"] for c in category_rows] if category_rows else []
 
     return {
         "title": row["Title"],
@@ -986,8 +993,10 @@ def get_book_by_isbn(isbn):
         "author": row["Author"],
         "description": row["Description"],
         "cover": row["Cover"],
+        "categories": categories,
+        "avg_rating": 0,
+        "review_count": 0
     }
-
 
 
 def get_posts_by_reader(reader_id):
