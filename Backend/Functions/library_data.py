@@ -4,6 +4,7 @@ from datetime import date
 from decimal import Decimal
 from typing import Any
 
+from Backend.DB_Stuff import db_connect
 from Backend.DB_Stuff.db_connect import execute_query, get_connection
 
 
@@ -344,6 +345,7 @@ def get_book_by_id(book_id: int | str | None) -> dict[str, Any] | None:
     if not book_id:
         books = get_books(limit=1)
         return books[0] if books else None
+
 
     if table_exists("posts"):
         row = fetch_one(
@@ -958,22 +960,44 @@ def get_books_by_title(keyword):
     """
     return fetch_all(query, (f"%{keyword}%",))
 
-def get_book_by_isbn(isbn): 
-    query = """
-    SELECT
-        ISBN AS Book_ID,
-        ISBN,
-        Title,
-        Author,
-        Category,
-        Rating,
-        Description,
-        Clicked,
-        Saved
+
+def get_book_by_isbn(isbn):
+    book_query = """
+    SELECT Title, ISBN, Publisher, Published_Year, Author, Description, Cover
     FROM books
     WHERE ISBN = %s
     """
-    return fetch_all(query, (isbn,))
+
+    category_query = """
+    SELECT Category
+    FROM book_categories
+    WHERE ISBN = %s
+    """
+
+    rows = fetch_all(book_query, (isbn,))
+    print("DEBUG ROWS:", rows)
+
+    if not rows:
+        return None
+
+    row = rows[0]
+
+    category_rows = fetch_all(category_query, (isbn,))
+    categories = [c["Category"] for c in category_rows] if category_rows else []
+
+    return {
+        "title": row["Title"],
+        "isbn": row["ISBN"],
+        "publisher": row["Publisher"],
+        "year": row["Published_Year"],
+        "author": row["Author"],
+        "description": row["Description"],
+        "cover": row["Cover"],
+        "categories": categories,
+        "avg_rating": 0,
+        "review_count": 0
+    }
+
 
 def get_posts_by_reader(reader_id):
 

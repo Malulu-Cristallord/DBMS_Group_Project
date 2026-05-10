@@ -90,7 +90,7 @@ for book in recommendations:
             increment_book_clicked(book["isbn"])
             update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "clicked")
             st.session_state["selected_book_id"] = book["isbn"]
-            st.switch_page("pages/05_Book_Detail.py")
+            st.switch_page("pages/15_Book_Detail.py")
 
         if st.button("Save", key=f'save_{book["isbn"]}', use_container_width=True):
             increment_book_saved(book["isbn"])
