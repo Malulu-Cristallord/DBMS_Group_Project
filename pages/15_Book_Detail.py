@@ -127,12 +127,12 @@ with main_col:
         btn_cols = st.columns(2)
         with btn_cols[0]:
             if st.button("Write / Edit review", type="primary", key="write_review_top"):
-                st.session_state["review_book_id"] = book["id"]
+                st.session_state["review_book_isbn"] = book["isbn"]
                 st.switch_page("pages/06_Create_Review.py")
 
         with btn_cols[1]:
             if st.button("Create post", key="create_post_top"):
-                st.session_state["post_book_id"] = book["id"]
+                st.session_state["post_book_isbn"] = book["isbn"]
                 st.switch_page("pages/07_Create_Post.py")
 
 
