@@ -23,10 +23,12 @@ from components.ui_helpers import (
     render_avatar,
     render_badge,
     render_book_cover,
+    render_login_required,
     render_navbar,
     render_stars,
     section_title,
 )
+from UI.Login.session import google_user_is_logged_in, sync_google_user_to_session
 
 
 st.set_page_config(
@@ -41,14 +43,22 @@ inject_global_css()
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
 
+if google_user_is_logged_in(st.user) and not st.session_state["logged_in"]:
+    google_success, google_message, _ = sync_google_user_to_session(
+        st.session_state,
+        st.user,
+    )
+
+    if not google_success:
+        render_navbar(active_page="discover")
+        st.error(google_message)
+        if st.button("Sign out of Google", type="primary"):
+            st.logout()
+        st.stop()
+
 if not st.session_state["logged_in"]:
     render_navbar(active_page="discover")
-    page_spacer(40)
-    st.warning("Please sign in to access your LibTrack home page.")
-
-    if st.button("Go to Login", type="primary"):
-        st.switch_page("pages/01_Login.py")
-
+    render_login_required("Please sign in to access your LibTrack home page.")
     st.stop()
 
 
@@ -56,13 +66,11 @@ current_reader = get_reader_from_session(st.session_state)
 
 if current_reader is None:
     render_navbar(active_page="discover")
-    page_spacer(40)
-    st.error("Could not load your reader profile. Please log in again.")
-
-    if st.button("Go to Login", type="primary"):
-        st.session_state.clear()
-        st.switch_page("pages/01_Login.py")
-
+    render_login_required(
+        "Could not load your reader profile. Please log in again.",
+        title="Profile unavailable",
+        clear_session=True,
+    )
     st.stop()
 
 

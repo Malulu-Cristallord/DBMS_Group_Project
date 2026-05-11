@@ -14,6 +14,7 @@ from Backend.Functions.library_data import (
 
 from components.ui_helpers import (
     inject_global_css,
+    render_login_required,
     render_navbar,
     page_spacer,
     section_title,
@@ -34,13 +35,19 @@ if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
 
 if not st.session_state["logged_in"]:
-    st.warning("Please login first.")
+    render_navbar(active_page="discover")
+    render_login_required("Please sign in to view your posts.")
     st.stop()
 
 current_reader = get_reader_from_session(st.session_state)
 
 if current_reader is None:
-    st.error("Cannot load reader profile.")
+    render_navbar(active_page="discover")
+    render_login_required(
+        "Cannot load your reader profile. Please log in again.",
+        title="Profile unavailable",
+        clear_session=True,
+    )
     st.stop()
 
 render_navbar(active_page="discover")

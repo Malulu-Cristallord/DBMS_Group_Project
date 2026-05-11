@@ -6,7 +6,13 @@ import streamlit as st
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from Backend.Functions.library_data import get_reader_from_session
-from components.ui_helpers import inject_global_css, page_spacer, render_navbar, section_title
+from components.ui_helpers import (
+    inject_global_css,
+    page_spacer,
+    render_login_required,
+    render_navbar,
+    section_title,
+)
 
 
 st.set_page_config(
@@ -22,9 +28,7 @@ page_spacer(20)
 
 current_reader = get_reader_from_session(st.session_state)
 if current_reader is None:
-    st.warning("Please sign in to record readings.")
-    if st.button("Go to Login", type="primary"):
-        st.switch_page("pages/01_Login.py")
+    render_login_required("Please sign in to record readings.")
     st.stop()
 
 

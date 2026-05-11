@@ -8,6 +8,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from Backend.Functions.library_data import get_genres
 from components.ui_helpers import inject_global_css, page_spacer, render_navbar
 from UI.Login.auth import register_reader
+from UI.Login.session import google_user_is_logged_in, sync_google_user_to_session
+from UI.Login.validators import validate_google_email, validate_password
 
 
 st.set_page_config(
@@ -19,6 +21,21 @@ st.set_page_config(
 inject_global_css()
 render_navbar()
 page_spacer(40)
+
+if google_user_is_logged_in(st.user) and not st.session_state.get("logged_in", False):
+    google_success, google_message, google_reader = sync_google_user_to_session(
+        st.session_state,
+        st.user,
+    )
+
+    if google_success and google_reader:
+        st.success(f"Welcome, {google_reader['Name']}!")
+        st.switch_page("app.py")
+    else:
+        st.error(google_message)
+        if st.button("Sign out of Google", type="primary"):
+            st.logout()
+        st.stop()
 
 
 _, center_col, _ = st.columns([1, 1.6, 1])
@@ -41,7 +58,7 @@ with center_col:
 
     email_input = st.text_input(
         "Email address",
-        placeholder="reader@email.com",
+        placeholder="reader@gmail.com",
         key="reg_email",
     )
 
@@ -51,7 +68,7 @@ with center_col:
         password_input = st.text_input(
             "Password",
             type="password",
-            placeholder="At least 8 characters",
+            placeholder="8-20 characters",
             key="reg_pw",
         )
 
@@ -96,15 +113,18 @@ with center_col:
 
     if register_btn:
         errors = []
+        clean_email = (email_input or "").strip().lower()
 
         if not name_input:
             errors.append("Name is required.")
 
-        if not email_input or "@" not in email_input:
-            errors.append("A valid email address is required.")
+        email_is_valid, email_message = validate_google_email(clean_email)
+        if not email_is_valid:
+            errors.append(email_message)
 
-        if len(password_input) < 8:
-            errors.append("Password must be at least 8 characters.")
+        password_is_valid, password_message = validate_password(password_input)
+        if not password_is_valid:
+            errors.append(password_message)
 
         if password_input != confirm_pw:
             errors.append("Passwords do not match.")
@@ -118,7 +138,7 @@ with center_col:
         else:
             success, message = register_reader(
                 name=name_input,
-                email=email_input,
+                email=clean_email,
                 password=password_input,
                 preferred_category=", ".join(preferred_genres),
                 receive_recommendations=receive_recs,
@@ -129,6 +149,20 @@ with center_col:
                 st.switch_page("pages/01_Login.py")
             else:
                 st.error(message)
+
+    page_spacer(12)
+    st.markdown("<hr>", unsafe_allow_html=True)
+    page_spacer(4)
+
+    if st.button("Continue with Google", use_container_width=True, key="google_register_btn"):
+        try:
+            st.login("google")
+        except Exception:
+            st.error("Google login is not configured yet.")
+            st.caption(
+                "Add .streamlit/secrets.toml with Google OAuth credentials, "
+                "then restart Streamlit."
+            )
 
     page_spacer(12)
     st.markdown("<hr>", unsafe_allow_html=True)
