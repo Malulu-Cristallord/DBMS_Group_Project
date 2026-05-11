@@ -5,8 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4c0b4b54-7149-4888-b2c8-68a9273f4334" name="Changes" comment="Merge branch 'master' of https://github.com/Malulu-Cristallord/DBMS_Group_Project&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
+      <change afterPath="$PROJECT_DIR$/Backend/Functions/post_handler.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/15_Book_Detail.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/15_Book_Detail.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/Functions/book_request.py" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/Functions/book_request.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/Functions/library_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/Functions/library_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pages/07_Create_Post.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/07_Create_Post.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,7 +66,8 @@
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "master",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/twgam/OneDrive/桌面/Coding Projects/python/DBMS_Group_Project"
+    "last_opened_file_path": "C:/Users/twgam/OneDrive/桌面/Coding Projects/python/DBMS_Group_Project",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
 }]]></component>
   <component name="RecentsManager">

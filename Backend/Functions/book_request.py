@@ -112,10 +112,6 @@ def request_book_data(isbn_value):
     except Exception as e:
         print(f"Unknown general error: {e}")
 
-
-def request_book_data_alt(isbn_value):
-    return None
-
 def get_book_cover(isbn_value):
     try:
         print("requesting book image")
