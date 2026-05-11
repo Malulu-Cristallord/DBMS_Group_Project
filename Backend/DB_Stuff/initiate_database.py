@@ -36,6 +36,7 @@ def initiate_readers():
         Reader_ID               INT             AUTO_INCREMENT PRIMARY KEY,
         Name                    VARCHAR(100)    NOT NULL,
         Email                   VARCHAR(255)    NOT NULL UNIQUE,
+        Google_Sub              VARCHAR(255)    UNIQUE,
         Password_Hash           VARCHAR(255)    NOT NULL,
         Preferred_Category      VARCHAR(255),
         Points                  INT             DEFAULT 0,
