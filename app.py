@@ -7,7 +7,7 @@ import streamlit as st
 sys.path.insert(0, os.path.dirname(__file__))
 
 from Backend.Functions.library_data import (
-    get_book_by_id,
+    get_book_by_isbn,
     get_books,
     get_posts,
     get_reader_from_session,
@@ -188,10 +188,9 @@ section_title("Activity feed")
 activity_posts = get_posts(limit=10)
 
 if not activity_posts:
-    st.info("No activity yet. Reviews will appear here after readers create posts.")
+    st.info("No activity yet. Posts will appear here after readers create posts.")
 else:
     for post in activity_posts:
-        rating_html = render_stars(post["rating"]) if post.get("rating") else ""
         reader_name = post.get("reader_name") or "Unknown reader"
         book_title = post.get("book_title") or "an unlinked book"
         content = post.get("content") or "No content."
@@ -207,10 +206,9 @@ else:
                         <div>
                             <strong style="font-size:0.95rem;">{escape(reader_name)}</strong>
                             <span class="muted">
-                                reviewed <strong>{escape(book_title)}</strong> on {escape(str(post.get("created_at") or ""))}
+                                post <strong>{escape(book_title)}</strong> on {escape(str(post.get("created_at") or ""))}
                             </span>
                         </div>
-                        <div style="margin-left:auto;">{rating_html}</div>
                     </div>
                     <p style="margin:6px 0 10px 0; font-size:0.92rem; line-height:1.55;">
                         {escape(content)}
@@ -228,7 +226,7 @@ else:
             st.markdown(render_badge("Review", style="beige"), unsafe_allow_html=True)
 
             if st.button("Details", key=f"feed_detail_{post['post_id']}"):
-                selected_book = get_book_by_id(post.get("book_id"))
+                selected_book = get_book_by_isbn(post.get("book_id"))
                 if selected_book:
                     increment_book_clicked(selected_book["id"])
                     st.session_state["selected_book_id"] = selected_book["id"]

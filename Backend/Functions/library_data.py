@@ -279,19 +279,18 @@ def get_books(
         rows = fetch_all(
             f"""
             SELECT
-                b.ISBN AS id,
-                b.Title AS title,
                 b.ISBN AS isbn,
+                b.Title AS title,
                 b.Category AS category,
                 b.Publisher AS publisher,
                 b.Published_Year AS year,
                 b.Author AS author,
                 b.Cover AS cover,
                 b.Description AS description,
-                COALESCE(NULLIF(b.Average_Rating, 0), b.Rating, 0) AS avg_rating,
+                COALESCE(b.Average_Rating, 0) AS avg_rating,
                 b.Clicked AS clicked,
                 b.Saved AS saved,
-                COUNT(p.Post_ID) AS review_count
+                b.Review_Count AS review_count
             FROM books b
             LEFT JOIN posts p ON p.ISBN = b.ISBN
             {where_clause}
@@ -326,7 +325,7 @@ def get_books(
                 b.Author AS author,
                 b.Cover AS cover,
                 b.Description AS description,
-                COALESCE(NULLIF(b.Average_Rating, 0), b.Rating, 0) AS avg_rating,
+                COALESCE(b.Average_Rating, 0) AS avg_rating,
                 b.Clicked AS clicked,
                 b.Saved AS saved,
                 0 AS review_count
@@ -341,8 +340,8 @@ def get_books(
     return [normalize_book(row) for row in rows]
 
 
-def get_book_by_id(book_id: int | str | None) -> dict[str, Any] | None:
-    if not book_id:
+def get_book_by_isbn(book_isbn: int | str | None) -> dict[str, Any] | None:
+    if not book_isbn:
         books = get_books(limit=1)
         return books[0] if books else None
 
@@ -351,59 +350,45 @@ def get_book_by_id(book_id: int | str | None) -> dict[str, Any] | None:
         row = fetch_one(
             """
             SELECT
-                b.ISBN AS id,
-                b.Title AS title,
                 b.ISBN AS isbn,
+                b.Title AS title,
                 b.Category AS category,
                 b.Publisher AS publisher,
                 b.Published_Year AS year,
                 b.Author AS author,
                 b.Cover AS cover,
                 b.Description AS description,
-                COALESCE(NULLIF(b.Average_Rating, 0), b.Rating, 0) AS avg_rating,
+                COALESCE(b.Average_Rating, 0) AS avg_rating,
                 b.Clicked AS clicked,
                 b.Saved AS saved,
-                COUNT(p.Post_ID) AS review_count
+                b.Review_Count AS review_count
             FROM books b
             LEFT JOIN posts p ON p.ISBN = b.ISBN
             WHERE b.ISBN = %s
-            GROUP BY
-                b.Title,
-                b.ISBN,
-                b.Category,
-                b.Publisher,
-                b.Published_Year,
-                b.Author,
-                b.Cover,
-                b.Description,
-                b.Rating,
-                b.Average_Rating,
-                b.Clicked,
-                b.Saved
+            GROUP BY b.ISBN
             """,
-            (book_id,),
+            (book_isbn,),
         )
     else:
         row = fetch_one(
             """
             SELECT
-                b.ISBN AS id,
-                b.Title AS title,
                 b.ISBN AS isbn,
+                b.Title AS title,
                 b.Category AS category,
                 b.Publisher AS publisher,
                 b.Published_Year AS year,
                 b.Author AS author,
                 b.Cover AS cover,
                 b.Description AS description,
-                COALESCE(NULLIF(b.Average_Rating, 0), b.Rating, 0) AS avg_rating,
+                COALESCE(b.Average_Rating, 0) AS avg_rating,
                 b.Clicked AS clicked,
                 b.Saved AS saved,
-                0 AS review_count
+                b.Review_Count AS review_count
             FROM books b
             WHERE b.ISBN = %s
             """,
-            (book_id,),
+            (book_isbn,),
         )
 
     if row:
@@ -426,7 +411,7 @@ def _recommendation_reason(book: dict[str, Any], reader: dict[str, Any] | None) 
         return "Recommended because it matches your preferred category and has strong reader engagement."
     if _category_matches(book.get("category"), reader):
         return f"Recommended because this book matches your preferred category: {book.get('category')}."
-    if to_float(book.get("rating")) >= 4:
+    if to_float(book.get("avg_rating")) >= 4:
         return "Recommended because it has a high rating and many readers saved it."
     return "Recommended because it has a strong overall recommendation score."
 
@@ -441,14 +426,13 @@ def get_books_for_recommendation() -> list[dict[str, Any]]:
             b.Author AS author,
             b.Category AS category,
             b.Description AS description,
-            COALESCE(NULLIF(b.Average_Rating, 0), b.Rating, 0) AS avg_rating,
-            COALESCE(NULLIF(b.Average_Rating, 0), b.Rating, 0) AS rating,
+            COALESCE(b.Average_Rating, 0) AS avg_rating,
             b.Clicked AS clicked,
             b.Saved AS saved,
             b.Publisher AS publisher,
             b.Published_Year AS year,
             b.Cover AS cover,
-            0 AS review_count
+            b.Review_Count AS review_count
         FROM books b
         """
     )
@@ -571,10 +555,10 @@ def get_recommendations_for_reader(
             b.Publisher AS publisher,
             b.Published_Year AS year,
             b.Cover AS cover,
-            COALESCE(NULLIF(b.Average_Rating, 0), b.Rating, 0) AS avg_rating,
+            COALESCE(b.Average_Rating, 0) AS avg_rating,
             b.Clicked AS clicked,
             b.Saved AS saved,
-            0 AS review_count
+            b.Review_Count AS review_count
         FROM recommendations rec
         JOIN books b ON rec.ISBN = b.ISBN
         WHERE rec.Reader_ID = %s
@@ -589,7 +573,7 @@ def get_recommendations_for_reader(
 
 def update_recommendation_status(
     reader_id: int | str,
-    book_id: int | str,
+    book_isbn: int | str,
     status: str,
 ) -> tuple[bool, str]:
     allowed_statuses = {"unread", "clicked", "saved"}
@@ -603,29 +587,29 @@ def update_recommendation_status(
         WHERE Reader_ID = %s
           AND ISBN = %s
         """,
-        (status, reader_id, book_id),
+        (status, reader_id, book_isbn),
     )
 
 
-def increment_book_clicked(book_id: int | str) -> tuple[bool, str]:
+def increment_book_clicked(book_isbn: int | str) -> tuple[bool, str]:
     return execute_write(
         """
         UPDATE books
         SET Clicked = COALESCE(Clicked, 0) + 1
         WHERE ISBN = %s
         """,
-        (book_id,),
+        (book_isbn,),
     )
 
 
-def increment_book_saved(book_id: int | str) -> tuple[bool, str]:
+def increment_book_saved(book_isbn: int | str) -> tuple[bool, str]:
     return execute_write(
         """
         UPDATE books
         SET Saved = COALESCE(Saved, 0) + 1
         WHERE ISBN = %s
         """,
-        (book_id,),
+        (book_isbn,),
     )
 
 
@@ -639,7 +623,7 @@ def get_recommended_books(reader: dict[str, Any] | None, limit: int = 4) -> list
 
 def get_posts(
     reader_id: int | str | None = None,
-    book_id: int | str | None = None,
+    book_isbn: int | str | None = None,
     limit: int | None = None,
 ) -> list[dict[str, Any]]:
     if not table_exists("posts"):
@@ -652,9 +636,9 @@ def get_posts(
         conditions.append("p.Reader_ID = %s")
         params.append(reader_id)
 
-    if book_id:
+    if book_isbn:
         conditions.append("p.ISBN = %s")
-        params.append(book_id)
+        params.append(book_isbn)
 
     where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
 
@@ -668,7 +652,6 @@ def get_posts(
         SELECT
             p.Post_ID AS post_id,
             p.Reader_ID AS reader_id,
-            p.ISBN AS book_id,
             p.ISBN AS isbn,
             p.Content AS content,
             p.Created_Date AS created_at,
@@ -727,7 +710,7 @@ def create_review(
             update_query,
             (clean_content, rating, existing["review_id"])
         )
-
+        update_book_review_stats(isbn)
         return True, "Your review has been updated."
 
     # 不存在 -> INSERT
@@ -745,7 +728,7 @@ def create_review(
         insert_query,
         (reader_id, isbn, clean_content, rating)
     )
-
+    update_book_review_stats(isbn)
     return True, "Review published successfully."
 
 
@@ -962,8 +945,26 @@ def get_book_by_isbn(isbn):
         "description": row["Description"],
         "cover": row["Cover"],
         "categories": categories,
-        "avg_rating": 0,
-        "review_count": 0
+        "avg_rating": row["Average_Rating"],
+        "review_count": row["Review_Count"]
     }
+def update_book_review_stats(isbn):
 
+    query = """
+    UPDATE books b
+    SET
+        Average_Rating = (
+            SELECT ROUND(AVG(r.Rating), 1)
+            FROM reviews r
+            WHERE r.ISBN = b.ISBN
+        ),
+        Review_Count = (
+            SELECT COUNT(*)
+            FROM reviews r
+            WHERE r.ISBN = b.ISBN
+        )
+    WHERE b.ISBN = %s
+    """
+
+    execute_query(query, (isbn,))
 

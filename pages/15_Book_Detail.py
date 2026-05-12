@@ -7,7 +7,7 @@ from streamlit import session_state
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from Backend.Functions.library_data import get_book_by_id, get_reviews, reader_initials, get_book_by_isbn
+from Backend.Functions.library_data import  get_reviews, reader_initials, get_book_by_isbn
 from components.ui_helpers import (
     COLORS,
     inject_global_css,
@@ -176,8 +176,8 @@ section_title("Community reviews")
 
 if st.button("Back to Discovery"):
     st.switch_page("pages/03_Discovery.py")
-'''
-if book_reviews:
+
+if book_reviews := get_reviews(isbn=book["isbn"], limit=20):
     for review in book_reviews:
         reader_name = review.get("reader_name") or "Unknown reader"
         rating_html = render_stars(review["rating"]) if review.get("rating") else ""
@@ -202,4 +202,3 @@ else:
         '<p class="muted">No reviews yet. Be the first reader to share your thoughts.</p>',
         unsafe_allow_html=True,
     )
-'''
