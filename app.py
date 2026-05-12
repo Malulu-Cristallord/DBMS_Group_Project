@@ -226,7 +226,7 @@ else:
             st.markdown(render_badge("Review", style="beige"), unsafe_allow_html=True)
 
             if st.button("Details", key=f"feed_detail_{post['post_id']}"):
-                selected_book = get_book_by_isbn(post.get("book_id"))
+                selected_book = get_book_by_isbn(post.get("isbn"))
                 if selected_book:
                     increment_book_clicked(selected_book["id"])
                     st.session_state["selected_book_id"] = selected_book["id"]

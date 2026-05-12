@@ -78,7 +78,7 @@ with center_col:
     book_options = {"No book linked": None}
     get_books()
     st.write(books)
-    book_options.update({f'{b["Title"]} - {b["Author"]}': b["Book_ID"] for b in books})
+    book_options.update({f'{b["Title"]} - {b["Author"]}': b["ISBN"] for b in books})
     linked_book = st.selectbox("Select book", list(book_options.keys()))
 
     page_spacer(12)

@@ -264,7 +264,7 @@ def get_books(
 
     where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
 
-    order_by = "b.Rating DESC, b.Title ASC"
+    order_by = "b.Average_Rating DESC, b.Title ASC"
     if sort_option == "title":
         order_by = "b.Title ASC"
     elif sort_option == "year":
@@ -297,13 +297,11 @@ def get_books(
             GROUP BY
                 b.Title,
                 b.ISBN,
-                b.Category,
                 b.Publisher,
                 b.Published_Year,
                 b.Author,
                 b.Cover,
                 b.Description,
-                b.Rating,
                 b.Average_Rating,
                 b.Clicked,
                 b.Saved
@@ -319,7 +317,6 @@ def get_books(
                 b.ISBN AS id,
                 b.Title AS title,
                 b.ISBN AS isbn,
-                b.Category AS category,
                 b.Publisher AS publisher,
                 b.Published_Year AS year,
                 b.Author AS author,
@@ -339,29 +336,26 @@ def get_books(
 
     return [normalize_book(row) for row in rows]
 
-
+#this is not use now below has a function has the same name but different code.
 def get_book_by_isbn(book_isbn: int | str | None) -> dict[str, Any] | None:
     if not book_isbn:
         books = get_books(limit=1)
         return books[0] if books else None
-
-
-    if table_exists("posts"):
-        row = fetch_one(
-            """
+    row = fetch_one(
+        """
             SELECT
-                b.ISBN AS isbn,
-                b.Title AS title,
-                b.Category AS category,
-                b.Publisher AS publisher,
-                b.Published_Year AS year,
-                b.Author AS author,
-                b.Cover AS cover,
-                b.Description AS description,
-                COALESCE(b.Average_Rating, 0) AS avg_rating,
-                b.Clicked AS clicked,
-                b.Saved AS saved,
-                b.Review_Count AS review_count
+            b.ISBN AS isbn,
+            b.Title AS title,
+            b.Category AS category,
+            b.Publisher AS publisher,
+            b.Published_Year AS year,
+            b.Author AS author,
+            b.Cover AS cover,
+            b.Description AS description,
+            COALESCE(b.Average_Rating, 0) AS avg_rating,
+            b.Clicked AS clicked,
+            b.Saved AS saved,
+            b.Review_Count AS review_count
             FROM books b
             LEFT JOIN posts p ON p.ISBN = b.ISBN
             WHERE b.ISBN = %s
@@ -369,28 +363,6 @@ def get_book_by_isbn(book_isbn: int | str | None) -> dict[str, Any] | None:
             """,
             (book_isbn,),
         )
-    else:
-        row = fetch_one(
-            """
-            SELECT
-                b.ISBN AS isbn,
-                b.Title AS title,
-                b.Category AS category,
-                b.Publisher AS publisher,
-                b.Published_Year AS year,
-                b.Author AS author,
-                b.Cover AS cover,
-                b.Description AS description,
-                COALESCE(b.Average_Rating, 0) AS avg_rating,
-                b.Clicked AS clicked,
-                b.Saved AS saved,
-                b.Review_Count AS review_count
-            FROM books b
-            WHERE b.ISBN = %s
-            """,
-            (book_isbn,),
-        )
-
     if row:
         return normalize_book(row)
 
@@ -900,12 +872,7 @@ def get_books_by_title(keyword):
     SELECT
         ISBN,
         Title,
-        Author,
-        Category,
-        Rating,
-        Description,
-        Clicked,
-        Saved
+        Author
     FROM books
     WHERE Title LIKE %s
     """
@@ -914,7 +881,7 @@ def get_books_by_title(keyword):
 
 def get_book_by_isbn(isbn):
     book_query = """
-    SELECT Title, ISBN, Publisher, Published_Year, Author, Description, Cover
+    SELECT Title, ISBN, Publisher, Published_Year, Author, Description, Cover, Average_Rating, Review_Count
     FROM books
     WHERE ISBN = %s
     """
@@ -937,11 +904,11 @@ def get_book_by_isbn(isbn):
     categories = [c["Category"] for c in category_rows] if category_rows else []
 
     return {
-        "title": row["Title"],
-        "isbn": row["ISBN"],
+        "Title": row["Title"],
+        "ISBN": row["ISBN"],
         "publisher": row["Publisher"],
         "year": row["Published_Year"],
-        "author": row["Author"],
+        "Author": row["Author"],
         "description": row["Description"],
         "cover": row["Cover"],
         "categories": categories,

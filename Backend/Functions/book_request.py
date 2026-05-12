@@ -36,7 +36,6 @@ def data_to_db(book_data, author_data):
             if cover_data
             else None
         )
-        rating = 0
 
         description = book_data.get("description", "")
         if isinstance(description, dict):
@@ -47,15 +46,14 @@ def data_to_db(book_data, author_data):
 
         query = """
         INSERT IGNORE INTO books
-        (Title, ISBN, Author, Rating, Description, Publisher, Published_Year, cover)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        (Title, ISBN, Author, Description, Publisher, Published_Year, cover)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
 
         values = (
             title,
             isbn,
             author_name,
-            rating,
             description[:255] if description else "",
             publisher,
             published_year if published_year.isdigit() else None,

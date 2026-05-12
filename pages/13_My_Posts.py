@@ -6,10 +6,12 @@ import streamlit as st
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from Backend.Functions.library_data import (
-    get_reader_from_session,
+from Backend.Functions.post_handler import (
     get_posts_by_reader,
     delete_post,
+)
+from Backend.Functions.library_data import (
+    get_reader_from_session,
 )
 
 from components.ui_helpers import (
