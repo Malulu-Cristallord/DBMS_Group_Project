@@ -27,3 +27,6 @@ Functions
     Record Readings: Let the user input their own data and create stats. Link to Reward page and reading history
     Posts Reviews: Delete the whole page since it has no useful functions
     Book Detail: FIX
+    Profile: Change badge to add more notifications / add log out function
+    Add Books: Add ISBN 10
+    Bookshelf Page: Add saved books

@@ -6,13 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="4c0b4b54-7149-4888-b2c8-68a9273f4334" name="Changes" comment="Merge branch 'master' of https://github.com/Malulu-Cristallord/DBMS_Group_Project&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/DB_Stuff/initiate_database.py" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/DB_Stuff/initiate_database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/Functions/book_request.py" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/Functions/book_request.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/Functions/library_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/Functions/library_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/Functions/post_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/Functions/post_handler.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TODO.txt" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/05_Posts_Reviews.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/05_Posts_Reviews.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/15_Book_Detail.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/15_Book_Detail.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -131,6 +125,15 @@
       <option name="presentableId" value="Default" />
       <updated>1776344185468</updated>
     </task>
+    <task id="LOCAL-00001" summary="Merge branch 'master' of https://github.com/Malulu-Cristallord/DBMS_Group_Project&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
+      <option name="closed" value="true" />
+      <created>1778752775956</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1778752775956</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -143,6 +146,10 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Merge branch 'master' of https://github.com/Malulu-Cristallord/DBMS_Group_Project&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
+    <option name="LAST_COMMIT_MESSAGE" value="Merge branch 'master' of https://github.com/Malulu-Cristallord/DBMS_Group_Project&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
