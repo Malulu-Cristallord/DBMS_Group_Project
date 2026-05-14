@@ -1,5 +1,6 @@
 # Local agent skills
 .agents/skills/
+skills-lock.json
 
 # Local environment variables
 .env
