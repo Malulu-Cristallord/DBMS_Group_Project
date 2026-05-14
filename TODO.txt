@@ -13,10 +13,17 @@ Functions
     -Posts(0/1)
     -Reward System(0/1)
 
-04/24/2025
+04/24/2026
     TODO: SEPARATE FILES IN APP.PY
     DONE: multiple directories created, .py files should be organized within the directories.
 
-04/29/2025
+04/29/2026
     TODO: MERGE FRONT-END AND BACK-END
 
+05/14/2026
+
+    All pages: Add login hint
+    Login page: Delete navbar links for both login and register pages
+    Record Readings: Let the user input their own data and create stats. Link to Reward page and reading history
+    Posts Reviews: Delete the whole page since it has no useful functions
+    Book Detail: FIX

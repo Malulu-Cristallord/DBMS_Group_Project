@@ -12,6 +12,7 @@ def initiate_books():
         Author           VARCHAR(255),
         Cover            VARCHAR(255),
         Description      VARCHAR(255),
+        Genre           VARCHAR(255),
         Average_Rating   DECIMAL(3, 1)      DEFAULT 0,
         Review_Count     INT                DEFAULT 0,
         Clicked          INT                DEFAULT 0,

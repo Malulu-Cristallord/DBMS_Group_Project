@@ -32,7 +32,7 @@ page_spacer(20)
 
 current_isbn = "9780439362139"
 
-#book = get_book_by_id(st.session_state.get("selected_book_id"))
+#book = get_book_by_isbn(st.session_state.get("selected_book_id"))
 
 book = get_book_by_isbn(current_isbn)
 

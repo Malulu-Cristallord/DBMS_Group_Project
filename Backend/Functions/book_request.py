@@ -31,6 +31,7 @@ def data_to_db(book_data, author_data):
         author_name = author_data.get("personal_name", "Unknown")
 
         cover_data = book_data.get("covers", [])
+        genre = book_data.get("genre", [])
         cover = (
             f"https://covers.openlibrary.org/b/id/{cover_data[0]}-L.jpg"
             if cover_data
@@ -46,8 +47,8 @@ def data_to_db(book_data, author_data):
 
         query = """
         INSERT IGNORE INTO books
-        (Title, ISBN, Author, Description, Publisher, Published_Year, cover)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        (Title, ISBN, Author, Description, Publisher, Published_Year, cover, Genre)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """
 
         values = (

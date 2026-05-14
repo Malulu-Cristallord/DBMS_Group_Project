@@ -246,20 +246,20 @@ def normalize_book(row: dict[str, Any]) -> dict[str, Any]:
 
 def get_books(
     search_query: str = "",
-    category: str = "All genres",
+    genre: str = "All genres",
     sort_option: str = "rating",
     limit: int | None = None,
-) -> list[dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
     conditions: list[str] = []
     params: list[Any] = []
 
-    if category and category != "All genres":
-        conditions.append("b.Category = %s")
-        params.append(category)
+    if genre and genre != "All genres":
+        conditions.append("b.genre = %s")
+        params.append(genre)
 
     if search_query:
         like_value = f"%{search_query}%"
-        conditions.append("(b.Title LIKE %s OR b.Author LIKE %s OR b.Category LIKE %s)")
+        conditions.append("(b.Title LIKE %s OR b.Author LIKE %s OR b.genre LIKE %s)")
         params.extend([like_value, like_value, like_value])
 
     where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
@@ -281,7 +281,7 @@ def get_books(
             SELECT
                 b.ISBN AS isbn,
                 b.Title AS title,
-                b.Category AS category,
+                b.genre AS genre,
                 b.Publisher AS publisher,
                 b.Published_Year AS year,
                 b.Author AS author,
@@ -346,7 +346,7 @@ def get_book_by_isbn(book_isbn: int | str | None) -> dict[str, Any] | None:
             SELECT
             b.ISBN AS isbn,
             b.Title AS title,
-            b.Category AS category,
+            b.Genre AS genre,
             b.Publisher AS publisher,
             b.Published_Year AS year,
             b.Author AS author,
@@ -357,7 +357,6 @@ def get_book_by_isbn(book_isbn: int | str | None) -> dict[str, Any] | None:
             b.Saved AS saved,
             b.Review_Count AS review_count
             FROM books b
-            LEFT JOIN posts p ON p.ISBN = b.ISBN
             WHERE b.ISBN = %s
             GROUP BY b.ISBN
             """,
@@ -379,10 +378,10 @@ def _category_matches(book_category: str | None, reader: dict[str, Any] | None) 
 
 
 def _recommendation_reason(book: dict[str, Any], reader: dict[str, Any] | None) -> str:
-    if _category_matches(book.get("category"), reader) and int(book.get("saved") or 0) > 0:
-        return "Recommended because it matches your preferred category and has strong reader engagement."
-    if _category_matches(book.get("category"), reader):
-        return f"Recommended because this book matches your preferred category: {book.get('category')}."
+    if _category_matches(book.get("genre"), reader) and int(book.get("saved") or 0) > 0:
+        return "Recommended because it matches your preferred genre and has strong reader engagement."
+    if _category_matches(book.get("genre"), reader):
+        return f"Recommended because this book matches your preferred genre: {book.get('genre')}."
     if to_float(book.get("avg_rating")) >= 4:
         return "Recommended because it has a high rating and many readers saved it."
     return "Recommended because it has a strong overall recommendation score."
@@ -396,7 +395,7 @@ def get_books_for_recommendation() -> list[dict[str, Any]]:
             b.ISBN AS isbn,
             b.Title AS title,
             b.Author AS author,
-            b.Category AS category,
+            b.genre AS genre,
             b.Description AS description,
             COALESCE(b.Average_Rating, 0) AS avg_rating,
             b.Clicked AS clicked,
@@ -434,7 +433,7 @@ def calculate_recommendation_score(book: dict[str, Any], reader: dict[str, Any] 
     max_saved = int(book.get("_max_saved") or 0)
     normalized_saved = (int(book.get("saved") or 0) / max_saved) if max_saved else 0.0
 
-    category_match = 1.0 if _category_matches(book.get("category"), reader) else 0.0
+    category_match = 1.0 if _category_matches(book.get("genre"), reader) else 0.0
 
     score = (
         rating_weight * normalized_rating
@@ -453,8 +452,8 @@ def _rank_recommendation_candidates(
         book["score"] = calculate_recommendation_score(book, reader)
         book["reason"] = _recommendation_reason(book, reader)
 
-    preferred_books = [book for book in books if _category_matches(book.get("category"), reader)]
-    other_books = [book for book in books if not _category_matches(book.get("category"), reader)]
+    preferred_books = [book for book in books if _category_matches(book.get("genre"), reader)]
+    other_books = [book for book in books if not _category_matches(book.get("genre"), reader)]
 
     preferred_books.sort(key=lambda book: (book["score"], to_float(book.get("rating"))), reverse=True)
     other_books.sort(key=lambda book: (book["score"], to_float(book.get("rating"))), reverse=True)
@@ -522,7 +521,7 @@ def get_recommendations_for_reader(
             rec.Status AS recommendation_status,
             b.Title AS title,
             b.Author AS author,
-            b.Category AS category,
+            b.genre AS genre,
             b.Description AS description,
             b.Publisher AS publisher,
             b.Published_Year AS year,
@@ -879,42 +878,7 @@ def get_books_by_title(keyword):
     return fetch_all(query, (f"%{keyword}%",))
 
 
-def get_book_by_isbn(isbn):
-    book_query = """
-    SELECT Title, ISBN, Publisher, Published_Year, Author, Description, Cover, Average_Rating, Review_Count
-    FROM books
-    WHERE ISBN = %s
-    """
 
-    category_query = """
-    SELECT Category
-    FROM book_categories
-    WHERE ISBN = %s
-    """
-
-    rows = fetch_all(book_query, (isbn,))
-    print("DEBUG ROWS:", rows)
-
-    if not rows:
-        return None
-
-    row = rows[0]
-
-    category_rows = fetch_all(category_query, (isbn,))
-    categories = [c["Category"] for c in category_rows] if category_rows else []
-
-    return {
-        "Title": row["Title"],
-        "ISBN": row["ISBN"],
-        "publisher": row["Publisher"],
-        "year": row["Published_Year"],
-        "Author": row["Author"],
-        "description": row["Description"],
-        "cover": row["Cover"],
-        "categories": categories,
-        "avg_rating": row["Average_Rating"],
-        "review_count": row["Review_Count"]
-    }
 def update_book_review_stats(isbn):
 
     query = """

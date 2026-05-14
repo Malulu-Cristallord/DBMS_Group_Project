@@ -7,12 +7,12 @@ import streamlit as st
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from Backend.Functions.library_data import (
-    create_post,
     get_books,
     get_posts,
     get_reader_from_session,
     reader_initials,
 )
+from Backend.Functions.post_handler import (create_post)
 from components.ui_helpers import (
     COLORS,
     inject_global_css,
