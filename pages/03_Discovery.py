@@ -78,7 +78,7 @@ with main_col:
     active_genre = st.session_state.get("active_genre", "All genres")
     filtered_books = get_books(
         search_query=search_query,
-        category=active_genre,
+        genre=active_genre,
         sort_option=sort_map[sort_label],
     )
 
@@ -86,7 +86,7 @@ with main_col:
 
     section_title("Popular this week")
 
-    popular_books = get_books(category=active_genre, sort_option="rating", limit=6)
+    popular_books = get_books(genre=active_genre, sort_option="rating", limit=6)
     if popular_books:
         cols = st.columns(min(len(popular_books), 6))
         for index, book in enumerate(popular_books):
@@ -130,7 +130,7 @@ with main_col:
             with cols[2]:
                 page_spacer(10)
                 st.markdown(
-                    f'{render_badge(book["category"], "beige")}<br><br>'
+                    f'{render_badge(book["genre"], "beige")}<br><br>'
                     f'{render_badge("Database title", "available")}',
                     unsafe_allow_html=True,
                 )
