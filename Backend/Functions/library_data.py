@@ -225,14 +225,13 @@ def normalize_book(row: dict[str, Any]) -> dict[str, Any]:
         "id": row.get("id") or row.get("isbn"),
         "title": row.get("title") or "Untitled",
         "isbn": row.get("isbn") or "",
-        "category": row.get("category") or "Uncategorized",
+        "genre": row.get("genre") or "Uncategorized",
         "publisher": row.get("publisher") or "",
         "year": row.get("year") or "",
         "author": row.get("author") or "Unknown author",
         "cover": row.get("cover") or "#3E7255",
         "description": row.get("description") or "No description has been added yet.",
         "avg_rating": rating,
-        "rating": rating,
         "clicked": int(row.get("clicked") or 0),
         "saved": int(row.get("saved") or 0),
         "review_count": int(row.get("review_count") or 0),
@@ -292,7 +291,6 @@ def get_books(
                 b.Saved AS saved,
                 b.Review_Count AS review_count
             FROM books b
-            LEFT JOIN posts p ON p.ISBN = b.ISBN
             {where_clause}
             GROUP BY
                 b.Title,
