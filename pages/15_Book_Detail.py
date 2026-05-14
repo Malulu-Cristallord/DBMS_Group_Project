@@ -30,11 +30,11 @@ inject_global_css()
 render_navbar(active_page="discover")
 page_spacer(20)
 
-current_isbn = "9780439362139"
+#current_isbn = "9780439362139"
 
-#book = get_book_by_isbn(st.session_state.get("selected_book_id"))
+book = get_book_by_isbn(st.session_state.get("selected_book_id"))
 
-book = get_book_by_isbn(current_isbn)
+#book = get_book_by_isbn(current_isbn)
 
 if not book:
     st.warning("No books are available in the database yet.")
@@ -98,8 +98,8 @@ with main_col:
         )
         
     with header_cols[1]:
-        categories = book.get("categories") or []
-        category_text = ", ".join(categories) if categories else "Uncategorized"
+        genres = book.get("genre") or []
+        genre_text = "".join(genres) if genres else "Uncategorized"
 
         st.markdown(
             f'<h1 style="font-size:2rem; margin-bottom:4px;">{escape(book["title"])}</h1>',
@@ -107,7 +107,7 @@ with main_col:
         )
         st.markdown(
             f'<p class="secondary" style="font-size:1rem; margin-bottom:10px;">'
-            f'{escape(book["author"])} - {escape(category_text)} - {escape(str(book["year"]))}</p>',
+            f'{escape(book["author"])} - {escape(genre_text)} - {escape(str(book["year"]))}</p>',
             unsafe_allow_html=True,
         )
         st.markdown(
@@ -119,7 +119,7 @@ with main_col:
         page_spacer(10)
         st.markdown(
             f'{render_badge("In books table", "available")} '
-            f'{render_badge(category_text, "beige")}',
+            f'{render_badge(genre_text, "beige")}',
             unsafe_allow_html=True,
         )
 

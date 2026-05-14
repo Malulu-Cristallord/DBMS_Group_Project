@@ -31,7 +31,7 @@ def data_to_db(book_data, author_data):
         author_name = author_data.get("personal_name", "Unknown")
 
         cover_data = book_data.get("covers", [])
-        genre = book_data.get("genre", [])
+        genre = book_data.get("genre", "Uncategorized")
         cover = (
             f"https://covers.openlibrary.org/b/id/{cover_data[0]}-L.jpg"
             if cover_data
@@ -58,19 +58,13 @@ def data_to_db(book_data, author_data):
             description[:255] if description else "",
             publisher,
             published_year if published_year.isdigit() else None,
-            cover
+            cover,
+            genre
         )
         print("values:", values)
 
         db_connect.insert_book(query, values)
 
-        category_query = """
-        INSERT INTO  book_categories (ISBN, Category)
-        VALUES (%s, %s)
-        """
-        print("category_query:", category_query)
-        for category in category:
-            db_connect.execute_query(category_query, (isbn, category))
 
         print("insertion complete")
 

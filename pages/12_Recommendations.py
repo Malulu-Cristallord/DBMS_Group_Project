@@ -46,9 +46,9 @@ if current_reader is None:
 
 section_title("Recommendations")
 
-preferred_category = current_reader.get("Preferred_Category") or "Not set"
+preferred_genre = current_reader.get("Preferred_genre") or "Not set"
 st.markdown(
-    f'<p class="muted">Preferred category: {escape(str(preferred_category))}</p>',
+    f'<p class="muted">Preferred genre: {escape(str(preferred_genre))}</p>',
     unsafe_allow_html=True,
 )
 
@@ -76,7 +76,7 @@ for book in recommendations:
     with body_col:
         st.markdown(
             f'<strong style="color:{COLORS["dark_green"]};">{escape(book["title"])}</strong><br>'
-            f'<span class="secondary">{escape(book["author"])} - {escape(book["category"])}</span><br>'
+            f'<span class="secondary">{escape(book["author"])} - {escape(book["genre"])}</span><br>'
             f'{render_stars(book["avg_rating"])} '
             f'<span class="muted">score {book["score"]:.4f}</span><br>'
             f'<span class="muted">{escape(book["reason"])}</span><br>'

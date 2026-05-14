@@ -87,7 +87,7 @@ with center_col:
     with mini_col2:
         st.markdown(
             f'<strong style="color:{COLORS["dark_green"]};">{escape(selected_book["title"])}</strong><br>'
-            f'<span class="muted">{escape(selected_book["author"])} - {escape(selected_book["category"])}</span>',
+            f'<span class="muted">{escape(selected_book["author"])} - {escape(selected_book["genre"])}</span>',
             unsafe_allow_html=True,
         )
 
