@@ -68,6 +68,14 @@ def delete_post(post_id):
 
     return True, "Post deleted successfully."
 
+def get_post_by_id(post_id):
+    query = """
+    SELECT Post_ID, Content, Created_Date, Reader_ID, ISBN
+    FROM posts
+    WHERE Post_ID = %s
+    """
+    return fetch_all(query, (post_id,))
+
 def get_book_by_isbn(isbn):
     book_query = """
     SELECT Title, ISBN, Publisher, Published_Year, Author, Description, Cover, Average_Rating, Review_Count
@@ -104,3 +112,34 @@ def get_book_by_isbn(isbn):
         "avg_rating": row["Average_Rating"],
         "review_count": row["Review_Count"]
     }
+
+
+def update_post(
+    post_id: int | str,
+    content: str,
+    isbn: str | None = None,
+    ) -> tuple[bool, str]:
+
+    if not table_exists("posts"):
+        return False, "The posts table does not exist."
+
+    clean_content = content.strip()
+
+    if not clean_content:
+        return False, "Post content cannot be empty."
+
+    query = """
+    UPDATE posts
+    SET
+        Content = %s,
+        ISBN = %s
+    WHERE Post_ID = %s
+    """
+
+    values = (
+        clean_content[:255],
+        isbn,
+        post_id
+    )
+
+    return execute_write(query, values)

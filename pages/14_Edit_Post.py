@@ -5,16 +5,18 @@ import sys
 import streamlit as st
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
 from Backend.Functions.post_handler import (
-    create_post
+    update_post,
+    get_post_by_id
 )
 from Backend.Functions.library_data import (
-    get_books,
     get_reader_from_session,
     reader_initials,
     get_book_by_isbn,
-    get_books_by_title
+    get_books_by_title,
 )
+
 from components.ui_helpers import (
     COLORS,
     inject_global_css,
@@ -25,6 +27,7 @@ from components.ui_helpers import (
     section_title,
 )
 
+# ---------------- PAGE SETUP ----------------
 st.set_page_config(
     page_title="Edit_Post",
     page_icon="LT",
@@ -35,15 +38,30 @@ inject_global_css()
 render_navbar(active_page="my_library")
 page_spacer(30)
 
+# ---------------- AUTH ----------------
 current_reader = get_reader_from_session(st.session_state)
 if current_reader is None:
     render_login_required("Please sign in before editing a post.")
     st.stop()
 
+# ---------------- LOAD POST ----------------
+post_id = st.session_state.get("edit_post_id")
+
+if not post_id:
+    st.error("No post selected for editing.")
+    st.stop()
+
+post = get_post_by_id(post_id)[0]
+
+if not post:
+    st.error("Post not found.")
+    st.stop()
+
+# ---------------- UI ----------------
 _, center_col, _ = st.columns([1, 2.5, 1])
 
 with center_col:
-    section_title("Edit a post")
+    section_title("Edit your post")
 
     st.markdown(
         f'<div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">'
@@ -53,17 +71,22 @@ with center_col:
         unsafe_allow_html=True,
     )
 
+    # ---------------- PREFILL CONTENT ----------------
     post_content = st.text_area(
         "What is on your mind?",
-        placeholder="Share your reading thoughts, a quote, a milestone, or a recommendation...",
+        value=post.get("Content", ""),
         height=160,
-        key="post_content",
+        key="edit_post_content",
         label_visibility="collapsed",
     )
 
     page_spacer(8)
 
+    # ---------------- BOOK LINK (PRESELECT) ----------------
     search_type = st.radio("Search by", ["Title", "ISBN"], horizontal=True)
+
+    keyword = ""
+    books = []
 
     if search_type == "Title":
         keyword = st.text_input("Enter book title")
@@ -72,29 +95,50 @@ with center_col:
         isbn = st.text_input("Enter ISBN")
         books = get_book_by_isbn(isbn) if isbn else []
 
+    # normalize single-book response
+    if isinstance(books, dict):
+        books = [books]
+
     book_options = {"No book linked": None}
-    get_books()
-    st.write(books)
-    book_options.update({f'{b["Title"]} - {b["Author"]}': b["ISBN"] for b in books})
-    linked_book = st.selectbox("Select book", list(book_options.keys()))
+
+    for b in books:
+        book_options[f'{b["Title"]} - {b["Author"]}'] = b["ISBN"]
+
+    # preselect current linked book (if exists)
+    current_isbn = post.get("ISBN")
+    current_post_id = post.get("Post_ID")
+    default_label = "No book linked"
+
+    for label, isbn_val in book_options.items():
+        if isbn_val == current_isbn:
+            default_label = label
+            break
+
+    linked_book = st.selectbox(
+        "Select book",
+        list(book_options.keys()),
+        index=list(book_options.keys()).index(default_label),
+    )
 
     page_spacer(12)
 
+    # ---------------- ACTIONS ----------------
     publish_col, cancel_col = st.columns([3, 1])
 
     with publish_col:
-        if st.button("Publish post", type="primary", use_container_width=True, key="pub_post"):
-            success, message = create_post(
-                reader_id=current_reader["Reader_ID"],
-                book_id=book_options[linked_book],
-                content=post_content,
+        if st.button("Update post", type="primary", use_container_width=True):
 
+            if not post_content.strip():
+                st.error("Post content cannot be empty.")
+                st.stop()
+
+            success, message = update_post(
+                post_id=post_id,
+                content=post_content,
+                isbn=book_options[linked_book]
             )
+
             if success:
-                st.success("Your post has been published to the community feed.")
+                st.success("Your post has been updated successfully.")
             else:
                 st.error(message)
-
-    with cancel_col:
-        if st.button("Cancel", use_container_width=True, key="cancel_post"):
-            st.switch_page("app.py")
