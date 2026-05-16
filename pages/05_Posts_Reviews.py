@@ -55,7 +55,7 @@ with sidebar_col:
             elif item == "Record readings":
                 st.switch_page("pages/04_Record_Readings.py")
             elif item == "History":
-                st.switch_page("pages/06_Reading_History.py")
+                st.switch_page("pages/16_Reading_History.py")
 
 
 with main_col:

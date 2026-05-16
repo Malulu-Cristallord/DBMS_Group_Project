@@ -20,13 +20,13 @@ from components.ui_helpers import (
 
 
 st.set_page_config(
-    page_title="Discover | LibTrack",
+    page_title="Discover",
     page_icon="LT",
     layout="wide",
 )
 
 inject_global_css()
-render_navbar(active_page="discover")
+render_navbar(active_page="Discover")
 page_spacer(20)
 
 

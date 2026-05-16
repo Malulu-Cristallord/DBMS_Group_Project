@@ -16,7 +16,7 @@ from components.ui_helpers import (
 
 
 st.set_page_config(
-    page_title="Record Readings | LibTrack",
+    page_title="Record",
     page_icon="LT",
     layout="wide",
 )

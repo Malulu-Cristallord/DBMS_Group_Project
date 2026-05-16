@@ -50,14 +50,14 @@ if google_user_is_logged_in(st.user) and not st.session_state["logged_in"]:
     )
 
     if not google_success:
-        render_navbar(active_page="discover")
+        render_navbar(active_page="Discover")
         st.error(google_message)
         if st.button("Sign out of Google", type="primary"):
             st.logout()
         st.stop()
 
 if not st.session_state["logged_in"]:
-    render_navbar(active_page="discover")
+    render_navbar(active_page="Discover")
     render_login_required("Please sign in to access your LibTrack home page.")
     st.stop()
 
@@ -65,7 +65,7 @@ if not st.session_state["logged_in"]:
 current_reader = get_reader_from_session(st.session_state)
 
 if current_reader is None:
-    render_navbar(active_page="discover")
+    render_navbar(active_page="Discover")
     render_login_required(
         "Could not load your reader profile. Please log in again.",
         title="Profile unavailable",
@@ -74,7 +74,7 @@ if current_reader is None:
     st.stop()
 
 
-render_navbar(active_page="discover")
+render_navbar(active_page="Discover")
 page_spacer(24)
 
 col_welcome, col_action = st.columns([3, 1])
