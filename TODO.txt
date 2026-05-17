@@ -28,5 +28,7 @@ Functions
     Posts Reviews: Delete the whole page since it has no useful functions
     Book Detail: FIX
     Profile: Change badge to add more notifications / add log out function
-    Add Books: Add ISBN 10
+    Add Books: FIX
     Bookshelf Page: Add saved books
+    Edit Post: Finish (Done)
+    Navbar: I don't know...

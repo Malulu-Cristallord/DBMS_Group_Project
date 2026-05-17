@@ -37,13 +37,18 @@ with center_col:
         placeholder="9780439362139",
         key="ISBN",
     )
+    clean_isbn = isbn_input.strip().replace("-","")
 
     if st.button("Submit", type="primary"):
-        if not isbn_input.strip():
+        if not clean_isbn:
             st.error("Please enter an ISBN.")
+        if not clean_isbn.isdigit():
+            st.error("Please enter 13 digit ISBN(Dashes are allowed).")
         else:
-            result = book_request.request_book_data(isbn_input.strip())
-            if isinstance(result, dict) and result.get("error"):
-                st.error(result["error"])
+            result = book_request.request_book_data(clean_isbn)
+            if result == "error":
+                st.error(f"Error entering book for ISBN: {clean_isbn}")
+            elif result == -1:
+                st.error("This book already exists in our database.")
             else:
                 st.success("Book data imported into our system database.\n Thank you for your contribution!")
