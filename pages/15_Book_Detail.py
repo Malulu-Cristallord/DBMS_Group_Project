@@ -93,9 +93,11 @@ with main_col:
     # However, a default cover is needed in future updates
 
     with header_cols[0]:
-        st.image(
-            book.get("cover") or "Resources/Book Covers/Cover_Default.png"
-        )
+        if book.get("cover") is not None:
+            st.image(book["cover"])
+        else:
+            st.image("Resources/Book Covers/Cover_Default.png")
+
         
     with header_cols[1]:
         genres = book.get("genre") or []
