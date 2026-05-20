@@ -3,23 +3,17 @@ from mysql.connector import IntegrityError
 from requests import RequestException
 
 from Backend.DB_Stuff import db_connect
-
-
-def extract_categories(book_data):
-    raw_subjects = book_data.get("subjects", [])
-
-    # clean categories (remove "-- Juvenile fiction" suffix)
-    cleaned = []
-    for s in raw_subjects:
-        cleaned.append(s.split(" -- ")[0].strip())
-
-    return cleaned
+from Backend.DB_Stuff.db_connect import execute_query, execute_query_fetch
 
 headers = {
     'User-Agent': 'LibTrack(malucristallord@gmail.com)'
 }
 
-def data_to_db(book_data, author_data):
+# Workflow: input isbn > search the db for duplicates > request data from Open Library > data to db
+# If failed on request from Ol > request data from Google Books
+
+
+def data_to_db(book_data, author_data, gathered_at):
     print("data to db")
 
     # Data extraction
@@ -27,11 +21,11 @@ def data_to_db(book_data, author_data):
 
         title = book_data.get("title", "")
         isbn = book_data.get("isbn_13", [""])[0]
-        category = extract_categories(book_data)
-        author_name = author_data.get("personal_name", "Unknown")
+        author_name = author_data.get("personal_name", "Unknown") if author_data else ""
 
         cover_data = book_data.get("covers", [])
-        genre = book_data.get("genre", "Uncategorized")
+        genre = book_data.get("genres", "Uncategorized")[0]
+        print(f"Found genre: {genre}")
         cover = (
             f"https://covers.openlibrary.org/b/id/{cover_data[0]}-L.jpg"
             if cover_data
@@ -47,8 +41,8 @@ def data_to_db(book_data, author_data):
 
         query = """
         INSERT IGNORE INTO books
-        (Title, ISBN, Author, Description, Publisher, Published_Year, cover, Genre)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        (Title, ISBN, Author, Description, Publisher, Published_Year, cover, Genre, Gathered_At)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
 
         values = (
@@ -59,13 +53,12 @@ def data_to_db(book_data, author_data):
             publisher,
             published_year if published_year.isdigit() else None,
             cover,
-            genre
+            genre,
+            gathered_at
         )
         print("values:", values)
 
         db_connect.insert_book(query, values)
-
-
         print("insertion complete")
 
     except IntegrityError as e:
@@ -77,33 +70,84 @@ def data_to_db(book_data, author_data):
     except Exception  as e:
         print(f"Unknown general error: {e}")
 
+def check_duplicates(isbn_value):
+    query = f"""
+    SELECT COUNT(*) AS count FROM Books WHERE ISBN = %s
+    """
+    values = (isbn_value,)
+    result = execute_query_fetch(query, values)
+    # Example result:
+    # [{'count': 0}]
+
+    count = result[0]["count"]
+    print(count)
+    print(f"duplicates count: {count}")
+
+    if count == 0:
+        print("No duplicates found")
+        return True
+    else:
+        print("Duplicates found")
+        return False
+
 def request_book_data(isbn_value):
-    try:
-        print("requesting book data")
-        book_api = f"https://openlibrary.org/isbn/{isbn_value}.json"
-        book_response = requests.get(book_api, timeout=10, headers=headers)
-        book_response.raise_for_status()
-        book_data = book_response.json()
-        print("Book data: ", book_data)
+    if check_duplicates(isbn_value):
+        try:
+            print("requesting book data")
+            book_api = f"https://openlibrary.org/isbn/{isbn_value}.json"
+            book_response = requests.get(book_api, timeout=10, headers=headers)
+            book_response.raise_for_status()
+            book_data = book_response.json()
+            gathered_at = "Open Library"
 
-        author_id = book_data["authors"][0]["key"]
-        author_api = f"https://openlibrary.org{author_id}.json"
-        author_response = requests.get(author_api, timeout=10, headers=headers)
-        author_response.raise_for_status()
-        author_data = author_response.json()
+            if book_data is None:
+                print("Failed to fetch data, trying to fetch from backup online database")
+                raise RequestException
 
-        if book_data is None:
-            print("Failed to fetch data, trying to fetch from backup online database")
+            print("Book data: ", book_data)
 
-        data_to_db(book_data, author_data)
-        return book_data
+            author_data = None
+            authors = book_data.get("authors", [])
 
-    except KeyError as exc:
-        return {"error": f"Unable to retrieve data for ISBN {isbn_value}: {exc}"}
-    except RequestException as e:
-        print(f"RequestException: {e}")
-    except Exception as e:
-        print(f"Unknown general error: {e}")
+            if authors and isinstance(authors, list):
+                try:
+                    author_id = authors[0].get("key")
+
+                    if author_id:
+                        author_api = f"https://openlibrary.org{author_id}.json"
+
+                        author_response = requests.get(
+                            author_api,
+                            timeout=10,
+                            headers=headers
+                        )
+
+                        author_response.raise_for_status()
+
+                        author_data = author_response.json()
+
+                except RequestException as e:
+                    print(f"Failed to retrieve author data: {e}")
+
+                except Exception as e:
+                    print(f"Unexpected author retrieval error: {e}")
+
+            data_to_db(book_data, author_data, gathered_at)
+            return book_data
+
+        except KeyError as exc:
+            print({"error": f"Unable to retrieve data for ISBN {isbn_value}: {exc}"})
+            return "error"
+        except RequestException as e:
+            print(f"RequestException: {e}")
+            return "error"
+        except Exception as e:
+            print(f"Unknown general error: {e}")
+            return "error"
+    else:
+        print(f"Book data for ISBN {isbn_value} already exists")
+        return -1
+
 
 def get_book_cover(isbn_value):
     try:
@@ -119,6 +163,67 @@ def get_book_cover(isbn_value):
 
     except Exception as e:
         print(f"Exception: {e}")
+
+
+def request_book_data_google(isbn_value):
+    try:
+        print("Requesting Google Books data")
+
+        api = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn_value}"
+
+        response = requests.get(
+            api,
+            timeout=10,
+            headers=headers
+        )
+
+        response.raise_for_status()
+
+        data = response.json()
+
+        # No books found
+        if data.get("totalItems", 0) == 0:
+            return {
+                "error": f"No book found for ISBN {isbn_value}"
+            }
+
+        # First matched book
+        book_data = data["items"][0]
+
+        print("Book data:", book_data)
+
+        data_to_db(book_data)
+
+        return book_data
+
+    except RequestException as e:
+        print(f"RequestException: {e}")
+        return {"error": str(e)}
+
+    except Exception as e:
+        print(f"Unknown general error: {e}")
+        return {"error": str(e)}
+
+def get_book_cover_google(isbn_value):
+    try:
+        query = """
+            SELECT Cover
+            FROM books
+            WHERE ISBN = %s
+            """
+
+        values = (isbn_value,)
+
+        result = db_connect.execute_query_fetch(query, values)
+
+        if result and len(result) > 0:
+            return result[0]["Cover"]
+
+        return None
+
+    except Exception as e:
+        print(f"Exception: {e}")
+
 
 def test():
     print("Test phase, input = 978043936213")

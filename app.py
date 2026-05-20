@@ -14,7 +14,7 @@ from Backend.Functions.library_data import (
     get_recommended_books,
     increment_book_clicked,
     reader_initials,
-    update_recommendation_status,
+    update_recommendation_status, increment_book_saved,
 )
 from components.ui_helpers import (
     COLORS,
@@ -50,14 +50,14 @@ if google_user_is_logged_in(st.user) and not st.session_state["logged_in"]:
     )
 
     if not google_success:
-        render_navbar(active_page="discover")
+        render_navbar(active_page="Discover")
         st.error(google_message)
         if st.button("Sign out of Google", type="primary"):
             st.logout()
         st.stop()
 
 if not st.session_state["logged_in"]:
-    render_navbar(active_page="discover")
+    render_navbar(active_page="Discover")
     render_login_required("Please sign in to access your LibTrack home page.")
     st.stop()
 
@@ -65,7 +65,7 @@ if not st.session_state["logged_in"]:
 current_reader = get_reader_from_session(st.session_state)
 
 if current_reader is None:
-    render_navbar(active_page="discover")
+    render_navbar(active_page="Discover")
     render_login_required(
         "Could not load your reader profile. Please log in again.",
         title="Profile unavailable",
@@ -74,7 +74,7 @@ if current_reader is None:
     st.stop()
 
 
-render_navbar(active_page="discover")
+render_navbar(active_page="Discover")
 page_spacer(24)
 
 col_welcome, col_action = st.columns([3, 1])
@@ -100,6 +100,8 @@ with col_action:
 
 page_spacer(10)
 
+#--------------------------------------------------------------------SEARCH BAR
+
 search_query = st.text_input(
     "",
     placeholder="Search for a book, author, or genre...",
@@ -116,6 +118,9 @@ if search_query:
 
 
 page_spacer(20)
+
+#--------------------------------------------------------------------RECOMMENDATION
+
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 section_title("Recommended for you")
@@ -147,18 +152,25 @@ else:
                 st.session_state["selected_book_id"] = book["id"]
                 st.switch_page("pages/15_Book_Detail.py")
 
-
+            if st.button("Save", key=f'save_{book["isbn"]}', use_container_width=True):
+                increment_book_saved(book["isbn"])
+                update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "saved")
+                st.success("Saved.")
 page_spacer(20)
+
+#--------------------------------------------------------------------ADD NEW BOOKS
+
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
-st.markdown('<body>This is a debug zone</body>', unsafe_allow_html=True)
-if st.button("Find books", type="primary"):
-    st.switch_page("pages/03_Discovery.py")
-if st.button("Record Readings", type="primary"):
-    st.switch_page("pages/04_Record_Readings.py")
-if st.button("Add Books", type="primary"):
+section_title("Got a new book to add into the database?")
+if st.button("Add a new book to our database", type="primary", use_container_width=True):
     st.switch_page("pages/11_Add_Books.py")
 
+page_spacer(20)
+
+#--------------------------------------------------------------------POPULAR BOOKS
+
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 section_title("Popular this week")
 
@@ -173,14 +185,27 @@ else:
         with pop_cols[index]:
             st.markdown(render_book_cover(book["cover"], size="card"), unsafe_allow_html=True)
             st.markdown(
-                f'<span style="font-size:0.8rem; font-weight:600; color:{COLORS["dark_green"]};">'
+                f'<span style="font-size:0.8rem; font-weight:600; min-height=100px; color:{COLORS["dark_green"]};">'
                 f'{escape(book["title"])}</span><br>'
                 f'<span class="muted" style="font-size:0.75rem;">{escape(book["author"])}</span>',
                 unsafe_allow_html=True,
             )
+            if st.button("View", key=f"pop_{book['id']}", use_container_width=True):
+                increment_book_clicked(book["id"])
+                update_recommendation_status(current_reader["Reader_ID"], book["id"], "clicked")
+                st.session_state["selected_book_id"] = book["id"]
+                st.switch_page("pages/15_Book_Detail.py")
+
+            if st.button("Save", key=f'save_pop_{book["isbn"]}', use_container_width=True):
+                increment_book_saved(book["isbn"])
+                update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "saved")
+                st.success("Saved.")
 
 
 page_spacer(20)
+
+#--------------------------------------------------------------------ACTIVITY FEED
+
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 section_title("Activity feed")

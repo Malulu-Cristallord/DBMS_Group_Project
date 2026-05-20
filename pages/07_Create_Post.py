@@ -27,7 +27,7 @@ from components.ui_helpers import (
 
 
 st.set_page_config(
-    page_title="Create Post | LibTrack",
+    page_title="Create_Post",
     page_icon="LT",
     layout="wide",
 )

@@ -54,10 +54,6 @@ def execute_query_fetch(query, values=None):
         result = cursor.fetchall()
         return result
 
-        connection.commit()
-        print("Query committed")
-        return True
-
     except mysql.connector.Error as e:
         if connection:
             connection.rollback()

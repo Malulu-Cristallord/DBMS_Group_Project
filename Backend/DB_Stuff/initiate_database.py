@@ -12,11 +12,12 @@ def initiate_books():
         Author           VARCHAR(255),
         Cover            VARCHAR(255),
         Description      VARCHAR(255),
-        Genre           VARCHAR(255),
+        Genre            VARCHAR(255),
         Average_Rating   DECIMAL(3, 1)      DEFAULT 0,
         Review_Count     INT                DEFAULT 0,
         Clicked          INT                DEFAULT 0,
-        Saved            INT                DEFAULT 0
+        Saved            INT                DEFAULT 0,
+        Gathered_At      VARCHAR(255)
     )
     """
     db_connect.execute_query(query)
@@ -163,6 +164,16 @@ def initiate_badges():
     """
     db_connect.execute_query(query)
 
+def initiate_saved_books():
+    query = """
+    CREATE TABLE IF NOT EXISTS saved_books (
+    Save_ID            INT             AUTO_INCREMENT PRIMARY KEY,
+    Saved_Book_ISBN    VARCHAR(18)     NOT NULL REFERENCES books(ISBN),
+    Saved_To_Reader_ID INT             NOT NULL REFERENCES readers(Reader_ID)
+    )
+    """
+    db_connect.execute_query(query)
+
 
 def del_all():
     query = """
@@ -175,7 +186,6 @@ def del_all():
         rewards,
         badges,
         books,
-        book_categories,
         readers
     """
     db_connect.execute_query(query)
@@ -191,7 +201,7 @@ def execute_all_methods():
     initiate_comments()
     initiate_rewards()
     initiate_badges()
-    initiate_book_categories()
+    initiate_saved_books()
 
 def data_test():
     query = "CREATE TABLE IF NOT EXISTS test(test int)"

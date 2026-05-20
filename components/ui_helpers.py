@@ -426,9 +426,9 @@ def render_navbar(active_page: str = ""):
                 LibTrack
             </div>
             <div class="nav-links">
-                <a href="pages/03_Discovery.py" class="{nav_class('discover')}">Discover</a>
-                <a href="pages/04/Record_Readings.py" class="{nav_class("Record Readings")}">Record Readings</q>
-                <a href="pages/05Book_Detail.py" class="{nav_class("my_library")}">My library</q>
+                <a href="Discovery" class="{nav_class('discover')}">Discover</a>
+                <a href="Record_Readings" class="{nav_class("Record_Readings")}">Record Readings</q>
+                <a href="Reading_History" class="{nav_class("Reading_History")}">Reading History</q>
             </div>
             <div style="display:flex; align-items:center; gap:16px;">
                 <div class="nav-search">Search for a book...</div>
@@ -481,8 +481,8 @@ def render_book_cover(cover: str | None, size: str = "normal") -> str:
             f'alt="Book cover" style="object-fit:cover;">'
         )
 
-    return f'<div class="{css_class}" style="background-color:{escape(str(cover_value))};"></div>'
-
+    return f'<div class="{css_class}" style="background-color:{escape(str(cover_value))};"></div>' #
+    #change to default cover or keep the colors?c
 
 def render_stars(rating: float) -> str:
     safe_rating = max(0, min(5, float(rating or 0)))

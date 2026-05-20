@@ -31,10 +31,10 @@ render_navbar(active_page="discover")
 page_spacer(20)
 
 #current_isbn = "9780439362139"
+#book = get_book_by_isbn(current_isbn)
 
 book = get_book_by_isbn(st.session_state.get("selected_book_id"))
 
-#book = get_book_by_isbn(current_isbn)
 
 if not book:
     st.warning("No books are available in the database yet.")
@@ -93,9 +93,11 @@ with main_col:
     # However, a default cover is needed in future updates
 
     with header_cols[0]:
-        st.image(
-            book.get("cover") or "Resources/Book Covers/Cover_Default.png"
-        )
+        if book.get("cover") is not None:
+            st.image(book["cover"])
+        else:
+            st.image("Resources/Book Covers/Cover_Default.png")
+
         
     with header_cols[1]:
         genres = book.get("genre") or []

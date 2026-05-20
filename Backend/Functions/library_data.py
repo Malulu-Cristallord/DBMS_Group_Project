@@ -205,13 +205,13 @@ def get_reader_genres(reader: dict[str, Any] | None) -> list[str]:
 def get_genres(include_all: bool = True) -> list[str]:
     rows = fetch_all(
         """
-        SELECT DISTINCT Category AS category
+        SELECT DISTINCT genre AS genre
         FROM books
-        WHERE Category IS NOT NULL AND TRIM(Category) <> ''
-        ORDER BY Category
+        WHERE genre IS NOT NULL AND TRIM(genre) <> ''
+        ORDER BY genre
         """
     )
-    genres = [row["category"] for row in rows if row.get("category")]
+    genres = [row["genre"] for row in rows if row.get("genre")]
 
     if not genres:
         genres = DEFAULT_GENRES.copy()
@@ -334,7 +334,7 @@ def get_books(
 
     return [normalize_book(row) for row in rows]
 
-#this is not use now below has a function has the same name but different code.
+#this is not used now below has a function has the same name but different code.
 def get_book_by_isbn(book_isbn: int | str | None) -> dict[str, Any] | None:
     if not book_isbn:
         books = get_books(limit=1)
@@ -874,7 +874,6 @@ def get_books_by_title(keyword):
     WHERE Title LIKE %s
     """
     return fetch_all(query, (f"%{keyword}%",))
-
 
 
 def update_book_review_stats(isbn):
