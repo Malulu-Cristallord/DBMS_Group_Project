@@ -18,7 +18,7 @@ def set_reader_session(session_state, reader: dict) -> None:
     session_state["reader_id"] = reader["Reader_ID"]
     session_state["reader_name"] = reader["Name"]
     session_state["reader_email"] = reader["Email"]
-    session_state["preferred_category"] = reader.get("Preferred_Category")
+    session_state["preferred_genre"] = reader.get("Preferred_Genre")
     session_state["points"] = reader.get("Points", 0)
 
 
