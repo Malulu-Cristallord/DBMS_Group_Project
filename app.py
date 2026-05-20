@@ -239,7 +239,8 @@ else:
                         {escape(content)}
                     </p>
                     <div class="action-row">
-                        {int(post.get("upvote_count") or 0)} likes
+                        likes = int(post.get("upvote_count") or 0)
+                        st.markdown(f"👍 {likes} likes")
                     </div>
                 </div>
                 """,
@@ -248,7 +249,6 @@ else:
 
         with col_tag:
             page_spacer(8)
-            st.markdown(render_badge("Review", style="beige"), unsafe_allow_html=True)
 
             if st.button("Details", key=f"feed_detail_{post['post_id']}"):
                 selected_book = get_book_by_isbn(post.get("isbn"))

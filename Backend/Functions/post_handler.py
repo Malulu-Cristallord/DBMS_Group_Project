@@ -143,3 +143,25 @@ def update_post(
     )
 
     return execute_write(query, values)
+
+
+def add_like(post_id, reader_id):
+    query = """
+    INSERT IGNORE INTO likes (post_id, reader_id)
+    VALUES (%s, %s)
+    """
+
+    execute_query(query, (post_id, reader_id))
+
+    update_query = """
+    UPDATE posts
+    SET upvote_count = (
+        SELECT COUNT(*)
+        FROM likes
+        WHERE post_id = %s
+        
+    )
+    WHERE post_id = %s
+    """
+
+    execute_query(update_query, (post_id, post_id))
