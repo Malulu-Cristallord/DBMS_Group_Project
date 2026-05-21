@@ -9,7 +9,11 @@ from Backend.Functions.library_data import get_genres
 from components.ui_helpers import inject_global_css, page_spacer, render_navbar
 from UI.Login.auth import register_reader
 from UI.Login.session import google_user_is_logged_in, sync_google_user_to_session
-from UI.Login.validators import validate_google_email, validate_password
+from UI.Login.validators import (
+    PASSWORD_REQUIREMENTS_HELP,
+    validate_google_email,
+    validate_password,
+)
 
 
 st.set_page_config(
@@ -68,8 +72,9 @@ with center_col:
         password_input = st.text_input(
             "Password",
             type="password",
-            placeholder="8-20 characters",
+            placeholder="Example: ReaderA1!",
             key="reg_pw",
+            help=PASSWORD_REQUIREMENTS_HELP,
         )
 
     with col_pw2:
@@ -79,6 +84,8 @@ with center_col:
             placeholder="Repeat your password",
             key="reg_pw_confirm",
         )
+
+    st.caption(f"Password requirements: {PASSWORD_REQUIREMENTS_HELP}")
 
     page_spacer(8)
 

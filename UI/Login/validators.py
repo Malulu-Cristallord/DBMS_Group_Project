@@ -10,6 +10,11 @@ PASSWORD_ALLOWED_CHARS_ERROR = (
     "Password may only contain English letters, numbers, and these special "
     "characters: ! @ # $ % ^ & * _ -."
 )
+PASSWORD_REQUIREMENTS_HELP = (
+    "Use 8-20 characters with at least one uppercase letter, one lowercase "
+    "letter, one number, and one special character (! @ # $ % ^ & * _ -). "
+    "Example: ReaderA1!"
+)
 
 _GMAIL_PATTERN = re.compile(
     r"^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+"
