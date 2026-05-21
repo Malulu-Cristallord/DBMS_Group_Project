@@ -6,6 +6,16 @@ import streamlit as st
 
 sys.path.insert(0, os.path.dirname(__file__))
 
+from Backend.Functions.post_handler import(
+    add_like,
+    get_like_count,
+    remove_like,
+    has_liked,
+    create_comment,
+    get_comments,
+)
+
+
 from Backend.Functions.library_data import (
     get_book_by_isbn,
     get_books,
@@ -223,6 +233,7 @@ else:
         col_post, col_tag = st.columns([5, 1])
 
         with col_post:
+            likes = int(post.get("upvote_count") or 0)
             st.markdown(
                 f"""
                 <div class="card">
@@ -239,18 +250,91 @@ else:
                         {escape(content)}
                     </p>
                     <div class="action-row">
-                        likes = int(post.get("upvote_count") or 0)
-                        st.markdown(f"👍 {likes} likes")
                     </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
 
+            liked = has_liked(
+                post["post_id"],
+                current_reader["Reader_ID"]
+            )
+
+            heart = "❤️" if liked else "🤍"
+            likes = get_like_count(post["post_id"])
+
+            if st.button(
+                f"{heart} {likes}",
+                key=f"like_{post['post_id']}"
+                
+            ):
+
+                if liked:
+                    remove_like(
+                        post["post_id"],
+                        current_reader["Reader_ID"]
+                    )
+                else:
+                    add_like(
+                        post["post_id"],
+                        current_reader["Reader_ID"]
+                    )
+
+                st.rerun()
+
+            comments = get_comments(post["post_id"])
+            st.caption(f"💬 {len(comments)} comments")
+
+            with st.expander("Comments"):
+
+                if not comments:
+                    st.caption("No comments yet.")
+
+                for comment in comments:
+
+                    st.markdown(
+                        f"""
+                        <div style="
+                            padding:10px;
+                            border-radius:12px;
+                            background:#f7f7f7;
+                            margin-bottom:8px;
+                        ">
+                            <strong>
+                                {escape(comment["reader_name"])}
+                            </strong>
+                                {escape(comment["content"])}
+
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+                new_comment = st.text_input(
+                    "Add a comment...",
+                    key=f"comment_input_{post['post_id']}"
+                )
+
+                if st.button(
+                    "Post",
+                    key=f"comment_btn_{post['post_id']}"
+                ):
+
+                    if new_comment.strip():
+
+                        create_comment(
+                            post["post_id"],
+                            current_reader["Reader_ID"],
+                            new_comment,
+                        )
+
+                        st.rerun()
+
         with col_tag:
             page_spacer(8)
 
-            if st.button("Details", key=f"feed_detail_{post['post_id']}"):
+            if st.button("Book Details", key=f"feed_detail_{post['post_id']}"):
                 selected_book = get_book_by_isbn(post.get("isbn"))
                 if selected_book:
                     increment_book_clicked(selected_book["id"])

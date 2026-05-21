@@ -1,5 +1,5 @@
 from Backend.DB_Stuff.db_connect import fetch_all, execute_query
-from Backend.Functions.library_data import table_exists, execute_write
+from Backend.Functions.library_data import fetch_one, table_exists, execute_write
 
 
 def create_post(
@@ -147,21 +147,75 @@ def update_post(
 
 def add_like(post_id, reader_id):
     query = """
-    INSERT IGNORE INTO likes (post_id, reader_id)
+    INSERT IGNORE INTO likes (Post_id, Reader_id)
     VALUES (%s, %s)
     """
 
     execute_query(query, (post_id, reader_id))
 
-    update_query = """
-    UPDATE posts
-    SET upvote_count = (
-        SELECT COUNT(*)
-        FROM likes
-        WHERE post_id = %s
-        
-    )
-    WHERE post_id = %s
+
+def remove_like(post_id, reader_id):
+    query = """
+    DELETE FROM likes
+    WHERE Post_id = %s
+    AND Reader_id = %s
     """
 
-    execute_query(update_query, (post_id, post_id))
+    execute_query(query, (post_id, reader_id))
+
+
+def has_liked(post_id, reader_id):
+    query = """
+    SELECT *
+    FROM likes
+    WHERE Post_id = %s
+    AND Reader_id = %s
+    """
+
+    result = fetch_one(query, (post_id, reader_id))
+
+    return result is not None
+
+def create_comment(post_id, reader_id, content):
+    query = """
+    INSERT INTO comments (
+        Post_id,
+        Reader_id,
+        Content,
+        Created_At
+    )
+    VALUES (%s, %s, %s, NOW())
+    """
+
+    execute_query(query, (
+        post_id,
+        reader_id,
+        content,
+    ))
+
+def get_comments(post_id):
+    query = """
+    SELECT
+        c.comment_id,
+        c.content,
+        c.created_at,
+        r.Name AS reader_name
+    FROM comments c
+    JOIN readers r
+        ON c.reader_id = r.Reader_ID
+    WHERE c.post_id = %s
+    ORDER BY c.created_at ASC
+    """
+
+    return fetch_all(query, (post_id,))
+
+def get_like_count(post_id):
+    query = """
+    SELECT COUNT(*) AS total
+    FROM likes
+    WHERE Post_id = %s
+    """
+
+    result = fetch_one(query, (post_id,))
+
+    return result["total"] if result else 0

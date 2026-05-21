@@ -59,7 +59,6 @@ def initiate_posts():
         Created_Date        TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
         Reader_ID           INT             NOT NULL,
         ISBN                VARCHAR(18),
-        Upvote_Count        INT             DEFAULT 0,
         CONSTRAINT fk_posts_reader
             FOREIGN KEY (Reader_ID) REFERENCES readers(Reader_ID),
         CONSTRAINT fk_posts_book
