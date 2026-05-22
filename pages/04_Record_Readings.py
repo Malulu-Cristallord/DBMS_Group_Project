@@ -23,7 +23,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from components.ui_helpers import (
     inject_global_css, render_navbar,
-    section_title, section_label, spacer, COLORS, COVER_COLORS, render_login_required,
+    section_title, section_label, spacer, COLORS, COVER_COLORS, render_login_required, render_navigation_section,
+    page_spacer,
 )
 
 st.set_page_config(
@@ -499,3 +500,9 @@ with insight_col:
     )
     if st.button("Save goal", use_container_width=True, key="save_goal"):
         st.toast(f"Daily reading goal set to {new_goal} min!")
+
+page_spacer(20)
+#--------------------------------------------------------------------NAVIGATION
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+section_title("Navigation")
+render_navigation_section()

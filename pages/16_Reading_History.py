@@ -16,7 +16,7 @@ from components.ui_helpers import (
     render_login_required,
     render_navbar,
     render_stars,
-    section_title,
+    section_title, render_navigation_section,
 )
 
 
@@ -69,3 +69,9 @@ for post in reader_posts:
         st.markdown(render_badge(str(post.get("created_at") or "No date"), "beige"), unsafe_allow_html=True)
 
     st.markdown("<hr>", unsafe_allow_html=True)
+
+page_spacer(20)
+#--------------------------------------------------------------------NAVIGATION
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+section_title("Navigation")
+render_navigation_section()

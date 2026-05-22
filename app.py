@@ -3,6 +3,7 @@ import os
 import sys
 
 import streamlit as st
+from Backend.Functions.saved_books import save_book
 
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -36,7 +37,7 @@ from components.ui_helpers import (
     render_login_required,
     render_navbar,
     render_stars,
-    section_title,
+    section_title, render_navigation_section,
 )
 from UI.Login.session import google_user_is_logged_in, sync_google_user_to_session
 
@@ -165,6 +166,7 @@ else:
             if st.button("Save", key=f'save_{book["isbn"]}', use_container_width=True):
                 increment_book_saved(book["isbn"])
                 update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "saved")
+                save_book(current_reader["Reader_ID"], book["isbn"])
                 st.success("Saved.")
 page_spacer(20)
 
@@ -345,3 +347,12 @@ else:
 
 
 page_spacer(20)
+#--------------------------------------------------------------------NAVIGATION
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+section_title("Navigation")
+render_navigation_section()
+
+
+
+
+

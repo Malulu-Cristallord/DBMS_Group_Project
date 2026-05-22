@@ -6,8 +6,8 @@ import streamlit as st
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from Backend.Functions import book_request
-from components.ui_helpers import inject_global_css, page_spacer, render_navbar
-
+from components.ui_helpers import inject_global_css, page_spacer, render_navbar, render_navigation_section, \
+    section_title
 
 st.set_page_config(
     page_title="Add Books | LibTrack",
@@ -52,3 +52,9 @@ with center_col:
                 st.error("This book already exists in our database.")
             else:
                 st.success("Book data imported into our system database.\n Thank you for your contribution!")
+
+page_spacer(20)
+#--------------------------------------------------------------------NAVIGATION
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+section_title("Navigation")
+render_navigation_section()

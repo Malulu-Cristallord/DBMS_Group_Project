@@ -574,3 +574,20 @@ def cover(color: str, size: str = "sm") -> str:
         f'<div style="position:absolute;left:0;top:0;bottom:0;width:7px;'
         f'background:{spine};border-radius:5px 0 0 5px;"></div></div>'
     )
+
+def render_navigation_section():
+
+    col_link1, col_link2 = st.columns(2)
+    with col_link1:
+        st.page_link(page="pages/03_Discovery.py", label="Discovery")
+        st.page_link(page="pages/04_Record_Readings.py", label="Record Readings")
+        st.page_link(page="pages/05_Badges_Rewards.py", label="Badges")
+        st.page_link(page="pages/07_Create_Post.py", label="Create a Post")
+        st.page_link(page="pages/08_Profile.py", label="My Profile")
+    with col_link2:
+        st.page_link(page="pages/11_Add_Books.py", label="Add Books")
+        st.page_link(page="pages/12_Recommendations.py", label="Recommendations")
+        st.page_link(page="pages/13_My_Posts.py", label="My Posts")
+        st.page_link(page="pages/16_Reading_History.py", label="Reading History")
+        st.page_link(page="pages/17_Saved_Books.py", label="Saved Books")
+    return col_link1, col_link2

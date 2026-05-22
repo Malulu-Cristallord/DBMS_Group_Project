@@ -24,7 +24,7 @@ from components.ui_helpers import (
     render_avatar,
     render_login_required,
     render_navbar,
-    section_title,
+    section_title, render_navigation_section,
 )
 
 # ---------------- PAGE SETUP ----------------
@@ -142,3 +142,9 @@ with center_col:
                 st.success("Your post has been updated successfully.")
             else:
                 st.error(message)
+
+page_spacer(20)
+#--------------------------------------------------------------------NAVIGATION
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+section_title("Navigation")
+render_navigation_section()

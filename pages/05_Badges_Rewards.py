@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from components.ui_helpers import (
     inject_global_css, render_navbar,
     badge, progress_bar,
-    section_title, section_label, spacer, COLORS, render_login_required,
+    section_title, section_label, spacer, COLORS, render_login_required, page_spacer, render_navigation_section,
 )
 
 st.set_page_config(
@@ -508,3 +508,9 @@ with side_col:
         </div>
     </div>
     """, unsafe_allow_html=True)
+
+    page_spacer(20)
+    # --------------------------------------------------------------------NAVIGATION
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+    section_title("Navigation")
+    render_navigation_section()

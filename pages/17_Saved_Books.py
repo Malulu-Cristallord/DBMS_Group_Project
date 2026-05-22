@@ -23,7 +23,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from components.ui_helpers import (
     inject_global_css, render_navbar,
     cover, badge, stars, progress_bar,
-    section_title, section_label, spacer, COLORS, COVER_COLORS, render_login_required,
+    section_title, section_label, spacer, COLORS, COVER_COLORS, render_login_required, page_spacer,
+    render_navigation_section,
 )
 
 current_reader = get_reader_from_session(st.session_state)
@@ -444,3 +445,9 @@ for book in SAVED_BOOKS:
             st.toast(f"Opening '{book['title']}'...")
 
     st.markdown('<hr style="border-color:#F5F5F5;margin:4px 0;">', unsafe_allow_html=True)
+
+page_spacer(20)
+#--------------------------------------------------------------------NAVIGATION
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+section_title("Navigation")
+render_navigation_section()

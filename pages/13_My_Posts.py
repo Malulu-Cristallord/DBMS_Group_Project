@@ -20,7 +20,7 @@ from components.ui_helpers import (
     render_navbar,
     page_spacer,
     section_title,
-    render_stars,
+    render_stars, render_navigation_section,
 )
 
 st.set_page_config(
@@ -103,3 +103,9 @@ else:
                 if success:
                     st.success(message)
                     st.rerun()
+
+page_spacer(20)
+#--------------------------------------------------------------------NAVIGATION
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+section_title("Navigation")
+render_navigation_section()

@@ -22,7 +22,7 @@ from components.ui_helpers import (
     render_avatar,
     render_login_required,
     render_navbar,
-    section_title,
+    section_title, render_navigation_section,
 )
 
 
@@ -101,3 +101,9 @@ with center_col:
     with cancel_col:
         if st.button("Cancel", use_container_width=True, key="cancel_post"):
             st.switch_page("app.py")
+
+page_spacer(20)
+#--------------------------------------------------------------------NAVIGATION
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+section_title("Navigation")
+render_navigation_section()
