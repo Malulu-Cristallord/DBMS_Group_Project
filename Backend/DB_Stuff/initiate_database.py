@@ -186,7 +186,8 @@ def del_all():
         rewards,
         badges,
         books,
-        readers
+        readers,
+        saved_books
     """
     db_connect.execute_query(query)
 

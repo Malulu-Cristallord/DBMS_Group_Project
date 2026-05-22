@@ -17,6 +17,11 @@ COLORS = {
     "text_secondary": "#3A3A3A",
 }
 
+COVER_COLORS = [
+    "#3E7255", "#654421", "#4A7FA5", "#654421",
+    "#1F3F2E", "#D2B354", "#8B7355", "#3A3A3A",
+    "#5C4033", "#2E5D4B", "#7B5EA7", "#C17817",
+]
 
 def inject_global_css():
     st.markdown(
@@ -425,13 +430,7 @@ def render_navbar(active_page: str = ""):
                 <span class="logo-icon">LT</span>
                 LibTrack
             </div>
-            <div class="nav-links">
-                <a href="Discovery" class="{nav_class('discover')}">Discover</a>
-                <a href="Record_Readings" class="{nav_class("Record_Readings")}">Record Readings</q>
-                <a href="Reading_History" class="{nav_class("Reading_History")}">Reading History</q>
-            </div>
             <div style="display:flex; align-items:center; gap:16px;">
-                <div class="nav-search">Search for a book...</div>
                 <div class="nav-avatar">{escape(_session_initials())}</div>
             </div>
         </div>
@@ -536,3 +535,42 @@ def render_sidebar_menu(items: list[str], active: str):
         cls = "sidebar-item active" if item == active else "sidebar-item"
         html += f'<div class="{cls}">{escape(str(item))}</div>'
     st.markdown(html, unsafe_allow_html=True)
+
+
+def section_label(text: str):
+    st.markdown(f'<div class="lt-section-label">{text}</div>', unsafe_allow_html=True)
+
+
+def spacer(px: int = 20):
+    st.markdown(f'<div style="height:{px}px;"></div>', unsafe_allow_html=True)
+
+
+def badge(label: str, style: str = "green") -> str:
+    """Return HTML pill badge. style: green | gold | beige | grey | locked"""
+    return f'<span class="lt-badge lt-badge-{style}">{label}</span>'
+
+def progress_bar(pct: int, gold: bool = False) -> str:
+    fill_cls = "lt-progress-gold" if gold else "lt-progress-fill"
+    return (
+        f'<div class="lt-progress-bg">'
+        f'<div class="{fill_cls}" style="width:{min(pct,100)}%;"></div>'
+        f'</div>'
+    )
+
+
+def stars(rating: float) -> str:
+    full = int(rating)
+    return (
+        f'<span class="lt-stars">{"★"*full}{"☆"*(5-full)}</span>'
+        f'<span style="color:{COLORS["gold"]};font-weight:600;font-size:.9rem;"> {rating}</span>'
+    )
+
+def cover(color: str, size: str = "sm") -> str:
+    """Return HTML for a colored book-cover placeholder. size: sm | md | lg | hero"""
+    css = {"sm": "lt-cover", "md": "lt-cover-md", "lg": "lt-cover-lg", "hero": "lt-cover-hero"}[size]
+    spine = "rgba(0,0,0,0.18)"
+    return (
+        f'<div class="{css}" style="background:{color};position:relative;">'
+        f'<div style="position:absolute;left:0;top:0;bottom:0;width:7px;'
+        f'background:{spine};border-radius:5px 0 0 5px;"></div></div>'
+    )

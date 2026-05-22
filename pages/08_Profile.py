@@ -59,7 +59,7 @@ with sidebar_col:
             if item == "My borrowings":
                 st.switch_page("pages/04_Record_Readings.py")
             elif item == "My posts":
-                st.switch_page("pages/05_Posts_Reviews.py")
+                st.switch_page("pages/13_My_Posts.py")
             elif item == "History":
                 st.switch_page("pages/16_Reading_History.py")
             elif item == "Settings":

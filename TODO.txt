@@ -32,3 +32,11 @@ Functions
     Bookshelf Page: Add saved books
     Edit Post: Finish (Done)
     Navbar: I don't know...
+
+Main Functions:
+
+Account & Profile Management (Done)
+Book Discovery (Done)
+Review & Rating (Done)
+Posts & Community Interaction (Done)
+Reward and Engagement Mechanism
