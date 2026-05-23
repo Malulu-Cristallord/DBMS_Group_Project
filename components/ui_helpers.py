@@ -2,6 +2,8 @@ from html import escape
 
 import streamlit as st
 
+from UI.Login.session import clear_login_session, google_user_is_logged_in
+
 
 COLORS = {
     "dark_green": "#1F3F2E",
@@ -437,6 +439,26 @@ def render_navbar(active_page: str = ""):
         """,
         unsafe_allow_html=True,
     )
+    render_logout_button()
+
+
+def render_logout_button():
+    if not st.session_state.get("logged_in", False):
+        return
+
+    with st.sidebar:
+        st.markdown("### Account")
+        reader_name = st.session_state.get("reader_name") or "Reader"
+        st.caption(f"Signed in as {reader_name}")
+
+        if st.button("Log out", use_container_width=True, key="global_logout"):
+            google_signed_in = google_user_is_logged_in(st.user)
+            clear_login_session(st.session_state)
+
+            if google_signed_in:
+                st.logout()
+
+            st.switch_page("pages/01_Login.py")
 
 
 def render_login_required(

@@ -1,6 +1,17 @@
 from UI.Login.auth import login_or_register_google_reader
 
 
+LOGIN_SESSION_KEYS = (
+    "logged_in",
+    "reader_id",
+    "reader_name",
+    "reader_email",
+    "preferred_category",
+    "preferred_genre",
+    "points",
+)
+
+
 def _state_get(session_state, key, default=None):
     if hasattr(session_state, "get"):
         return session_state.get(key, default)
@@ -18,8 +29,16 @@ def set_reader_session(session_state, reader: dict) -> None:
     session_state["reader_id"] = reader["Reader_ID"]
     session_state["reader_name"] = reader["Name"]
     session_state["reader_email"] = reader["Email"]
-    session_state["preferred_genre"] = reader.get("Preferred_Genre")
+    session_state["preferred_category"] = reader.get("Preferred_Category")
     session_state["points"] = reader.get("Points", 0)
+
+
+def clear_login_session(session_state) -> None:
+    for key in LOGIN_SESSION_KEYS:
+        if key in session_state:
+            del session_state[key]
+
+    session_state["logged_in"] = False
 
 
 def sync_google_user_to_session(session_state, google_user) -> tuple[bool, str, dict | None]:

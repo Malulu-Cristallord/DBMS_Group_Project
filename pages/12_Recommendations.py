@@ -11,9 +11,9 @@ from Backend.Functions.library_data import (
     get_recommendations_for_reader,
     get_reader_from_session,
     increment_book_clicked,
-    increment_book_saved,
     update_recommendation_status,
 )
+from Backend.Functions.saved_books import save_book
 from components.ui_helpers import (
     COLORS,
     inject_global_css,
@@ -46,7 +46,7 @@ if current_reader is None:
 
 section_title("Recommendations")
 
-preferred_genre = current_reader.get("Preferred_genre") or "Not set"
+preferred_genre = current_reader.get("Preferred_Category") or "Not set"
 st.markdown(
     f'<p class="muted">Preferred genre: {escape(str(preferred_genre))}</p>',
     unsafe_allow_html=True,
@@ -92,9 +92,12 @@ for book in recommendations:
             st.switch_page("pages/15_Book_Detail.py")
 
         if st.button("Save", key=f'save_{book["isbn"]}', use_container_width=True):
-            increment_book_saved(book["isbn"])
-            update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "saved")
-            st.success("Saved.")
+            result = save_book(book["isbn"], current_reader["Reader_ID"])
+            if result["success"]:
+                update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "saved")
+                st.success("Saved.")
+            else:
+                st.info(result["message"])
 
     st.markdown("<hr>", unsafe_allow_html=True)
 

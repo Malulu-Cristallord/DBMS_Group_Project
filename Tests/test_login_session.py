@@ -1,7 +1,12 @@
 import unittest
 from unittest.mock import patch
 
-from UI.Login.session import google_user_is_logged_in, set_reader_session, sync_google_user_to_session
+from UI.Login.session import (
+    clear_login_session,
+    google_user_is_logged_in,
+    set_reader_session,
+    sync_google_user_to_session,
+)
 
 
 class StreamlitUserWithoutLoginAttribute(dict):
@@ -33,6 +38,27 @@ class LoginSessionTests(unittest.TestCase):
         user_info = StreamlitUserWithoutLoginAttribute()
 
         self.assertFalse(google_user_is_logged_in(user_info))
+
+    def test_clear_login_session_removes_reader_keys(self):
+        session_state = {
+            "logged_in": True,
+            "reader_id": 3,
+            "reader_name": "Reader Three",
+            "reader_email": "reader3@gmail.com",
+            "preferred_category": "Fiction",
+            "points": 10,
+            "book_search_query": "Dune",
+        }
+
+        clear_login_session(session_state)
+
+        self.assertFalse(session_state["logged_in"])
+        self.assertNotIn("reader_id", session_state)
+        self.assertNotIn("reader_name", session_state)
+        self.assertNotIn("reader_email", session_state)
+        self.assertNotIn("preferred_category", session_state)
+        self.assertNotIn("points", session_state)
+        self.assertEqual(session_state["book_search_query"], "Dune")
 
     @patch("UI.Login.session.login_or_register_google_reader")
     def test_sync_google_user_to_session_uses_google_reader(self, mock_google_login):
