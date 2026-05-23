@@ -24,7 +24,7 @@ def data_to_db(book_data, author_data, gathered_at):
         author_name = author_data.get("personal_name", "Unknown") if author_data else ""
 
         cover_data = book_data.get("covers", [])
-        genre = book_data.get("genres", "Uncategorized")[0]
+        genre = book_data.get("genres")[0] if book_data.get("genres") else "Uncategorized"
         print(f"Found genre: {genre}")
         cover = (
             f"https://covers.openlibrary.org/b/id/{cover_data[0]}-L.jpg"
