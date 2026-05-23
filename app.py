@@ -166,7 +166,7 @@ else:
             if st.button("Save", key=f'save_{book["isbn"]}', use_container_width=True):
                 increment_book_saved(book["isbn"])
                 update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "saved")
-                save_book(current_reader["Reader_ID"], book["isbn"])
+                save_book(book["isbn"], current_reader["Reader_ID"])
                 st.success("Saved.")
 page_spacer(20)
 

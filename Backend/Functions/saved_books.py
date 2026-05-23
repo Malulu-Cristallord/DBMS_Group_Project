@@ -19,19 +19,23 @@ def get_saved_books(reader_id):
 
     query = """
     SELECT
-        b.ISBN,
-        b.Title,
-        b.Author,
-        b.Cover,
-        b.Genre,
-        b.Average_Rating,
-        b.Review_Count,
-        b.Clicked
+        b.ISBN AS isbn,
+        b.Title AS title,
+        b.Author AS author,
+        b.genre AS genre,
+        b.Description AS description,
+        COALESCE(b.Average_Rating, 0) AS avg_rating,
+        b.Clicked AS clicked,
+        b.Saved AS saved,
+        b.Publisher AS publisher,
+        b.Published_Year AS year,
+        b.Cover AS cover,
+        b.Review_Count AS review_count
 
     FROM books AS b
 
     JOIN saved_books AS sb
-        ON sb.Saved_Book_ISBN = b.ISBN
+        ON sb.Saved_Book_isbn = b.isbn
 
     WHERE sb.Saved_To_Reader_ID = %s
     """
@@ -66,7 +70,8 @@ def save_book(isbn, saved_to_reader_id):
     )
     VALUES (%s, %s)
     """
-
+    print("Saving book, READERID:", saved_to_reader_id)
+    result = execute_query_fetch(query, (isbn, saved_to_reader_id))
     execute_query(
         query,
         (isbn, saved_to_reader_id)

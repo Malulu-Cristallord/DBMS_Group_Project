@@ -76,10 +76,7 @@ else:
             st.markdown(
                 f'<strong style="color:{COLORS["dark_green"]};">{escape(book["title"])}</strong><br>'
                 f'<span class="secondary">{escape(book["author"])} - {escape(book["genre"])}</span><br>'
-                f'{render_stars(book["avg_rating"])} '
-                f'<span class="muted">score {book["score"]:.4f}</span><br>'
-                f'<span class="muted">{escape(book["reason"])}</span><br>'
-                f'{render_badge(book["recommendation_status"] or "unread", "beige")}',
+                f'{render_stars(book["avg_rating"])}',
                 unsafe_allow_html=True,
             )
 
@@ -92,6 +89,7 @@ else:
                 st.session_state["selected_book_id"] = book["isbn"]
                 if delete_saved_book(current_reader["Reader_ID"], book["isbn"]):
                     decrement_book_saved(book['isbn'])
+                    delete_saved_book(book["isbn"], current_reader["Reader_ID"])
                     success_message = f"Deleted book {book['title']} from saved books successfully."
                     st.success(success_message)
                 else:
