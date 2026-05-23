@@ -165,66 +165,6 @@ def get_book_cover(isbn_value):
         print(f"Exception: {e}")
 
 
-def request_book_data_google(isbn_value):
-    try:
-        print("Requesting Google Books data")
-
-        api = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn_value}"
-
-        response = requests.get(
-            api,
-            timeout=10,
-            headers=headers
-        )
-
-        response.raise_for_status()
-
-        data = response.json()
-
-        # No books found
-        if data.get("totalItems", 0) == 0:
-            return {
-                "error": f"No book found for ISBN {isbn_value}"
-            }
-
-        # First matched book
-        book_data = data["items"][0]
-
-        print("Book data:", book_data)
-
-        data_to_db(book_data)
-
-        return book_data
-
-    except RequestException as e:
-        print(f"RequestException: {e}")
-        return {"error": str(e)}
-
-    except Exception as e:
-        print(f"Unknown general error: {e}")
-        return {"error": str(e)}
-
-def get_book_cover_google(isbn_value):
-    try:
-        query = """
-            SELECT Cover
-            FROM books
-            WHERE ISBN = %s
-            """
-
-        values = (isbn_value,)
-
-        result = db_connect.execute_query_fetch(query, values)
-
-        if result and len(result) > 0:
-            return result[0]["Cover"]
-
-        return None
-
-    except Exception as e:
-        print(f"Exception: {e}")
-
-
 def test():
     print("Test phase, input = 978043936213")
     request_book_data("9780439362139")

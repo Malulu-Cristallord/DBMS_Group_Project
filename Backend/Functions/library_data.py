@@ -581,6 +581,15 @@ def increment_book_saved(book_isbn: int | str) -> tuple[bool, str]:
         (book_isbn,),
     )
 
+def decrement_book_saved(book_isbn: int | str) -> tuple[bool, str]:
+    return execute_write(
+        """
+        UPDATE books
+        SET Saved = COALESCE(Saved, 0) - 1
+        WHERE ISBN = %s
+        """,
+        (book_isbn,),
+    )
 
 def get_recommended_books(reader: dict[str, Any] | None, limit: int = 4) -> list[dict[str, Any]]:
     books = get_books_for_recommendation()
@@ -862,10 +871,6 @@ def get_reader_badges(reader: dict[str, Any] | None, posts_published: int = 0) -
     if not table_exists("reviews"):
         return False, "The reviews table does not exist yet. Run the database setup first."
 
-#wait for change
-def get_saved_books(user_ID):
-    query = """
-    SELECT ISBN, Title, Author, """
 
 def get_books_by_title(keyword): 
     query = """

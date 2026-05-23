@@ -167,13 +167,23 @@ def initiate_badges():
 def initiate_saved_books():
     query = """
     CREATE TABLE IF NOT EXISTS saved_books (
-    Save_ID            INT             AUTO_INCREMENT PRIMARY KEY,
-    Saved_Book_ISBN    VARCHAR(18)     NOT NULL REFERENCES books(ISBN),
-    Saved_To_Reader_ID INT             NOT NULL REFERENCES readers(Reader_ID)
+        Save_ID              INT AUTO_INCREMENT PRIMARY KEY,
+        Saved_Book_ISBN      VARCHAR(18) NOT NULL,
+        Saved_To_Reader_ID   INT NOT NULL,
+        FOREIGN KEY (Saved_Book_ISBN)
+            REFERENCES books(ISBN)
+            ON DELETE CASCADE,
+        FOREIGN KEY (Saved_To_Reader_ID)
+            REFERENCES readers(Reader_ID)
+            ON DELETE CASCADE,
+        UNIQUE KEY unique_saved_book (
+            Saved_Book_ISBN,
+            Saved_To_Reader_ID
+        )
     )
     """
-    db_connect.execute_query(query)
 
+    db_connect.execute_query(query)
 
 def del_all():
     query = """
