@@ -59,11 +59,23 @@ def get_posts_by_reader(reader_id):
 
 def delete_post(post_id):
 
+    query1 = """
+    DELETE FROM comments
+    WHERE Post_ID = %s
+    """
+
+    query2 = """
+    DELETE FROM likes
+    WHERE Post_ID = %s
+    """
+
     query = """
     DELETE FROM posts
     WHERE Post_ID = %s
     """
 
+    execute_query(query1, (post_id,))
+    execute_query(query2, (post_id,))
     execute_query(query, (post_id,))
 
 def get_post_by_id(post_id):

@@ -240,7 +240,6 @@ else:
         col_post, col_tag = st.columns([5, 1])
 
         with col_post:
-            likes = int(post.get("upvote_count") or 0)
             st.markdown(
                 f"""
                 <div class="card">
