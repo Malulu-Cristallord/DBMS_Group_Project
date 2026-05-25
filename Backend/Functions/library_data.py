@@ -417,27 +417,49 @@ def get_books_for_recommendation() -> list[dict[str, Any]]:
     return books
 
 
-def calculate_recommendation_score(book: dict[str, Any], reader: dict[str, Any] | None) -> float:
+def _normalized_rating(book: dict[str, Any]) -> float:
+    rating = to_float(book.get("avg_rating", book.get("rating")))
+    return max(0.0, min(1.0, rating / 5))
+
+
+def _normalized_count(book: dict[str, Any], count_key: str, max_key: str) -> float:
+    max_value = int(book.get(max_key) or 0)
+    if not max_value:
+        return 0.0
+
+    return max(0.0, min(1.0, int(book.get(count_key) or 0) / max_value))
+
+
+def calculate_personalized_score(book: dict[str, Any], reader: dict[str, Any] | None) -> float:
     rating_weight = 0.4
     clicked_weight = 0.2
     saved_weight = 0.2
     category_weight = 0.2
 
-    normalized_rating = max(0.0, min(1.0, to_float(book.get("rating")) / 5))
-
-    max_clicked = int(book.get("_max_clicked") or 0)
-    normalized_clicked = (int(book.get("clicked") or 0) / max_clicked) if max_clicked else 0.0
-
-    max_saved = int(book.get("_max_saved") or 0)
-    normalized_saved = (int(book.get("saved") or 0) / max_saved) if max_saved else 0.0
-
     category_match = 1.0 if _category_matches(book.get("genre"), reader) else 0.0
 
     score = (
-        rating_weight * normalized_rating
-        + clicked_weight * normalized_clicked
-        + saved_weight * normalized_saved
+        rating_weight * _normalized_rating(book)
+        + clicked_weight * _normalized_count(book, "clicked", "_max_clicked")
+        + saved_weight * _normalized_count(book, "saved", "_max_saved")
         + category_weight * category_match
+    )
+    return round(score, 4)
+
+
+def calculate_recommendation_score(book: dict[str, Any], reader: dict[str, Any] | None) -> float:
+    return calculate_personalized_score(book, reader)
+
+
+def calculate_popular_score(book: dict[str, Any]) -> float:
+    rating_weight = 0.4
+    clicked_weight = 0.3
+    saved_weight = 0.3
+
+    score = (
+        rating_weight * _normalized_rating(book)
+        + clicked_weight * _normalized_count(book, "clicked", "_max_clicked")
+        + saved_weight * _normalized_count(book, "saved", "_max_saved")
     )
     return round(score, 4)
 
@@ -447,16 +469,45 @@ def _rank_recommendation_candidates(
     reader: dict[str, Any] | None,
 ) -> list[dict[str, Any]]:
     for book in books:
-        book["score"] = calculate_recommendation_score(book, reader)
+        book["score"] = calculate_personalized_score(book, reader)
         book["reason"] = _recommendation_reason(book, reader)
 
     preferred_books = [book for book in books if _category_matches(book.get("genre"), reader)]
     other_books = [book for book in books if not _category_matches(book.get("genre"), reader)]
 
-    preferred_books.sort(key=lambda book: (book["score"], to_float(book.get("rating"))), reverse=True)
-    other_books.sort(key=lambda book: (book["score"], to_float(book.get("rating"))), reverse=True)
+    preferred_books.sort(key=lambda book: (book["score"], to_float(book.get("avg_rating"))), reverse=True)
+    other_books.sort(key=lambda book: (book["score"], to_float(book.get("avg_rating"))), reverse=True)
 
     return preferred_books + other_books
+
+
+def _rank_popular_books(books: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    for book in books:
+        book["score"] = calculate_popular_score(book)
+        book["reason"] = "Popular because readers rate, view, and save it often."
+
+    books.sort(key=lambda book: (book["score"], to_float(book.get("avg_rating")), int(book.get("saved") or 0)), reverse=True)
+    return books
+
+
+def get_popular_books(limit: int = 10) -> list[dict[str, Any]]:
+    books = get_books_for_recommendation()
+    if not books:
+        return get_books(sort_option="rating", limit=limit)
+
+    return _rank_popular_books(books)[:limit]
+
+
+def get_personalized_recommendations(reader_id: int | str, limit: int = 10) -> list[dict[str, Any]]:
+    reader = get_reader_by_id(reader_id)
+    if not reader or not get_reader_genres(reader):
+        return get_popular_books(limit=limit)
+
+    books = get_books_for_recommendation()
+    if not books:
+        return get_popular_books(limit=limit)
+
+    return _rank_recommendation_candidates(books, reader)[:limit]
 
 
 def generate_recommendations_for_reader(reader_id: int | str, limit: int = 10) -> list[dict[str, Any]]:
@@ -467,8 +518,7 @@ def generate_recommendations_for_reader(reader_id: int | str, limit: int = 10) -
     if not reader:
         return []
 
-    books = get_books_for_recommendation()
-    candidates = _rank_recommendation_candidates(books, reader)[:limit]
+    candidates = get_personalized_recommendations(reader_id, limit=limit)
 
     for book in candidates:
         execute_write(
@@ -585,18 +635,17 @@ def decrement_book_saved(book_isbn: int | str) -> tuple[bool, str]:
     return execute_write(
         """
         UPDATE books
-        SET Saved = COALESCE(Saved, 0) - 1
+        SET Saved = GREATEST(COALESCE(Saved, 0) - 1, 0)
         WHERE ISBN = %s
         """,
         (book_isbn,),
     )
 
 def get_recommended_books(reader: dict[str, Any] | None, limit: int = 4) -> list[dict[str, Any]]:
-    books = get_books_for_recommendation()
-    if not books:
-        return get_books(sort_option="rating", limit=limit)
+    if not reader or not get_reader_genres(reader):
+        return get_popular_books(limit=limit)
 
-    return _rank_recommendation_candidates(books, reader)[:limit]
+    return get_personalized_recommendations(reader["Reader_ID"], limit=limit)
 
 
 def get_posts(
@@ -903,4 +952,3 @@ def update_book_review_stats(isbn):
     """
 
     execute_query(query, (isbn,))
-

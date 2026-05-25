@@ -42,6 +42,15 @@ if google_user_is_logged_in(st.user) and not st.session_state.get("logged_in", F
         st.stop()
 
 
+if st.session_state.get("logged_in", False):
+    _, center_col, _ = st.columns([1, 1.6, 1])
+    with center_col:
+        st.info("You are already logged in.")
+        if st.button("Go to your home page", type="primary", use_container_width=True):
+            st.switch_page("app.py")
+    st.stop()
+
+
 _, center_col, _ = st.columns([1, 1.6, 1])
 
 with center_col:

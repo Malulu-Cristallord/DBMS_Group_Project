@@ -3,22 +3,15 @@ import os
 import sys
 
 import streamlit as st
-from requests import delete
 
 from Backend.Functions.saved_books import delete_saved_book, get_saved_books
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from Backend.Functions.library_data import (
-    generate_recommendations_for_reader,
-    get_recommendations_for_reader,
     get_reader_from_session,
     increment_book_clicked,
-    increment_book_saved,
-    update_recommendation_status, decrement_book_saved,
-)
-from Backend.Functions.saved_books import(
-    save_book,
+    update_recommendation_status,
 )
 from components.ui_helpers import (
     COLORS,
@@ -82,18 +75,17 @@ else:
 
         with action_col:
             if st.button("View", key=f'view_{book["isbn"]}', use_container_width=True):
+                increment_book_clicked(book["isbn"])
                 update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "clicked")
                 st.session_state["selected_book_id"] = book["isbn"]
                 st.switch_page("pages/15_Book_Detail.py")
             if st.button("Delete from save", key=f'delete_{book["isbn"]}', use_container_width=True):
                 st.session_state["selected_book_id"] = book["isbn"]
-                if delete_saved_book(current_reader["Reader_ID"], book["isbn"]):
-                    decrement_book_saved(book['isbn'])
-                    delete_saved_book(book["isbn"], current_reader["Reader_ID"])
-                    success_message = f"Deleted book {book['title']} from saved books successfully."
-                    st.success(success_message)
+                result = delete_saved_book(book["isbn"], current_reader["Reader_ID"])
+                if result["success"]:
+                    st.success(f"Deleted book {book['title']} from saved books successfully.")
                 else:
-                    success_message = f"Book {book['title']} was not deleted. An error has likely occurred"
+                    st.info(result["message"])
 
         st.markdown("<hr>", unsafe_allow_html=True)
 

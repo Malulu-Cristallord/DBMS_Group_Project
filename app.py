@@ -19,13 +19,13 @@ from Backend.Functions.post_handler import(
 
 from Backend.Functions.library_data import (
     get_book_by_isbn,
-    get_books,
+    get_popular_books,
     get_posts,
+    get_personalized_recommendations,
     get_reader_from_session,
-    get_recommended_books,
     increment_book_clicked,
     reader_initials,
-    update_recommendation_status, increment_book_saved,
+    update_recommendation_status,
 )
 from components.ui_helpers import (
     COLORS,
@@ -134,9 +134,9 @@ page_spacer(20)
 
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
-section_title("Recommended for you")
+section_title("Recommend to You")
 
-recommended_books = get_recommended_books(current_reader, limit=4)
+recommended_books = get_personalized_recommendations(current_reader["Reader_ID"], limit=4)
 
 if not recommended_books:
     st.info("No recommended books found yet. Add books to the database or update your preferred categories.")
@@ -164,10 +164,12 @@ else:
                 st.switch_page("pages/15_Book_Detail.py")
 
             if st.button("Save", key=f'save_{book["isbn"]}', use_container_width=True):
-                increment_book_saved(book["isbn"])
-                update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "saved")
-                save_book(book["isbn"], current_reader["Reader_ID"])
-                st.success("Saved.")
+                result = save_book(book["isbn"], current_reader["Reader_ID"])
+                if result["success"]:
+                    update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "saved")
+                    st.success("Saved.")
+                else:
+                    st.info(result["message"])
 page_spacer(20)
 
 #--------------------------------------------------------------------ADD NEW BOOKS
@@ -184,9 +186,9 @@ page_spacer(20)
 
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
-section_title("Popular this week")
+section_title("Popular Books")
 
-popular_books = get_books(sort_option="rating", limit=6)
+popular_books = get_popular_books(limit=6)
 
 if not popular_books:
     st.info("No books found yet. Please insert book data into the books table.")
@@ -209,10 +211,12 @@ else:
                 st.switch_page("pages/15_Book_Detail.py")
 
             if st.button("Save", key=f'save_pop_{book["isbn"]}', use_container_width=True):
-                increment_book_saved(book["isbn"])
-                update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "saved")
-                save_book(current_reader["Reader_ID"], book["isbn"])
-                st.success("Saved.")
+                result = save_book(book["isbn"], current_reader["Reader_ID"])
+                if result["success"]:
+                    update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "saved")
+                    st.success("Saved.")
+                else:
+                    st.info(result["message"])
 
 
 page_spacer(20)
@@ -352,8 +356,6 @@ page_spacer(20)
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 section_title("Navigation")
 render_navigation_section()
-
-
 
 
 

@@ -6,7 +6,15 @@ import streamlit as st
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from Backend.Functions.library_data import get_books, get_genres, increment_book_clicked
+from Backend.Functions.library_data import (
+    get_books,
+    get_genres,
+    get_popular_books,
+    get_reader_from_session,
+    increment_book_clicked,
+    update_recommendation_status,
+)
+from Backend.Functions.saved_books import save_book
 from components.ui_helpers import (
     COLORS,
     inject_global_css,
@@ -28,6 +36,23 @@ st.set_page_config(
 inject_global_css()
 render_navbar(active_page="Discover")
 page_spacer(20)
+
+current_reader = None
+if st.session_state.get("logged_in", False):
+    current_reader = get_reader_from_session(st.session_state)
+
+
+def save_discovery_book(book):
+    if current_reader is None:
+        st.warning("Please sign in before saving books.")
+        return
+
+    result = save_book(book["isbn"], current_reader["Reader_ID"])
+    if result["success"]:
+        update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "saved")
+        st.success("Saved.")
+    else:
+        st.info(result["message"])
 
 
 sidebar_col, main_col = st.columns([1, 4])
@@ -84,22 +109,32 @@ with main_col:
 
     page_spacer(16)
 
-    section_title("Popular this week")
+    section_title("Top 10 Popular Books")
 
-    popular_books = get_books(genre=active_genre, sort_option="rating", limit=6)
+    popular_books = get_popular_books(limit=10)
     if popular_books:
-        cols = st.columns(min(len(popular_books), 6))
-        for index, book in enumerate(popular_books):
-            with cols[index]:
-                st.markdown(render_book_cover(book["cover"], "card"), unsafe_allow_html=True)
-                st.markdown(
-                    f'<span style="font-size:0.82rem; font-weight:600; color:{COLORS["dark_green"]};">'
-                    f'{escape(book["title"])}</span><br>'
-                    f'<span class="muted" style="font-size:0.75rem;">{escape(book["author"])}</span>',
-                    unsafe_allow_html=True,
-                )
+        for start in range(0, len(popular_books), 5):
+            cols = st.columns(min(len(popular_books[start:start + 5]), 5))
+            for offset, book in enumerate(popular_books[start:start + 5]):
+                with cols[offset]:
+                    st.markdown(render_book_cover(book["cover"], "card"), unsafe_allow_html=True)
+                    st.markdown(
+                        f'<span style="font-size:0.82rem; font-weight:600; color:{COLORS["dark_green"]};">'
+                        f'{escape(book["title"])}</span><br>'
+                        f'<span class="muted" style="font-size:0.75rem;">{escape(book["author"])}</span><br>'
+                        f'{render_stars(book["avg_rating"])}',
+                        unsafe_allow_html=True,
+                    )
+                    if st.button("Details", key=f"popular_detail_{book['id']}", use_container_width=True):
+                        increment_book_clicked(book["id"])
+                        if current_reader:
+                            update_recommendation_status(current_reader["Reader_ID"], book["id"], "clicked")
+                        st.session_state["selected_book_id"] = book["id"]
+                        st.switch_page("pages/15_Book_Detail.py")
+                    if st.button("Save", key=f"popular_save_{book['isbn']}", use_container_width=True):
+                        save_discovery_book(book)
     else:
-        st.info("No books match the current filter.")
+        st.info("No books are available for popularity ranking yet.")
 
     page_spacer(20)
     st.markdown("<hr>", unsafe_allow_html=True)
@@ -139,8 +174,13 @@ with main_col:
                 page_spacer(8)
                 if st.button("Details", key=f"disc_detail_{book['id']}"):
                     increment_book_clicked(book["id"])
+                    if current_reader:
+                        update_recommendation_status(current_reader["Reader_ID"], book["id"], "clicked")
                     st.session_state["selected_book_id"] = book["id"]
                     st.switch_page("pages/15_Book_Detail.py")
+
+                if st.button("Save", key=f"disc_save_{book['id']}"):
+                    save_discovery_book(book)
 
                 if st.button("Review", key=f"disc_review_{book['id']}"):
                     st.session_state["review_book_id"] = book["id"]
