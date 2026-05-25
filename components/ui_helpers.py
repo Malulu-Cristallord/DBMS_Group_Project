@@ -584,6 +584,7 @@ def render_navigation_section():
         st.page_link(page="pages/05_Badges_Rewards.py", label="Badges")
         st.page_link(page="pages/07_Create_Post.py", label="Create a Post")
         st.page_link(page="pages/08_Profile.py", label="My Profile")
+        st.page_link(page="app.py", label="Main Page")
     with col_link2:
         st.page_link(page="pages/11_Add_Books.py", label="Add Books")
         st.page_link(page="pages/12_Recommendations.py", label="Recommendations")

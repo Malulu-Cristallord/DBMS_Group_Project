@@ -53,12 +53,10 @@ reader_badges = get_reader_badges(current_reader, reader_stats["posts_published"
 sidebar_col, profile_col, posts_col = st.columns([1, 3, 1.8])
 
 with sidebar_col:
-    menu_items = ["My profile", "My borrowings", "My posts", "History", "Settings"]
+    menu_items = ["My profile", "My posts", "History", "Settings"]
     for item in menu_items:
         if st.button(item, key=f"prof_nav_{item}", use_container_width=True):
-            if item == "My borrowings":
-                st.switch_page("pages/04_Record_Readings.py")
-            elif item == "My posts":
+            if item == "My posts":
                 st.switch_page("pages/13_My_Posts.py")
             elif item == "History":
                 st.switch_page("pages/16_Reading_History.py")

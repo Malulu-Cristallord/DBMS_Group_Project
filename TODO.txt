@@ -40,3 +40,6 @@ Book Discovery (Done)
 Review & Rating (Done)
 Posts & Community Interaction (Done)
 Reward and Engagement Mechanism
+
+05/23/2026
+Rating is not broken
