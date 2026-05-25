@@ -334,7 +334,6 @@ def get_books(
 
     return [normalize_book(row) for row in rows]
 
-#this is not used now below has a function has the same name but different code.
 def get_book_by_isbn(book_isbn: int | str | None) -> dict[str, Any] | None:
     if not book_isbn:
         books = get_books(limit=1)

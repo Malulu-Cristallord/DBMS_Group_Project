@@ -341,8 +341,9 @@ else:
             page_spacer(8)
 
             if st.button("Book Details", key=f"feed_detail_{post['post_id']}"):
-                selected_book = get_book_by_isbn(post.get("isbn"))
-                if selected_book:
+
+                if post.get("isbn"):
+                    selected_book = get_book_by_isbn(post.get("isbn"))
                     increment_book_clicked(selected_book["id"])
                     st.session_state["selected_book_id"] = selected_book["id"]
                     st.switch_page("pages/15_Book_Detail.py")

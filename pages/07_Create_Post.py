@@ -8,11 +8,13 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from Backend.Functions.post_handler import (
     create_post
 )
+from Backend.Functions.post_handler import (
+    get_book_by_isbn
+    )
 from Backend.Functions.library_data import (
     get_books,
     get_reader_from_session,
     reader_initials,
-    get_book_by_isbn,
     get_books_by_title
 )
 from components.ui_helpers import (

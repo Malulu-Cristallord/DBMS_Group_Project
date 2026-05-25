@@ -87,41 +87,15 @@ def get_post_by_id(post_id):
     return fetch_all(query, (post_id,))
 
 def get_book_by_isbn(isbn):
-    book_query = """
-    SELECT Title, ISBN, Publisher, Published_Year, Author, Description, Cover, Average_Rating, Review_Count
+    query = """
+    SELECT
+        ISBN,
+        Title,
+        Author
     FROM books
     WHERE ISBN = %s
     """
-
-    category_query = """
-    SELECT Category
-    FROM book_categories
-    WHERE ISBN = %s
-    """
-
-    rows = fetch_all(book_query, (isbn,))
-    print("DEBUG ROWS:", rows)
-
-    if not rows:
-        return None
-
-    row = rows[0]
-
-    category_rows = fetch_all(category_query, (isbn,))
-    categories = [c["Category"] for c in category_rows] if category_rows else []
-
-    return {
-        "Title": row["Title"],
-        "ISBN": row["ISBN"],
-        "publisher": row["Publisher"],
-        "year": row["Published_Year"],
-        "Author": row["Author"],
-        "description": row["Description"],
-        "cover": row["Cover"],
-        "categories": categories,
-        "avg_rating": row["Average_Rating"],
-        "review_count": row["Review_Count"]
-    }
+    return fetch_all(query, (isbn,))
 
 
 def update_post(
