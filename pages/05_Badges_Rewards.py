@@ -1,18 +1,3 @@
-# =============================================================================
-# FILE: pages/05_Badges_Rewards.py
-# PURPOSE: Full badges & achievement system for LibTrack.
-#          Displays earned badges, locked badges with progress,
-#          XP points, and the reward history log.
-#
-# FRONT-END ONLY. All data is illustrative — no real backend.
-#
-# FUTURE BACK-END INTEGRATION:
-#   - User badges:    GET /api/rewards?user_id=<id>
-#   - Badge progress: GET /api/rewards/progress?user_id=<id>
-#   - XP total:       GET /api/users/<id>/xp
-#   - Leaderboard:    GET /api/leaderboard?sort=xp
-# =============================================================================
-
 import streamlit as st
 import sys, os
 

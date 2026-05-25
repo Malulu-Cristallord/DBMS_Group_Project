@@ -82,27 +82,22 @@ else:
 
         with col1:
 
-            if st.button(
-                "Edit",
-                key=f"edit_{post['Post_ID']}"
-            ):
-
-                st.session_state["edit_post_id"] = post["Post_ID"]
-
-                st.switch_page("pages/14_Edit_Post.py")
+            if st.button("Edit", key=f"edit_{post['Post_ID']}"):
+                try:
+                    st.session_state["edit_post_id"] = post["Post_ID"]
+                    st.switch_page("pages/14_Edit_Post.py")
+                except Exception as e:
+                    st.error("There is an unexpected error: ", e)
 
         with col2:
 
-            if st.button(
-                "Delete",
-                key=f"delete_{post['Post_ID']}"
-            ):
-
-                success, message = delete_post(post["Post_ID"])
-
-                if success:
-                    st.success(message)
+            if st.button("Delete", key=f"delete_{post['Post_ID']}"):
+                try:
+                    delete_post(post["Post_ID"])
+                    st.success("Post deleted.")
                     st.rerun()
+                except Exception as e:
+                    st.error("There is an unexpected error: ", e)
 
 page_spacer(20)
 #--------------------------------------------------------------------NAVIGATION

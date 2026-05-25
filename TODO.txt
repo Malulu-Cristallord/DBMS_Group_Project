@@ -43,3 +43,6 @@ Reward and Engagement Mechanism
 
 05/23/2026
 Rating is not broken
+
+05/25/2026
+There are databases for both reward and badges, however we have close to nothing as rewards. Why not just badges?

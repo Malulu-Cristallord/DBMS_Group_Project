@@ -139,7 +139,7 @@ def initiate_comments():
     """
     db_connect.execute_query(query)
 
-
+# What is this for?
 def initiate_rewards():
     query = """
     CREATE TABLE IF NOT EXISTS rewards (
@@ -156,10 +156,11 @@ def initiate_rewards():
 def initiate_badges():
     query = """
     CREATE TABLE IF NOT EXISTS badges (
-    Badge_ID           INT              PRIMARY KEY,
+    Badge_ID           INT              PRIMARY KEY AUTO INCREMENT NOT NULL,
     Badge_Name         VARCHAR(255),
     Badge_Image_Path   VARCHAR(255),
-    Badge_Description  VARCHAR(255), 
+    Badge_Description  TEXT, 
+    Badge_Rarity       VARCHAR(255),
     Badge_Points       INT)
     """
     db_connect.execute_query(query)

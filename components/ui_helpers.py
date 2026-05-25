@@ -439,26 +439,24 @@ def render_navbar(active_page: str = ""):
         """,
         unsafe_allow_html=True,
     )
-    render_logout_button()
 
 
 def render_logout_button():
     if not st.session_state.get("logged_in", False):
         return
 
-    with st.sidebar:
-        st.markdown("### Account")
-        reader_name = st.session_state.get("reader_name") or "Reader"
-        st.caption(f"Signed in as {reader_name}")
+    st.markdown("### Account")
+    reader_name = st.session_state.get("reader_name") or "Reader"
+    st.caption(f"Signed in as {reader_name}")
 
-        if st.button("Log out", use_container_width=True, key="global_logout"):
-            google_signed_in = google_user_is_logged_in(st.user)
-            clear_login_session(st.session_state)
+    if st.button("Log out", key="global_logout"):
+        google_signed_in = google_user_is_logged_in(st.user)
+        clear_login_session(st.session_state)
 
-            if google_signed_in:
-                st.logout()
+        if google_signed_in:
+            st.logout()
 
-            st.switch_page("pages/01_Login.py")
+        st.switch_page("pages/01_Login.py")
 
 
 def render_login_required(
@@ -613,4 +611,5 @@ def render_navigation_section():
         st.page_link(page="pages/13_My_Posts.py", label="My Posts")
         st.page_link(page="pages/16_Reading_History.py", label="Reading History")
         st.page_link(page="pages/17_Saved_Books.py", label="Saved Books")
+    render_logout_button()
     return col_link1, col_link2

@@ -66,8 +66,6 @@ def delete_post(post_id):
 
     execute_query(query, (post_id,))
 
-    return True, "Post deleted successfully."
-
 def get_post_by_id(post_id):
     query = """
     SELECT Post_ID, Content, Created_Date, Reader_ID, ISBN
