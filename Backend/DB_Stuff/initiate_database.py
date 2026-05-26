@@ -21,15 +21,6 @@ def initiate_books():
     )
     """
     db_connect.execute_query(query)
-def initiate_book_categories():
-    query = """
-    CREATE TABLE IF NOT EXISTS book_categories (
-        Category_ID      INT AUTO_INCREMENT PRIMARY KEY,
-        ISBN             VARCHAR(18) REFERENCES Books(ISBN),
-        Category         VARCHAR(255)
-        )
-    """
-    db_connect.execute_query(query)
 
 
 def initiate_readers():
@@ -142,18 +133,7 @@ def initiate_comments():
     """
     db_connect.execute_query(query)
 
-# What is this for?
-def initiate_rewards():
-    query = """
-    CREATE TABLE IF NOT EXISTS rewards (
-        Reward_ID           INT             AUTO_INCREMENT PRIMARY KEY,
-        Reward_Name         VARCHAR(255),
-        Description         VARCHAR(255),
-        Reward_Type         VARCHAR(100),
-        Points_Required     INT             DEFAULT 0
-    )
-    """
-    db_connect.execute_query(query)
+# delete rewards table.
 
 
 def initiate_badges():
@@ -229,7 +209,6 @@ def execute_all_methods():
     initiate_recommendations()
     initiate_likes()
     initiate_comments()
-    initiate_rewards()
     initiate_badges()
     initiate_saved_books()
     initiate_given_badges()
@@ -250,10 +229,9 @@ print(
 print(
     "Select a setup option:\n"
     "(A) initiate books table\n"
-    "(Aa)initiate books category table\n"
     "(B) initiate readers table\n"
     "(C) initiate posts table\n"
-    "(D) initiate rewards/badges table\n"
+    "(D) initiate badges table\n"
     "(R) initiate recommendations table\n"
     "(N) delete all existing tables\n\n"
     "(full) initiate all tables\n\n"
@@ -264,14 +242,11 @@ dev_input = input()
 match dev_input:
     case "A":
         initiate_books()
-    case "Aa":
-        initiate_book_categories()
     case "B":
         initiate_readers()
     case "C":
         initiate_posts()
     case "D":
-        initiate_rewards()
         initiate_badges()
     case "R":
         initiate_recommendations()

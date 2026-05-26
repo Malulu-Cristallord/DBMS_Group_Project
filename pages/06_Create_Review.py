@@ -6,11 +6,14 @@ import streamlit as st
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from Backend.Functions.library_data import (
-    create_review, 
-    get_books, 
-    get_reader_from_session,
+from Backend.Functions.review_handler import (
+    create_review,
     get_review_by_reader_and_book
+)
+
+from Backend.Functions.library_data import ( 
+    get_books, 
+    get_reader_from_session
     )
 from components.ui_helpers import (
     COLORS,
