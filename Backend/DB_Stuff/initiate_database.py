@@ -47,6 +47,7 @@ def initiate_readers():
         Show_Reading_History    BOOLEAN         DEFAULT TRUE,
         Created_At              TIMESTAMP       DEFAULT CURRENT_TIMESTAMP
         Time_Read               TIME            DEFAULT 0,
+        Daily_Time_Goal         INT             DEFAULT 60,
         Books_Added             INT             DEFAULT 0
     )
     """

@@ -143,7 +143,8 @@ def get_reader_by_id(reader_id: int | str | None) -> dict[str, Any] | None:
             Points,
             Receive_Recommendations,
             Show_Reading_History,
-            Created_At
+            Created_At,
+            Daily_Time_Goal
         FROM readers
         WHERE Reader_ID = %s
         """,
@@ -156,6 +157,7 @@ def get_reader_by_id(reader_id: int | str | None) -> dict[str, Any] | None:
         reader["email"] = reader.get("Email")
         reader["preferred_category"] = reader.get("Preferred_Category")
         reader["point"] = reader.get("Points")
+        reader["daily_time_goal"] = reader.get("Daily_Time_Goal")
 
     return reader
 

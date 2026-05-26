@@ -1,21 +1,10 @@
-# =============================================================================
-# FILE: pages/04_Record_Reading.py
-# PURPOSE: "Record Reading" — Real-time reading timer, session logging,
-#          and Apple Health-style reading trend dashboard.
-#
-# FRONT-END ONLY. Timer runs in-session only (no persistence).
-#
-# FUTURE BACK-END INTEGRATION:
-#   - Save session: POST /api/reading-sessions { book_id, duration_min, date }
-#   - Get history:  GET  /api/reading-sessions?user_id=<id>&period=week
-#   - Get trends:   GET  /api/stats/reading-time?user_id=<id>&view=month
-#   - Current book: GET  /api/borrowings?user_id=<id>&status=active
-# =============================================================================
 
 import streamlit as st
 import time
 import datetime
 import sys, os
+from streamlit_autorefresh import st_autorefresh
+from datetime import timedelta
 
 from Backend.Functions.library_data import get_reader_from_session, get_books_by_title, get_books
 from Backend.Functions.post_handler import get_book_by_isbn
@@ -41,8 +30,6 @@ current_reader = get_reader_from_session(st.session_state)
 if current_reader is None:
     render_login_required("Please sign in before writing a review.")
     st.stop()
-else:
-    print("Current reader exists, ID = ", current_reader["Reader_ID"])
 
 # ── Page-specific CSS ─────────────────────────────────────────────────────
 st.markdown("""
@@ -167,9 +154,12 @@ if "timer_elapsed" not in st.session_state:
     st.session_state["timer_elapsed"] = 0        # seconds accumulated before pause
 if "current_book" not in st.session_state:
     st.session_state["current_book"] = ""
+if "reading_goal" not in st.session_state:
+    st.session_state["reading_goal"] = 60
 # Session log (stored in session only — cleared on browser refresh)
 if "sessions_log" not in st.session_state:
     st.session_state["sessions_log"] = []
+
 
 
 def format_time(seconds: int) -> str:
@@ -223,7 +213,6 @@ with timer_col:
     linked_book = st.selectbox("Select book", list(book_options.keys()))
     st.session_state["current_book"] = linked_book
     st.write("Selected book:", linked_book)
-    print(linked_book)
 
     spacer(16)
 
@@ -299,7 +288,7 @@ with timer_col:
                 st.session_state["timer_start"]    = None
                 st.session_state["timer_elapsed"]  = 0
                 st.session_state["current_book"]   = ""
-                save_reading_session_time(st.session_state["Reader_ID"], final_elapsed)
+                save_reading_session_time(current_reader["Reader_ID"], final_elapsed)
                 st.success(f"Session saved! {mins} min of reading logged.")
                 st.rerun()
 
@@ -313,8 +302,7 @@ with timer_col:
 
     # Auto-refresh while timer is running (every 5 seconds)
     if st.session_state["timer_running"]:
-        time.sleep(1)
-        st.rerun()
+        st_autorefresh(interval=1000, key="timer_refresh")
 
     spacer(28)
     st.markdown('<hr style="border-color:#EBEBEB;">', unsafe_allow_html=True)
@@ -349,19 +337,18 @@ with timer_col:
 # ── RIGHT: Trends & Insights sidebar ────────────────────────────────────
 with insight_col:
     spacer(4)
-    
+
     # ── GOAL PROGRESS ─────────────────────────────────────────────────────
     section_label("Daily reading goal")
-
-    goal_min = 60
+    st.session_state["reading_goal"] = current_reader["daily_time_goal"]
     done_min = 88
-    goal_pct = min(int(done_min / goal_min * 100), 100)
+    goal_pct = min(int(done_min / st.session_state["reading_goal"] * 100), 100)
 
     st.markdown(
         f'<div style="display:flex;justify-content:space-between;'
         f'font-size:.82rem;margin-bottom:4px;">'
         f'<span style="color:#1F3F2E;font-weight:600;">{done_min} min read</span>'
-        f'<span class="lt-muted">Goal: {goal_min} min</span>'
+        f'<span class="lt-muted">Goal: {st.session_state["reading_goal"]} min</span>'
         f'</div>',
         unsafe_allow_html=True,
     )
@@ -374,7 +361,7 @@ with insight_col:
         f'height:10px;width:{goal_pct}%;transition:width .4s;"></div>'
         f'</div>'
         f'<p style="font-size:.75rem;color:#3E7255;margin-top:6px;">'
-        f'{"✓ Daily goal reached! Great work." if goal_pct >= 100 else f"{goal_min - done_min} min remaining today"}'
+        f'{"✓ Daily goal reached! Great work." if goal_pct >= 100 else f"{st.session_state["reading_goal"] - done_min} min remaining today"}'
         f'</p>',
         unsafe_allow_html=True,
     )
@@ -387,12 +374,12 @@ with insight_col:
         "Change daily goal (min)",
         min_value=10,
         max_value=300,
-        value=goal_min,
+        value=st.session_state["reading_goal"],
         step=5,
         key="goal_input",
     )
     if st.button("Save goal", use_container_width=True, key="save_goal"):
-        st.toast(f"Daily reading goal set to {new_goal} min!")
+        st.success(f"Daily reading goal set to {new_goal} min!")
 
 page_spacer(20)
 #--------------------------------------------------------------------NAVIGATION
