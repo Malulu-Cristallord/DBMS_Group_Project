@@ -33,3 +33,48 @@ def initiate_badges():
         print("\n")
         db_connect.execute_query(query, values,)
 
+def reader_get_badge(reader_ID: int, badge_id: int):
+
+    if not reader_ID:
+        return None
+
+    query1 = """
+    SELECT *
+    FROM badges
+    WHERE Badge_ID = %s
+    """
+
+    result = db_connect.execute_query_fetch(query1, (badge_id,))
+
+    if not result:
+        print("ERROR: Badge not found")
+        return None
+
+    # Add points
+    points = result["Badge_Points"]
+
+    query2 = """
+    UPDATE readers
+    SET Points = Points + %s
+    WHERE Reader_ID = %s
+    """
+
+    db_connect.execute_query(query2, (points, reader_ID))
+    print("points added: ", points)
+
+    # Add to total given badges
+
+    query3 = """
+    INSERT INTO given_badges(Given_Badge_ID, Badge_ID, Reader_ID)
+    VALUES(%s, %s, %s)
+    """
+    result = db_connect.execute_query_fetch(query3, (badge_id,))
+
+    return (
+        result["Badge_ID"],
+        result["Badge_Name"],
+        result["Badge_Image_Path"],
+        result["Badge_Description"],
+        result["Badge_Rarity"],
+        result["Badge_Points"],
+    )

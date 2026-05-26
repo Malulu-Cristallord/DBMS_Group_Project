@@ -45,8 +45,8 @@ def initiate_readers():
         Books_Read              INT             DEFAULT 0,
         Receive_Recommendations BOOLEAN         DEFAULT TRUE,
         Show_Reading_History    BOOLEAN         DEFAULT TRUE,
-        Created_At              TIMESTAMP       DEFAULT CURRENT_TIMESTAMP
-        Time_Read               TIME            DEFAULT 0,
+        Created_At              TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+        Time_Read               TIME            DEFAULT '00:00:00',
         Daily_Time_Goal         INT             DEFAULT 60,
         Books_Added             INT             DEFAULT 0
     )
@@ -159,12 +159,13 @@ def initiate_rewards():
 def initiate_badges():
     query = """
     CREATE TABLE IF NOT EXISTS badges (
-    Badge_ID           INT              PRIMARY KEY AUTO INCREMENT NOT NULL,
+    Badge_ID           INT              AUTO_INCREMENT PRIMARY KEY,
     Badge_Name         VARCHAR(255),
     Badge_Image_Path   VARCHAR(255),
-    Badge_Description  TEXT, 
+    Badge_Description  TEXT,
     Badge_Rarity       VARCHAR(255),
-    Badge_Points       INT)
+    Badge_Points       INT
+)
     """
     db_connect.execute_query(query)
 
@@ -186,7 +187,20 @@ def initiate_saved_books():
         )
     )
     """
+    db_connect.execute_query(query)
 
+def initiate_given_badges():
+    query = """
+    CREATE TABLE IF NOT EXISTS given_badges (
+    Given_Badge_ID       INT AUTO_INCREMENT PRIMARY KEY,
+    Badge_ID             INT NOT NULL,
+    Reader_ID            INT NOT NULL,
+    CONSTRAINT fk_given_badge_id
+            FOREIGN KEY (Badge_ID) REFERENCES badges(Badge_ID),
+    CONSTRAINT fk_given_to_reader_id
+            FOREIGN KEY (Reader_ID) REFERENCES readers(Reader_ID)
+    )
+    """
     db_connect.execute_query(query)
 
 def del_all():
@@ -201,7 +215,8 @@ def del_all():
         badges,
         books,
         readers,
-        saved_books
+        saved_books,
+        given_badges
     """
     db_connect.execute_query(query)
 
@@ -217,6 +232,7 @@ def execute_all_methods():
     initiate_rewards()
     initiate_badges()
     initiate_saved_books()
+    initiate_given_badges()
 
 def data_test():
     query = "CREATE TABLE IF NOT EXISTS test(test int)"
