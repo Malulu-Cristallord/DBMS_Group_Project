@@ -19,13 +19,13 @@ badge_add_books_03 = ("Knowledge Flooding Like a Storm", "Resources/Badges/Badge
 badge_add_books_04 = ("Knowledge Invading Like a Sea", "Resources/Badges/Badge_Add_Books_04.png", "Contribute 500 books to the LibTrack Database", "legendary", 400)
 badges_add_books = (badge_add_books_01, badge_add_books_02, badge_add_books_03, badge_add_books_04)
 
-all_badges = (badges_read, badges_review_and_post, badges_add_books)
+all_badges = (*badges_read, *badges_review_and_post, *badges_add_books)
 
 # Waiting for change
 def initiate_badges():
     query = """
     INSERT INTO badges(Badge_Name, Badge_Image_Path, Badge_Description, Badge_Rarity, Badge_Points)
-    values(%s, %s, %s, %s, %d)
+    values(%s, %s, %s, %s, %s)
     """
     for badge in all_badges:
         values = (badge[0], badge[1], badge[2], badge[3], badge[4])
@@ -38,6 +38,24 @@ def reader_get_badge(reader_ID: int, badge_id: int):
     if not reader_ID:
         return None
 
+    # Check if badge already owned
+    check_query = """
+    SELECT *
+    FROM given_badges
+    WHERE Badge_ID = %s
+    AND Reader_ID = %s
+    """
+
+    existing = db_connect.execute_query_fetch(
+        check_query,
+        (badge_id, reader_ID)
+    )
+
+    if existing:
+        print("Badge already owned")
+        return None
+
+    # Get badge info
     query1 = """
     SELECT *
     FROM badges
@@ -50,9 +68,9 @@ def reader_get_badge(reader_ID: int, badge_id: int):
         print("ERROR: Badge not found")
         return None
 
-    # Add points
-    points = result["Badge_Points"]
+    points = result[0]["Badge_Points"]
 
+    # Add points
     query2 = """
     UPDATE readers
     SET Points = Points + %s
@@ -60,21 +78,20 @@ def reader_get_badge(reader_ID: int, badge_id: int):
     """
 
     db_connect.execute_query(query2, (points, reader_ID))
-    print("points added: ", points)
 
-    # Add to total given badges
+    print("points added:", points)
 
+    # Give badge
     query3 = """
-    INSERT INTO given_badges(Given_Badge_ID, Badge_ID, Reader_ID)
-    VALUES(%s, %s, %s)
+    INSERT INTO given_badges(Badge_ID, Reader_ID)
+    VALUES(%s, %s)
     """
-    result = db_connect.execute_query_fetch(query3, (badge_id,))
 
-    return (
-        result["Badge_ID"],
-        result["Badge_Name"],
-        result["Badge_Image_Path"],
-        result["Badge_Description"],
-        result["Badge_Rarity"],
-        result["Badge_Points"],
-    )
+    db_connect.execute_query(query3, (badge_id, reader_ID))
+
+    return None
+
+def test_get_badge():
+    print("Testing get_badge: ")
+    reader_ID = 1
+    badge_id = 2
