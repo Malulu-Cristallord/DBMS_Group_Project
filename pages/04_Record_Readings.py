@@ -41,6 +41,8 @@ current_reader = get_reader_from_session(st.session_state)
 if current_reader is None:
     render_login_required("Please sign in before writing a review.")
     st.stop()
+else:
+    print("Current reader exists, ID = ", current_reader["Reader_ID"])
 
 # ── Page-specific CSS ─────────────────────────────────────────────────────
 st.markdown("""
@@ -217,9 +219,9 @@ with timer_col:
 
     book_options = {"No book linked": None}
     get_books()
-    st.write(books)
     book_options.update({f'{b["Title"]} - {b["Author"]}': b["ISBN"] for b in books})
     linked_book = st.selectbox("Select book", list(book_options.keys()))
+    st.session_state["current_book"] = linked_book
     st.write("Selected book:", linked_book)
     print(linked_book)
 
@@ -309,7 +311,7 @@ with timer_col:
             st.session_state["timer_elapsed"] = 0
             st.rerun()
 
-    # Auto-refresh while timer is running (every 1 second)
+    # Auto-refresh while timer is running (every 5 seconds)
     if st.session_state["timer_running"]:
         time.sleep(1)
         st.rerun()
@@ -322,15 +324,8 @@ with timer_col:
     section_label("Your reading sessions this session")
 
     # Combine in-session logs with illustrative past sessions
-    DEMO_SESSIONS = [
-        {"book": "Dune",              "date": "May 21, 2026 · 21:30", "duration_min": 47, "duration_display": "00:47:12"},
-        {"book": "Foundation",        "date": "May 20, 2026 · 19:15", "duration_min": 32, "duration_display": "00:32:05"},
-        {"book": "The Name of the Wind", "date": "May 19, 2026 · 20:00", "duration_min": 55, "duration_display": "00:55:43"},
-        {"book": "Sapiens",           "date": "May 18, 2026 · 09:30", "duration_min": 28, "duration_display": "00:28:17"},
-        {"book": "1984",              "date": "May 17, 2026 · 22:00", "duration_min": 41, "duration_display": "00:41:08"},
-    ]
 
-    all_sessions = st.session_state["sessions_log"] + DEMO_SESSIONS
+    all_sessions = st.session_state["sessions_log"]
 
     if all_sessions:
         for s in all_sessions[:8]:
