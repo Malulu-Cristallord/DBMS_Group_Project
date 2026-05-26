@@ -436,7 +436,7 @@ with side_col:
     for icon, name, how, xp in objectives:
         earned = any(b["name"] == name and b["earned"] for b in BADGES)
         check = "✓ " if earned else ""
-        color = COLORS["dark_green"] if earned else COLORS["muted"]
+        color = COLORS["dark_green"] 
         st.markdown(f"""
         <div style="display:flex;align-items:flex-start;gap:10px;
              padding:8px 0;border-bottom:1px solid #F5F5F5;">
