@@ -27,4 +27,9 @@ def initiate_badges():
     INSERT INTO badges(Badge_Name, Badge_Image_Path, Badge_Description, Badge_Rarity, Badge_Points)
     values(%s, %s, %s, %s, %d)
     """
-    db_connect.execute_query(query)
+    for badge in all_badges:
+        values = (badge[0], badge[1], badge[2], badge[3], badge[4])
+        print("values: ", values)
+        print("\n")
+        db_connect.execute_query(query, values,)
+

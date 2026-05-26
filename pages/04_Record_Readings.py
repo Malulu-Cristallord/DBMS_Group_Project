@@ -17,7 +17,9 @@ import time
 import datetime
 import sys, os
 
-from Backend.Functions.library_data import get_reader_from_session
+from Backend.Functions.library_data import get_reader_from_session, get_books_by_title, get_books
+from Backend.Functions.post_handler import get_book_by_isbn
+from Backend.Functions.reader import save_reading_session_time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -204,20 +206,29 @@ with timer_col:
 
     # ── Book selector (current session)
     # In production: pre-fills from GET /api/borrowings?status=active
-    book_name = st.text_input(
-        "What are you reading right now?",
-        placeholder="e.g.  Dune — Frank Herbert",
-        value=st.session_state["current_book"],
-        key="book_input",
-    )
-    st.session_state["current_book"] = book_name
+    search_type = st.radio("Search by", ["Title", "ISBN"], horizontal=True)
+
+    if search_type == "Title":
+        keyword = st.text_input("Enter book title")
+        books = get_books_by_title(keyword) if keyword else []
+    else:
+        isbn = st.text_input("Enter ISBN")
+        books = get_book_by_isbn(isbn) if isbn else []
+
+    book_options = {"No book linked": None}
+    get_books()
+    st.write(books)
+    book_options.update({f'{b["Title"]} - {b["Author"]}': b["ISBN"] for b in books})
+    linked_book = st.selectbox("Select book", list(book_options.keys()))
+    st.write("Selected book:", linked_book)
+    print(linked_book)
 
     spacer(16)
 
     # ── Timer display
     elapsed = get_elapsed()
     display_time = format_time(elapsed)
-    book_label = st.session_state["current_book"] or "No book selected"
+    book_label = linked_book if linked_book else "No book selected"
     status_sub  = "Reading in progress..." if st.session_state["timer_running"] else "Timer paused"
 
     st.markdown(f"""
@@ -242,7 +253,7 @@ with timer_col:
                 use_container_width=True,
                 key="start_btn",
             ):
-                if not st.session_state["current_book"]:
+                if not linked_book:
                     st.warning("Please enter the book you're reading first.")
                 else:
                     st.session_state["timer_running"] = True
@@ -286,6 +297,7 @@ with timer_col:
                 st.session_state["timer_start"]    = None
                 st.session_state["timer_elapsed"]  = 0
                 st.session_state["current_book"]   = ""
+                save_reading_session_time(st.session_state["Reader_ID"], final_elapsed)
                 st.success(f"Session saved! {mins} min of reading logged.")
                 st.rerun()
 
@@ -459,9 +471,8 @@ with insight_col:
     # ── GOAL PROGRESS ─────────────────────────────────────────────────────
     section_label("Daily reading goal")
 
-    # In production: goal from user settings, progress from API
-    goal_min = 60     # minutes per day (configurable in settings)
-    done_min = 88     # minutes read today (from API)
+    goal_min = 60
+    done_min = 88
     goal_pct = min(int(done_min / goal_min * 100), 100)
 
     st.markdown(

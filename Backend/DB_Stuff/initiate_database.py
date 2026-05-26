@@ -46,6 +46,8 @@ def initiate_readers():
         Receive_Recommendations BOOLEAN         DEFAULT TRUE,
         Show_Reading_History    BOOLEAN         DEFAULT TRUE,
         Created_At              TIMESTAMP       DEFAULT CURRENT_TIMESTAMP
+        Time_Read               TIME            DEFAULT 0,
+        Books_Added             INT             DEFAULT 0
     )
     """
     db_connect.execute_query(query)

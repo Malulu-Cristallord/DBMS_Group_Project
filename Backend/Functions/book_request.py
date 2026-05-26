@@ -168,3 +168,38 @@ def get_book_cover(isbn_value):
 def test():
     print("Test phase, input = 978043936213")
     request_book_data("9780439362139")
+
+def increment_add_books(reader_ID):
+    print("Increment add books phase for readerID ", reader_ID)
+    try:
+        query = """
+        UPDATE readers
+        SET Books_Added = Books_Added + 1
+        WHERE reader_ID = %s
+        """
+        values = (reader_ID,)
+        db_connect.execute_query(query, values)
+    except RequestException as e:
+        print(f"RequestException: {e}")
+    except Exception as e:
+        print(f"Unknown general error: {e}")
+
+def check_for_badge_book_adding(reader_ID):
+    query = f"""
+    SELECT Books_Added FROM readers
+    WHERE reader_ID = %s
+    """
+    values = (reader_ID,)
+    result = execute_query_fetch(query, values)
+    if result and len(result) > 0:
+        if 10 <= result[0]["Books_Added"] < 50:
+            return 'badge_add_books_01'
+        elif 50 <= result[0]["Books_Added"] < 200:
+            return 'badge_add_books_02'
+        elif 200 <= result[0]["Books_Added"] < 500:
+            return 'badge_add_books_03'
+        elif result[0]["Books_Added"] >= 500:
+            return 'badge_add_books_04'
+        else:
+            return None
+    return None

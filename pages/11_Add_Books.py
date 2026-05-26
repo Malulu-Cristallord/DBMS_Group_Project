@@ -3,6 +3,9 @@ import sys
 
 import streamlit as st
 
+from Backend.Functions.book_request import check_for_badge_book_adding
+from Backend.Functions.library_data import increment_book_clicked, update_recommendation_status, get_reader_from_session
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from Backend.Functions import book_request
@@ -19,6 +22,7 @@ inject_global_css()
 render_navbar()
 page_spacer(50)
 
+current_reader = get_reader_from_session(st.session_state)
 
 _, center_col, _ = st.columns([1, 1.4, 1])
 
@@ -51,7 +55,8 @@ with center_col:
             elif result == -1:
                 st.error("This book already exists in our database.")
             else:
-                st.success("Book data imported into our system database.\n Thank you for your contribution!")
+                st.success(f"Book data ({result['title']})imported into our system database.\n Thank you for your contribution!")
+                check_for_badge_book_adding(current_reader["Reader_ID"])
 
 page_spacer(20)
 #--------------------------------------------------------------------NAVIGATION

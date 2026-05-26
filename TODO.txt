@@ -46,3 +46,7 @@ Rating is not broken
 
 05/25/2026
 There are databases for both reward and badges, however we have close to nothing as rewards. Why not just badges?
+
+05/26/2026
+Add Open Library page link under book detail
+Configure record readings

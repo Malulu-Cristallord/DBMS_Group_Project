@@ -93,7 +93,6 @@ with center_col:
                 reader_id=current_reader["Reader_ID"],
                 book_id=book_options[linked_book],
                 content=post_content,
-                
             )
             if success:
                 st.success("Your post has been published to the community feed.")
