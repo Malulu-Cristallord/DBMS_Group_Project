@@ -9,7 +9,11 @@ from Backend.Functions.book_request import get_book_cover
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from Backend.Functions.library_data import  get_reviews, reader_initials, get_book_by_isbn
+from Backend.Functions.review_handler import (
+    get_reviews
+)
+
+from Backend.Functions.library_data import reader_initials, get_book_by_isbn
 from components.ui_helpers import (
     COLORS,
     inject_global_css,
