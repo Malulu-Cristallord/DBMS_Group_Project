@@ -352,7 +352,7 @@ with insight_col:
         f'</div>',
         unsafe_allow_html=True,
     )
-
+    goal = st.session_state["reading_goal"]
     # Progress bar (green if goal met, gold if over)
     bar_color = COLORS["gold"] if goal_pct >= 100 else COLORS["dark_green"]
     st.markdown(
@@ -361,7 +361,7 @@ with insight_col:
         f'height:10px;width:{goal_pct}%;transition:width .4s;"></div>'
         f'</div>'
         f'<p style="font-size:.75rem;color:#3E7255;margin-top:6px;">'
-        f'{"✓ Daily goal reached! Great work." if goal_pct >= 100 else f"{st.session_state["reading_goal"] - done_min} min remaining today"}'
+        f'{"✓ Daily goal reached! Great work." if goal_pct >= 100 else f"{goal - done_min} min remaining today"}'
         f'</p>',
         unsafe_allow_html=True,
     )
