@@ -499,9 +499,11 @@ def render_book_cover(cover: str | None, size: str = "normal") -> str:
             f'<img class="{css_class}" src="{escape(str(cover_value))}" '
             f'alt="Book cover" style="object-fit:cover;">'
         )
-
-    return f'<div class="{css_class}" style="background-color:{escape(str(cover_value))};"></div>' #
-    #change to default cover or keep the colors?c
+    return(
+        f'<div class="{css_class}" '
+        f'style="background-color: {escape(str(cover_value))};"></div>'
+    )
+    #change to default cover or keep the colors?
 
 def render_stars(rating: float) -> str:
     safe_rating = max(0, min(5, float(rating or 0)))

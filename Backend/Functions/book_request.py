@@ -151,7 +151,6 @@ def request_book_data(isbn_value):
 
 def get_book_cover(isbn_value) -> str:
     try:
-        print("requesting book image")
         query = """SELECT Cover FROM books
         WHERE ISBN = %s"""
         values = (isbn_value,)

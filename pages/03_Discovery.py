@@ -109,34 +109,6 @@ with main_col:
 
     page_spacer(16)
 
-    section_title("Top 10 Popular Books")
-
-    popular_books = get_popular_books(limit=10)
-    if popular_books:
-        for start in range(0, len(popular_books), 5):
-            cols = st.columns(min(len(popular_books[start:start + 5]), 5))
-            for offset, book in enumerate(popular_books[start:start + 5]):
-                with cols[offset]:
-                    st.markdown(render_book_cover(book["cover"], "card"), unsafe_allow_html=True)
-                    st.markdown(
-                        f'<span style="font-size:0.82rem; font-weight:600; color:{COLORS["dark_green"]};">'
-                        f'{escape(book["title"])}</span><br>'
-                        f'<span class="muted" style="font-size:0.75rem;">{escape(book["author"])}</span><br>'
-                        f'{render_stars(book["avg_rating"])}',
-                        unsafe_allow_html=True,
-                    )
-                    if st.button("Details", key=f"popular_detail_{book['id']}", use_container_width=True):
-                        increment_book_clicked(book["id"])
-                        if current_reader:
-                            update_recommendation_status(current_reader["Reader_ID"], book["id"], "clicked")
-                        st.session_state["selected_book_id"] = book["id"]
-                        st.switch_page("pages/15_Book_Detail.py")
-                    if st.button("Save", key=f"popular_save_{book['isbn']}", use_container_width=True):
-                        save_discovery_book(book)
-    else:
-        st.info("No books are available for popularity ranking yet.")
-
-    page_spacer(20)
     st.markdown("<hr>", unsafe_allow_html=True)
 
     section_title("Recommended by the community")
@@ -158,7 +130,7 @@ with main_col:
                     f'{escape(book["title"])}</strong><br>'
                     f'<span class="secondary">{escape(book["author"])}</span><br>'
                     f'{render_stars(book["avg_rating"])} '
-                    f'<span class="muted">- {book["review_count"]} posts</span>',
+                    f'<span class="muted">- {book["review_count"]} review(s)</span>',
                     unsafe_allow_html=True,
                 )
 
@@ -189,6 +161,36 @@ with main_col:
         st.markdown("<hr>", unsafe_allow_html=True)
 
 page_spacer(20)
+
+section_title("Top 10 Popular Books")
+
+popular_books = get_popular_books(limit=10)
+if popular_books:
+    for start in range(0, len(popular_books), 5):
+        cols = st.columns(min(len(popular_books[start:start + 5]), 5))
+        for offset, book in enumerate(popular_books[start:start + 5]):
+            with cols[offset]:
+                st.markdown(render_book_cover(book["cover"], "card"), unsafe_allow_html=True)
+                st.markdown(
+                    f'<span style="font-size:0.82rem; font-weight:600; color:{COLORS["dark_green"]};">'
+                    f'{escape(book["title"])}</span><br>'
+                    f'<span class="muted" style="font-size:0.75rem;">{escape(book["author"])}</span><br>'
+                    f'{render_stars(book["avg_rating"])}',
+                    unsafe_allow_html=True,
+                )
+                if st.button("Details", key=f"popular_detail_{book['id']}", use_container_width=True):
+                    increment_book_clicked(book["id"])
+                    if current_reader:
+                        update_recommendation_status(current_reader["Reader_ID"], book["id"], "clicked")
+                    st.session_state["selected_book_id"] = book["id"]
+                    st.switch_page("pages/15_Book_Detail.py")
+                if st.button("Save", key=f"popular_save_{book['isbn']}", use_container_width=True):
+                    save_discovery_book(book)
+else:
+    st.info("No books are available for popularity ranking yet.")
+
+page_spacer(20)
+
 #--------------------------------------------------------------------NAVIGATION
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 section_title("Navigation")

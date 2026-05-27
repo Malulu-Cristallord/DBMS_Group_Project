@@ -144,9 +144,6 @@ st.markdown("<hr>", unsafe_allow_html=True)
 
 section_title("Community reviews")
 
-if st.button("Back to Discovery"):
-    st.switch_page("pages/03_Discovery.py")
-
 if book_reviews := get_reviews(isbn=book["isbn"], limit=20):
     for review in book_reviews:
         reader_name = review.get("reader_name") or "Unknown reader"
