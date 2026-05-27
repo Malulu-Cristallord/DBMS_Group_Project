@@ -262,9 +262,8 @@ BADGES = [
 ]
 
 # User stats (mock — replace with API)
-USER_XP = 400
-NEXT_LEVEL_XP = 600
-CURRENT_LEVEL = 5
+reader_points = current_reader["points"]
+print(reader_points)
 TOTAL_BADGES = sum(1 for b in BADGES if b["earned"])
 TOTAL_XP_POSSIBLE = sum(b["xp"] for b in BADGES)
 
@@ -288,7 +287,7 @@ LEADERS = [
 # =============================================================================
 # XP / LEVEL HERO BANNER
 # =============================================================================
-xp_pct = int(USER_XP / NEXT_LEVEL_XP * 100)
+xp_pct = int(reader_points / NEXT_LEVEL_XP * 100)
 earned_badges = [b for b in BADGES if b["earned"]]
 locked_badges  = [b for b in BADGES if not b["earned"]]
 
@@ -302,13 +301,13 @@ st.markdown(f"""
         <div class="xp-info">
             <h2>Your Rewards</h2>
             <p class="sub">
-                {TOTAL_BADGES} badges earned · {USER_XP} XP total
+                {TOTAL_BADGES} badges earned · {reader_points} XP total
             </p>
             <div class="xp-bar-bg">
                 <div class="xp-bar-fill" style="width:{xp_pct}%;"></div>
             </div>
             <div class="xp-bar-labels">
-                <span>{USER_XP} XP</span>
+                <span>{reader_points} XP</span>
                 <span>Level {CURRENT_LEVEL + 1} at {NEXT_LEVEL_XP} XP</span>
             </div>
         </div>
@@ -485,11 +484,11 @@ with side_col:
                  height:8px;width:{xp_pct}%;"></div>
         </div>
         <div style="display:flex;justify-content:space-between;font-size:.78rem;">
-            <span style="color:#1F3F2E;font-weight:600;">{USER_XP} XP</span>
+            <span style="color:#1F3F2E;font-weight:600;">{reader_points} XP</span>
             <span style="color:#8A8A8A;">{NEXT_LEVEL_XP} XP</span>
         </div>
         <div style="font-size:.75rem;color:#8A8A8A;margin-top:6px;">
-            {NEXT_LEVEL_XP - USER_XP} XP to reach Level {CURRENT_LEVEL + 1}
+            {NEXT_LEVEL_XP - reader_points} XP to reach Level {CURRENT_LEVEL + 1}
         </div>
     </div>
     """, unsafe_allow_html=True)

@@ -175,6 +175,7 @@ def initiate_given_badges():
     Given_Badge_ID       INT AUTO_INCREMENT PRIMARY KEY,
     Badge_ID             INT NOT NULL,
     Reader_ID            INT NOT NULL,
+    Given_Time           DATETIME DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_given_badge_id
             FOREIGN KEY (Badge_ID) REFERENCES badges(Badge_ID),
     CONSTRAINT fk_given_to_reader_id
