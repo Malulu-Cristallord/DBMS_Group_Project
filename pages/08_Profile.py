@@ -153,15 +153,6 @@ with profile_col:
     page_spacer(20)
     st.markdown("<hr>", unsafe_allow_html=True)
 
-    section_title("Badge progress")
-    for badge in reader_badges:
-        st.markdown(
-            f'<span class="muted" style="font-size:0.82rem;">'
-            f'{escape(badge["name"])} - {escape(badge["description"])}</span>',
-            unsafe_allow_html=True,
-        )
-        st.markdown(render_progress_bar(badge["progress"]), unsafe_allow_html=True)
-
 
 with posts_col:
     section_title("Latest posts")

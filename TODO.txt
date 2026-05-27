@@ -50,3 +50,4 @@ There are databases for both reward and badges, however we have close to nothing
 05/26/2026
 Add Open Library page link under book detail
 Configure record readings
+Books_added is not working

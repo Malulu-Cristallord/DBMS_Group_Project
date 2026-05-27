@@ -5,6 +5,8 @@ import sys
 import streamlit as st
 from streamlit import session_state
 
+from Backend.Functions.book_request import get_book_cover
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from Backend.Functions.library_data import  get_reviews, reader_initials, get_book_by_isbn
@@ -49,39 +51,6 @@ page_spacer(10)
 if "search_keyword" not in session_state:
     session_state["search_keyword"] = ""
 
-# Quick Search section
-search_col, button_col = st.columns([6, 1])
-
-with search_col:
-    search_input = st.text_input(
-        "Search books",
-        value=st.session_state["search_keyword"],
-        placeholder="Search by title, author, or ISBN...",
-        label_visibility="collapsed",
-    )
-
-with button_col:
-    search_clicked = st.button(
-        "Confirm",
-        type="primary",
-        use_container_width=True,
-    )
-
-# Handle search
-if search_clicked:
-    st.session_state["search_keyword"] = search_input
-
-    # Example: search by ISBN
-    searched_book = get_book_by_isbn(search_input)
-
-    if searched_book:
-        book = searched_book
-    else:
-        st.warning("No matching book found.")
-        st.stop()
-
-
-
 
 # Main
 main_col, meta_col = st.columns([3, 1])
@@ -93,12 +62,8 @@ with main_col:
     # However, a default cover is needed in future updates
 
     with header_cols[0]:
-        if book.get("cover") is not None:
-            st.image(book["cover"])
-        else:
-            st.image("Resources/Book Covers/Cover_Default.png")
+        st.image(get_book_cover(book.get("isbn")))
 
-        
     with header_cols[1]:
         genres = book.get("genre") or []
         genre_text = "".join(genres) if genres else "Uncategorized"
@@ -139,7 +104,6 @@ with main_col:
 
 
 with meta_col:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown(
         '<p style="font-size:0.8rem; font-weight:600; text-transform:uppercase; margin-bottom:12px;">Book data</p>',
         unsafe_allow_html=True,

@@ -29,7 +29,7 @@ def data_to_db(book_data, author_data, gathered_at):
         cover = (
             f"https://covers.openlibrary.org/b/id/{cover_data[0]}-L.jpg"
             if cover_data
-            else None
+            else "Resources/Book Covers/Cover_Default.png"
         )
 
         description = book_data.get("description", "")
@@ -149,7 +149,7 @@ def request_book_data(isbn_value):
         return -1
 
 
-def get_book_cover(isbn_value):
+def get_book_cover(isbn_value) -> str:
     try:
         print("requesting book image")
         query = """SELECT Cover FROM books
@@ -158,8 +158,7 @@ def get_book_cover(isbn_value):
         result = db_connect.execute_query_fetch(query, values)
 
         if result and len(result) > 0:
-            return result[0]["Cover"]  # extract actual image
-        return None
+            return str(result[0]["Cover"])  # extract actual image
 
     except Exception as e:
         print(f"Exception: {e}")
