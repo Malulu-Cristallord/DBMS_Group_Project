@@ -1,7 +1,7 @@
 import streamlit as st
 import sys, os
 
-from Backend.Functions.library_data import get_reader_from_session, get_reader_badges
+from Backend.Functions.library_data import get_reader_from_session, get_reader_badges, get_reader_locked_badges
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 

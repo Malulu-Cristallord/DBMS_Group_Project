@@ -855,14 +855,6 @@ def get_leaderboard(current_reader_id: int | str | None = None, limit: int = 10)
     return leaderboard
 
 
-def get_reader_badges(reader_ID) -> list[dict[str, Any]]:
-    query = """
-    SELECT b.* 
-    FROM given_badges gb
-    JOIN badges b ON gb.Badge_ID = b.Badge_ID
-         readers r ON gb.Reader_ID = r.Reader_ID
-    WHERE r.Reader_ID = %s"""
-    return fetch_all(query, (reader_ID,),)
 
 
 def get_books_by_title(keyword): 
@@ -896,3 +888,25 @@ def update_book_review_stats(isbn):
     """
 
     execute_query(query, (isbn,))
+
+def get_reader_locked_badges(reader_ID) -> list[dict[str, Any]]:
+    query = """
+    SELECT b.*
+    FROM badges b
+    WHERE b.Badge_ID not in (
+    SELECT gb.Badge_ID
+    FROM given_badges gb
+    JOIN readers r
+    ON r.Reader_ID = gb.Reader_ID
+    WHERE r.Reader_ID = %s
+    )"""
+    return fetch_all(query, (reader_ID,),)
+
+def get_reader_badges(reader_ID) -> list[dict[str, Any]]:
+    query = """
+    SELECT b.* 
+    FROM given_badges gb
+    JOIN badges b ON gb.Badge_ID = b.Badge_ID
+         readers r ON gb.Reader_ID = r.Reader_ID
+    WHERE r.Reader_ID = %s"""
+    return fetch_all(query, (reader_ID,),)
