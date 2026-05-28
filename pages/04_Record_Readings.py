@@ -181,210 +181,129 @@ def get_elapsed() -> int:
 
 spacer(24)
 
-# =============================================================================
-# LAYOUT: Timer (left) + Insights sidebar (right)
-# =============================================================================
-timer_col, insight_col = st.columns([2.2, 1.3])
 
-# ── LEFT: Timer + Session log ─────────────────────────────────────────────
-with timer_col:
 
-    section_title("Reading Timer")
-    st.markdown(
-        '<p class="lt-muted">Track the time you spend reading. '
-        'Every session counts toward your goals.</p>',
-        unsafe_allow_html=True,
-    )
-    spacer(12)
+section_title("Reading Timer")
+st.markdown(
+    '<p class="lt-muted">Track the time you spend reading. '
+    'Every session counts toward your goals.</p>',
+    unsafe_allow_html=True,
+)
+spacer(12)
 
-    # ── Book selector (current session)
-    # In production: pre-fills from GET /api/borrowings?status=active
-    search_type = st.radio("Search by", ["Title", "ISBN"], horizontal=True)
+# ── Book selector (current session)
+# In production: pre-fills from GET /api/borrowings?status=active
+search_type = st.radio("Search by", ["Title", "ISBN"], horizontal=True)
 
-    if search_type == "Title":
-        keyword = st.text_input("Enter book title")
-        books = get_books_by_title(keyword) if keyword else []
-    else:
-        isbn = st.text_input("Enter ISBN")
-        books = get_book_by_isbn(isbn) if isbn else []
+if search_type == "Title":
+    keyword = st.text_input("Enter book title")
+    books = get_books_by_title(keyword) if keyword else []
+else:
+    isbn = st.text_input("Enter ISBN")
+    books = get_book_by_isbn(isbn) if isbn else []
 
-    book_options = {"No book linked": None}
-    get_books()
-    book_options.update({f'{b["Title"]} - {b["Author"]}': b["ISBN"] for b in books})
-    linked_book = st.selectbox("Select book", list(book_options.keys()))
-    st.session_state["current_book"] = linked_book
-    st.write("Selected book:", linked_book)
+book_options = {"No book linked": None}
+get_books()
+book_options.update({f'{b["Title"]} - {b["Author"]}': b["ISBN"] for b in books})
+linked_book = st.selectbox("Select book", list(book_options.keys()))
+st.session_state["current_book"] = linked_book
+st.write("Selected book:", linked_book)
 
-    spacer(16)
+spacer(16)
 
-    # ── Timer display
-    elapsed = get_elapsed()
-    display_time = format_time(elapsed)
-    book_label = linked_book if linked_book else "No book selected"
-    status_sub  = "Reading in progress..." if st.session_state["timer_running"] else "Timer paused"
+# ── Timer display
+elapsed = get_elapsed()
+display_time = format_time(elapsed)
+book_label = linked_book if linked_book else "No book selected"
+status_sub  = "Reading in progress..." if st.session_state["timer_running"] else "Timer paused"
 
-    st.markdown(f"""
-    <div class="timer-card">
-        <div class="timer-display">{display_time}</div>
-        <div class="timer-sub">{status_sub}</div>
-        <div class="timer-book-name">"{book_label}"</div>
-    </div>
-    """, unsafe_allow_html=True)
+st.markdown(f"""
+<div class="timer-card">
+    <div class="timer-display">{display_time}</div>
+    <div class="timer-sub">{status_sub}</div>
+    <div class="timer-book-name">"{book_label}"</div>
+</div>
+""", unsafe_allow_html=True)
 
-    spacer(16)
+spacer(16)
 
-    # ── Timer controls
-    btn_col1, btn_col2, btn_col3 = st.columns(3)
+# ── Timer controls
+btn_col1, btn_col2, btn_col3 = st.columns(3)
 
-    with btn_col1:
-        # START / PAUSE
-        if not st.session_state["timer_running"]:
-            if st.button(
-                "▶ Start reading",
-                type="primary",
-                use_container_width=True,
-                key="start_btn",
-            ):
-                if not linked_book:
-                    st.warning("Please enter the book you're reading first.")
-                else:
-                    st.session_state["timer_running"] = True
-                    st.session_state["timer_start"] = time.time()
-                    st.rerun()
-        else:
-            if st.button(
-                "⏸ Pause",
-                use_container_width=True,
-                key="pause_btn",
-            ):
-                # Accumulate elapsed before pausing
-                st.session_state["timer_elapsed"] = get_elapsed()
-                st.session_state["timer_running"] = False
-                st.session_state["timer_start"] = None
-                st.rerun()
-
-    with btn_col2:
-        # SAVE SESSION
-        # In production: POST /api/reading-sessions { book, duration_min, date }
+with btn_col1:
+    # START / PAUSE
+    if not st.session_state["timer_running"]:
         if st.button(
-            "💾 Save session",
+            "▶ Start reading",
+            type="primary",
             use_container_width=True,
-            key="save_btn",
+            key="start_btn",
         ):
-            final_elapsed = get_elapsed()
-            if final_elapsed < 10:
-                st.warning("Read for at least a few seconds before saving!")
+            if not linked_book:
+                st.warning("Please enter the book you're reading first.")
             else:
-                if final_elapsed > 120:
-                    reader_add_books_read(current_reader["Reader_ID"])
-                mins = max(1, final_elapsed // 60)
-                book = st.session_state["current_book"] or "Unknown book"
-                now  = datetime.datetime.now().strftime("%b %d, %Y · %H:%M")
-                st.session_state["sessions_log"].insert(0, {
-                    "book": book,
-                    "date": now,
-                    "duration_min": mins,
-                    "duration_display": format_time(final_elapsed),
-                })
-                # Reset timer after saving
-                st.session_state["timer_running"]  = False
-                st.session_state["timer_start"]    = None
-                st.session_state["timer_elapsed"]  = 0
-                st.session_state["current_book"]   = ""
-                save_reading_session_time(current_reader["Reader_ID"], final_elapsed)
-                st.success(f"Session saved! {mins} min of reading logged.")
+                st.session_state["timer_running"] = True
+                st.session_state["timer_start"] = time.time()
                 st.rerun()
-
-    with btn_col3:
-        # RESET
-        if st.button("↺ Reset", use_container_width=True, key="reset_btn"):
+    else:
+        if st.button(
+            "⏸ Pause",
+            use_container_width=True,
+            key="pause_btn",
+        ):
+            # Accumulate elapsed before pausing
+            st.session_state["timer_elapsed"] = get_elapsed()
             st.session_state["timer_running"] = False
-            st.session_state["timer_start"]   = None
-            st.session_state["timer_elapsed"] = 0
+            st.session_state["timer_start"] = None
             st.rerun()
 
-    # Auto-refresh while timer is running (every 5 seconds)
-    if st.session_state["timer_running"]:
-        st_autorefresh(interval=1000, key="timer_refresh")
+with btn_col2:
+    # SAVE SESSION
+    # In production: POST /api/reading-sessions { book, duration_min, date }
+    if st.button(
+        "💾 Save session",
+        use_container_width=True,
+        key="save_btn",
+    ):
+        final_elapsed = get_elapsed()
+        if final_elapsed < 10:
+            st.warning("Read for at least a few seconds before saving!")
+        else:
+            if final_elapsed > 120:
+                reader_add_books_read(current_reader["Reader_ID"])
+            mins = max(1, final_elapsed // 60)
+            book = st.session_state["current_book"] or "Unknown book"
+            now  = datetime.datetime.now().strftime("%b %d, %Y · %H:%M")
+            st.session_state["sessions_log"].insert(0, {
+                "book": book,
+                "date": now,
+                "duration_min": mins,
+                "duration_display": format_time(final_elapsed),
+            })
+            # Reset timer after saving
+            st.session_state["timer_running"]  = False
+            st.session_state["timer_start"]    = None
+            st.session_state["timer_elapsed"]  = 0
+            st.session_state["current_book"]   = ""
+            save_reading_session_time(current_reader["Reader_ID"], final_elapsed)
+            st.success(f"Session saved! {mins} min of reading logged.")
+            st.rerun()
 
-    spacer(28)
-    st.markdown('<hr style="border-color:#EBEBEB;">', unsafe_allow_html=True)
+with btn_col3:
+    # RESET
+    if st.button("↺ Reset", use_container_width=True, key="reset_btn"):
+        st.session_state["timer_running"] = False
+        st.session_state["timer_start"]   = None
+        st.session_state["timer_elapsed"] = 0
+        st.rerun()
 
-    # ── SESSION LOG ──────────────────────────────────────────────────────
-    section_title("Session log")
-    section_label("Your reading sessions this session")
+# Auto-refresh while timer is running (every 5 seconds)
+if st.session_state["timer_running"]:
+    st_autorefresh(interval=1000, key="timer_refresh")
 
-    # Combine in-session logs with illustrative past sessions
+spacer(28)
+st.markdown('<hr style="border-color:#EBEBEB;">', unsafe_allow_html=True)
 
-    all_sessions = st.session_state["sessions_log"]
-
-    if all_sessions:
-        for s in all_sessions[:8]:
-            st.markdown(f"""
-            <div class="session-item">
-                <div class="session-icon">📖</div>
-                <div class="session-info">
-                    <div class="session-book">{s['book']}</div>
-                    <div class="session-date">{s['date']}</div>
-                </div>
-                <div class="session-dur">{s['duration_display']}</div>
-            </div>
-            """, unsafe_allow_html=True)
-    else:
-        st.markdown(
-            '<p class="lt-muted">No sessions yet. Start the timer to begin tracking!</p>',
-            unsafe_allow_html=True,
-        )
-
-
-# ── RIGHT: Trends & Insights sidebar ────────────────────────────────────
-with insight_col:
-    spacer(4)
-
-    # ── GOAL PROGRESS ─────────────────────────────────────────────────────
-    section_label("Daily reading goal")
-    st.session_state["reading_goal"] = current_reader["daily_time_goal"]
-    done_min = 88
-    goal_pct = min(int(done_min / st.session_state["reading_goal"] * 100), 100)
-
-    st.markdown(
-        f'<div style="display:flex;justify-content:space-between;'
-        f'font-size:.82rem;margin-bottom:4px;">'
-        f'<span style="color:#1F3F2E;font-weight:600;">{done_min} min read</span>'
-        f'<span class="lt-muted">Goal: {st.session_state["reading_goal"]} min</span>'
-        f'</div>',
-        unsafe_allow_html=True,
-    )
-    goal = st.session_state["reading_goal"]
-    # Progress bar (green if goal met, gold if over)
-    bar_color = COLORS["gold"] if goal_pct >= 100 else COLORS["dark_green"]
-    st.markdown(
-        f'<div style="background:#E8E8E8;border-radius:8px;height:10px;">'
-        f'<div style="background:{bar_color};border-radius:8px;'
-        f'height:10px;width:{goal_pct}%;transition:width .4s;"></div>'
-        f'</div>'
-        f'<p style="font-size:.75rem;color:#3E7255;margin-top:6px;">'
-        f'{"✓ Daily goal reached! Great work." if goal_pct >= 100 else f"{goal - done_min} min remaining today"}'
-        f'</p>',
-        unsafe_allow_html=True,
-    )
-
-    spacer(12)
-
-    # Change daily goal
-    # In production: PUT /api/users/<id>/settings { reading_goal_min: <value> }
-    new_goal = st.number_input(
-        "Change daily goal (min)",
-        min_value=10,
-        max_value=300,
-        value=st.session_state["reading_goal"],
-        step=5,
-        key="goal_input",
-    )
-    if st.button("Save goal", use_container_width=True, key="save_goal"):
-        st.success(f"Daily reading goal set to {new_goal} min!")
-
-page_spacer(20)
 #--------------------------------------------------------------------NAVIGATION
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 section_title("Navigation")

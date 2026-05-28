@@ -47,7 +47,6 @@ if current_reader is None:
 
 reader_stats = get_reader_stats(current_reader["Reader_ID"])
 reader_posts = get_posts(reader_id=current_reader["Reader_ID"], limit=5)
-reader_badges = get_reader_badges(current_reader, reader_stats["posts_published"])
 
 
 sidebar_col, profile_col, posts_col = st.columns([1, 3, 1.8])
@@ -79,10 +78,6 @@ with profile_col:
             f'<span class="muted">Reader since {escape(str(current_reader.get("Created_At") or "unknown"))}</span><br>',
             unsafe_allow_html=True,
         )
-        earned_badges = [badge for badge in reader_badges if badge["earned"]]
-        if earned_badges:
-            badges_html = " ".join(render_badge(badge["name"], "green") for badge in earned_badges)
-            st.markdown(badges_html, unsafe_allow_html=True)
 
     with edit_col:
         page_spacer(10)
