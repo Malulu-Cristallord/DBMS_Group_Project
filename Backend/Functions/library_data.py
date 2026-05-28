@@ -242,6 +242,7 @@ def get_reader_by_id(reader_id: int | str | None) -> dict[str, Any] | None:
         reader["preferred_category"] = reader.get("Preferred_Category")
         reader["point"] = reader.get("Points")
 
+
     return reader
 
 
@@ -903,7 +904,7 @@ def get_reader_locked_badges(reader_ID) -> list[dict[str, Any]]:
 
 def get_reader_badges(reader_ID) -> list[dict[str, Any]]:
     query = """
-    SELECT b.* , gb.*
+    SELECT b.* , gb.*, r.Books_Read
     FROM given_badges gb
     JOIN badges b ON gb.Badge_ID = b.Badge_ID
     JOIN readers r ON gb.Reader_ID = r.Reader_ID

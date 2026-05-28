@@ -1,4 +1,5 @@
 import streamlit as st
+import base64
 import sys, os
 from html import escape
 from Backend.Functions.library_data import get_reader_from_session, get_reader_badges, get_reader_locked_badges
@@ -83,9 +84,26 @@ st.markdown("""
     box-shadow: none;
 }
 .badge-icon-wrap {
-    width: 68px; height: 68px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 2rem; margin: 0 auto 12px; flex-shrink: 0;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: #F7F7F7;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto 12px;
+    flex-shrink: 0;
+
+    overflow: hidden;
+}
+
+.badge-icon-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
 }
 .badge-name {
     font-family: 'Playfair Display', serif;
@@ -142,6 +160,71 @@ st.markdown("""
 .leader-info { flex: 1; }
 .leader-name { font-size: 0.88rem; font-weight: 600; color: #1F3F2E; }
 .leader-xp { font-size: 0.75rem; color: #8A8A8A; }
+/* More */
+/* Locked badge progress summary */
+.progress-summary {
+    background: linear-gradient(135deg, #F8FAF8 0%, #EEF5EE 100%);
+    border: 1px solid #E3ECE3;
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin: 10px 0 22px;
+}
+
+.progress-summary-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1F3F2E;
+
+    margin-bottom: 14px;
+}
+
+.progress-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+}
+
+.progress-stat {
+    background: rgba(255,255,255,0.75);
+    border: 1px solid #E8ECE8;
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+
+.progress-stat-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #7B8B7B;
+    margin-bottom: 6px;
+    font-weight: 700;
+}
+
+.progress-stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1F3F2E;
+    line-height: 1;
+}
+
+.progress-summary-footer {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed #D6DFD6;
+
+    font-size: 0.82rem;
+    color: #6E7C6E;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -153,176 +236,123 @@ reader_points = current_reader["Points"]
 print(reader_points)
 earned_badges = get_reader_badges(current_reader["Reader_ID"])
 locked_badges = get_reader_locked_badges(current_reader["Reader_ID"])
+book_read = earned_badges[0]["Books_Read"] if earned_badges else 0
+
+def image_to_base64(image_path: str) -> str:
+    """
+    Convert local image file to base64 string.
+    Returns empty string if file does not exist.
+    """
+
+    if not image_path:
+        return ""
+
+    if not os.path.exists(image_path):
+        print(f"Missing image: {image_path}")
+        return ""
+
+    with open(image_path, "rb") as img_file:
+        encoded = base64.b64encode(img_file.read()).decode()
+
+    return encoded
 # =============================================================================
 # MAIN LAYOUT: badges (left 2/3) + sidebar (right 1/3)
 # =============================================================================
-main_col, side_col = st.columns([2.5, 1])
+# ── EARNED BADGES ─────────────────────────────────────────────────────
+section_title(f"Earned badges · {len(earned_badges)}")
 
-with main_col:
-
-    # ── EARNED BADGES ─────────────────────────────────────────────────────
-    section_title(f"Earned badges · {len(earned_badges)}")
-    section_label("Tap a badge to see details")
-
-    earned_cols = st.columns(3)
-    for i, b in enumerate(earned_badges):
-        with earned_cols[i % 3]:
-            st.markdown(f"""
-            <div class="badge-card">
-                <div class="badge-earned-tag">✓ Earned · {b['Given_Date']}</div>
-                <div class="badge-icon-wrap" style="background:{b['icon_bg']};">
-                    {b['icon']}
-                </div>
-                <div class="badge-name">{b['name']}</div>
-                <div class="badge-desc">{b['description']}</div>
-                <span class="lt-badge" style="background:{b['rarity_color']};
-                      color:{b['rarity_text']};font-size:.7rem;margin-right:4px;">
-                    {b['rarity']}
-                </span>
-                <span class="badge-xp">+{b['xp']} XP</span>
-            </div>
-            """, unsafe_allow_html=True)
-            spacer(10)
-
-    spacer(24)
-    st.markdown('<hr style="border-color:#EBEBEB;">', unsafe_allow_html=True)
-
-    # ── LOCKED BADGES — with progress ────────────────────────────────────
-    section_title(f"In progress · {len(locked_badges)}")
-    section_label("Keep reading to unlock these badges")
-
-    locked_cols = st.columns(3)
-    for i, b in enumerate(locked_badges):
-        with locked_cols[i % 3]:
-            current_label = b.get("current", f"{b['progress']}%")
-            st.markdown(f"""
-            <div class="badge-card locked">
-                <div class="badge-icon-wrap"
-                     style="background:#F0F0F0;filter:grayscale(0.4);">
-                    {b['icon']}
-                </div>
-                <div class="badge-name" style="color:#8A8A8A;">{b['name']}</div>
-                <div class="badge-desc">{b['description']}</div>
-                <div style="width:100%;margin:8px 0 4px;">
-                    <div style="background:#E8E8E8;border-radius:8px;height:6px;">
-                        <div style="background:#3E7255;border-radius:8px;
-                             height:6px;width:{b['progress']}%;"></div>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;
-                         margin-top:4px;font-size:.7rem;color:#8A8A8A;">
-                        <span>{current_label}</span>
-                        <span>{b['progress']}%</span>
-                    </div>
-                </div>
-                <span class="lt-badge" style="background:{b['rarity_color']};
-                      color:{b['rarity_text']};font-size:.7rem;margin-right:4px;">
-                    {b['rarity']}
-                </span>
-                <span class="badge-locked-xp">+{b['xp']} XP</span>
-            </div>
-            """, unsafe_allow_html=True)
-            spacer(10)
-
-    spacer(24)
-    st.markdown('<hr style="border-color:#EBEBEB;">', unsafe_allow_html=True)
-
-    # ── REWARD HISTORY ────────────────────────────────────────────────────
-    section_title("Reward history")
-
-    for h in HISTORY:
-        xp_display = f"+{h['xp']} XP"
+earned_cols = st.columns(3)
+for i, b in enumerate(earned_badges):
+    img64 = image_to_base64(b["Badge_Image_Path"])
+    with earned_cols[i % 3]:
         st.markdown(f"""
-        <div class="history-item">
-            <div class="history-icon" style="background:{h['bg']};">{h['icon']}</div>
-            <div class="history-info">
-                <div class="history-name">{h['name']}</div>
-                <div class="history-date">{h['date']}</div>
+        <div class="badge-card">
+            <div class="badge-earned-tag">✓ Earned · {b['Given_Time']}</div>
+            <div class="badge-icon-wrap">
+                <img src="data:image/png;base64,{img64}", alt="This is an image of the badge">
             </div>
-            <div class="history-xp">{xp_display}</div>
+            <div class="badge-name">{b['Badge_Name']}</div>
+            <div class="badge-desc">{b['Badge_Description']}</div>
+            <span class="lt-badge"font-size:.7rem;margin-right:4px;">
+                {b['Badge_Rarity']}
+            </span>
+            <span class="badge-xp">+{b['Badge_Points']} Points</span>
         </div>
         """, unsafe_allow_html=True)
+        spacer(10)
 
+spacer(24)
+st.markdown('<hr style="border-color:#EBEBEB;">', unsafe_allow_html=True)
 
-# ── SIDEBAR ────────────────────────────────────────────────────────────────
-with side_col:
-    spacer(4)
-
-    # All 6 badge objectives explained
-    section_title("Badge objectives")
-    section_label("How to earn each badge")
-
-    objectives = [
-        ("📖", "First Chapter",    "Borrow your 1st book",            "50 XP"),
-        ("📚", "Avid Reader",      "Borrow 10 books total",           "200 XP"),
-        ("✍️", "Critic's Pen",     "Write 5 reviews",                 "150 XP"),
-        ("🔥", "Streak Keeper",    "Read 7 days in a row",            "300 XP"),
-        ("❤️", "Social Reader",    "Get 50 likes on your posts",      "250 XP"),
-        ("💬", "Book Club Hero",   "Comment on 20 community posts",   "180 XP"),
-    ]
-
-    for icon, name, how, xp in objectives:
-        earned = any(b["name"] == name and b["earned"] for b in BADGES)
-        check = "✓ " if earned else ""
-        color = COLORS["dark_green"] 
-        st.markdown(f"""
-        <div style="display:flex;align-items:flex-start;gap:10px;
-             padding:8px 0;border-bottom:1px solid #F5F5F5;">
-            <span style="font-size:1.2rem;flex-shrink:0;">{icon}</span>
-            <div style="flex:1;">
-                <div style="font-size:.85rem;font-weight:600;color:{color};">
-                    {check}{name}
-                </div>
-                <div style="font-size:.75rem;color:#8A8A8A;">{how}</div>
+# ── LOCKED BADGES — with progress ────────────────────────────────────
+section_title(f"In progress · {len(locked_badges)}")
+st.markdown(f"""
+<div class="progress-summary">
+    <div class="progress-summary-title">
+        🔒 Badge Progress Overview
+    </div>
+    <div class="progress-summary-grid">
+        <div class="progress-stat">
+            <div class="progress-stat-label">
+                Current Points
             </div>
-            <div style="font-size:.72rem;color:#D2B354;font-weight:700;
-                 flex-shrink:0;">{xp}</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    spacer(20)
-    st.markdown('<hr style="border-color:#EBEBEB;">', unsafe_allow_html=True)
-
-    # XP Leaderboard
-    section_title("XP leaderboard")
-    for l in LEADERS:
-        you_tag = ' <span style="font-size:.7rem;color:#D2B354;">(you)</span>' if l["you"] else ""
-        rank_color = "#D2B354" if l["rank"] == 1 else (COLORS["muted"] if l["rank"] == 2 else COLORS["secondary"])
-        st.markdown(f"""
-        <div class="leader-row">
-            <div class="leader-rank" style="color:{rank_color};">{l['rank']}</div>
-            <div class="leader-av" style="background:{l['bg']};color:{l['col']};">
-                {l['init']}
-            </div>
-            <div class="leader-info">
-                <div class="leader-name">{l['name']}{you_tag}</div>
-                <div class="leader-xp">{l['xp']:,} XP</div>
+            <div class="progress-stat-value">
+                {reader_points}
             </div>
         </div>
-        """, unsafe_allow_html=True)
-
-    spacer(16)
-
-    # Progress toward next level
-    st.markdown(f"""
-    <div class="lt-stat">
-        <div style="font-size:.72rem;color:#8A8A8A;text-transform:uppercase;
-             letter-spacing:.1em;margin-bottom:8px;">Next level</div>
-        <div style="background:#E8E8E8;border-radius:8px;height:8px;margin-bottom:6px;">
-            <div style="background:#D2B354;border-radius:8px;
-                 height:8px;width:{xp_pct}%;"></div>
+        <div class="progress-stat">
+            <div class="progress-stat-label">
+                Reading Sessions
+            </div>
+            <div class="progress-stat-value">
+                {book_read}
+            </div>
         </div>
-        <div style="display:flex;justify-content:space-between;font-size:.78rem;">
-            <span style="color:#1F3F2E;font-weight:600;">{reader_points} XP</span>
-            <span style="color:#8A8A8A;">{NEXT_LEVEL_XP} XP</span>
-        </div>
-        <div style="font-size:.75rem;color:#8A8A8A;margin-top:6px;">
-            {NEXT_LEVEL_XP - reader_points} XP to reach Level {CURRENT_LEVEL + 1}
+        <div class="progress-stat">
+            <div class="progress-stat-label">
+                Locked Badges
+            </div>
+            <div class="progress-stat-value">
+                {len(locked_badges)}
+            </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    <div class="progress-summary-footer">
+        ✨ Keep reading consistently to unlock more achievements.
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-    page_spacer(20)
-    # --------------------------------------------------------------------NAVIGATION
-    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
-    section_title("Navigation")
-    render_navigation_section()
+locked_cols = st.columns(3)
+for i, b in enumerate(locked_badges):
+    img64 = image_to_base64(b["Badge_Image_Path"])
+    with locked_cols[i % 3]:
+        st.markdown(f"""
+        <div class="badge-card locked">
+            <div class="badge-icon-wrap"
+                 style="background:#F0F0F0;filter:grayscale(0.4);">
+                 <img src="data:image/png;base64,{img64}", alt="This is an image of the badge">
+            </div>
+            <div class="badge-name" style="color:#8A8A8A;">{b['Badge_Name']}</div>
+            <div class="badge-desc">{b['Badge_Description']}</div>
+            <div style="width:100%;margin:8px 0 4px;">
+                <div style="background:#E8E8E8;border-radius:8px;height:6px;">
+                </div>
+                <div style="display:flex;justify-content:space-between;
+                     margin-top:4px;font-size:.7rem;color:#8A8A8A;">
+                </div>
+            </div>
+            <span class="lt-badge" style=font-size:.7rem;margin-right:4px;">
+                {b['Badge_Rarity']}
+            </span>
+            <span class="badge-locked-xp">+{b['Badge_Points']} XP</span>
+        </div>
+        """, unsafe_allow_html=True)
+        spacer(10)
+
+spacer(24)
+st.markdown('<hr style="border-color:#EBEBEB;">', unsafe_allow_html=True)
+# --------------------------------------------------------------------NAVIGATION
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+section_title("Navigation")
+render_navigation_section()
