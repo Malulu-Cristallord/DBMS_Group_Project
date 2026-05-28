@@ -271,6 +271,7 @@ with btn_col2:
         else:
             if final_elapsed > 120:
                 reader_add_books_read(current_reader["Reader_ID"])
+                st.success("Congrats on finishing a reading session! Check the badges page to see if you've earned any new badges.")
             mins = max(1, final_elapsed // 60)
             book = st.session_state["current_book"] or "Unknown book"
             now  = datetime.datetime.now().strftime("%b %d, %Y · %H:%M")

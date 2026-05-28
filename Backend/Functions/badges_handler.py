@@ -119,5 +119,5 @@ def reader_add_books_read(reader_ID):
     SET Books_Read = Books_Read + 1
     WHERE Reader_ID = %s
     """
-    check_reader_badge(reader_ID)
     db_connect.execute_query(query1, (reader_ID,))
+    check_reader_badge(reader_ID)
