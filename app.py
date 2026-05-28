@@ -45,6 +45,7 @@ st.set_page_config(
     page_title="LibTrack | Home",
     page_icon="LT",
     layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 inject_global_css()

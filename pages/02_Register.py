@@ -19,6 +19,7 @@ st.set_page_config(
     page_title="Register | LibTrack",
     page_icon="LT",
     layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 inject_global_css()

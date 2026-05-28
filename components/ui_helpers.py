@@ -608,5 +608,6 @@ def render_navigation_section():
         st.page_link(page="pages/13_My_Posts.py", label="My Posts")
         st.page_link(page="pages/16_Reading_History.py", label="Reading History")
         st.page_link(page="pages/17_Saved_Books.py", label="Saved Books")
+        st.page_link(page="pages/10_Stats.py", label="Stats")
     render_logout_button()
     return col_link1, col_link2

@@ -29,9 +29,10 @@ from components.ui_helpers import (
 
 
 st.set_page_config(
-    page_title="Stats & Leaderboard | LibTrack",
+    page_title="Stats | LibTrack",
     page_icon="LT",
     layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 inject_global_css()
@@ -42,7 +43,7 @@ page_spacer(24)
 current_reader = get_reader_from_session(st.session_state)
 platform_stats = get_platform_stats()
 
-stat_cols = st.columns(4)
+stat_cols = st.columns(3)
 
 stats_items = [
     (f'{platform_stats["active_readers"]:,}', "Active readers"),
@@ -141,33 +142,6 @@ with right_col:
     page_spacer(20)
     st.markdown("<hr>", unsafe_allow_html=True)
 
-    section_title("Your badges")
-
-    if current_reader is None:
-        st.info("Sign in to view reader badge progress.")
-    else:
-        badges = get_reader_badges(current_reader)
-        earned_badges = [badge for badge in badges if badge["earned"]]
-
-        if earned_badges:
-            st.markdown(
-                " ".join(render_badge(badge["name"], "green") for badge in earned_badges),
-                unsafe_allow_html=True,
-            )
-        else:
-            st.markdown('<p class="muted">No badges earned yet.</p>', unsafe_allow_html=True)
-
-        page_spacer(10)
-
-        locked_badges = [badge for badge in badges if not badge["earned"]]
-        for badge in locked_badges:
-            st.markdown(
-                f'<span class="muted" style="font-size:0.82rem;">'
-                f'{escape(badge["name"])} - {escape(badge["description"])}</span>',
-                unsafe_allow_html=True,
-            )
-            st.markdown(render_progress_bar(badge["progress"]), unsafe_allow_html=True)
-            page_spacer(6)
 
 page_spacer(20)
 #--------------------------------------------------------------------NAVIGATION

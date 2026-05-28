@@ -23,6 +23,7 @@ st.set_page_config(
     page_title="Record Reading — LibTrack",
     page_icon="⏱️",
     layout="wide",
+    initial_sidebar_state="collapsed"
 )
 inject_global_css()
 render_navbar("Record Reading")
