@@ -78,7 +78,6 @@ for book in recommendations:
             f'<strong style="color:{COLORS["dark_green"]};">{escape(book["title"])}</strong><br>'
             f'<span class="secondary">{escape(book["author"])} - {escape(book["genre"])}</span><br>'
             f'{render_stars(book["avg_rating"])} '
-            f'<span class="muted">score {book["score"]:.4f}</span><br>'
             f'<span class="muted">{escape(book["reason"])}</span><br>'
             f'{render_badge(book["recommendation_status"] or "unread", "beige")}',
             unsafe_allow_html=True,

@@ -85,7 +85,7 @@ with left_col:
             st.markdown(
                 f'<strong style="font-size:0.95rem; color:{COLORS["dark_green"]};">'
                 f'{escape(book["title"])}</strong><br>'
-                f'<span class="muted">{escape(book["author"])} - {book["review_count"]} posts</span>',
+                f'<span class="muted">{escape(book["author"])} - {book["review_count"]} reviews</span>',
                 unsafe_allow_html=True,
             )
 

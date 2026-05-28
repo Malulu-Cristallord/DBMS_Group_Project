@@ -262,7 +262,7 @@ BADGES = [
 ]
 
 # User stats (mock — replace with API)
-reader_points = current_reader["points"]
+reader_points = current_reader["Points"]
 print(reader_points)
 TOTAL_BADGES = sum(1 for b in BADGES if b["earned"])
 TOTAL_XP_POSSIBLE = sum(b["xp"] for b in BADGES)
@@ -287,6 +287,8 @@ LEADERS = [
 # =============================================================================
 # XP / LEVEL HERO BANNER
 # =============================================================================
+NEXT_LEVEL_XP = 10000
+CURRENT_LEVEL = 1
 xp_pct = int(reader_points / NEXT_LEVEL_XP * 100)
 earned_badges = [b for b in BADGES if b["earned"]]
 locked_badges  = [b for b in BADGES if not b["earned"]]
