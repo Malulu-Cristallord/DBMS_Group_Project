@@ -2,7 +2,7 @@ from html import escape
 
 import streamlit as st
 
-from UI.Login.session import clear_login_session, google_user_is_logged_in
+from UI.Login.session import clear_login_session
 
 
 COLORS = {
@@ -450,12 +450,7 @@ def render_logout_button():
     st.caption(f"Signed in as {reader_name}")
 
     if st.button("Log out", key="global_logout"):
-        google_signed_in = google_user_is_logged_in(st.user)
         clear_login_session(st.session_state)
-
-        if google_signed_in:
-            st.logout()
-
         st.switch_page("pages/01_Login.py")
 
 

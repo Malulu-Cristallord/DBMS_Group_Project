@@ -39,7 +39,6 @@ from components.ui_helpers import (
     render_stars,
     section_title, render_navigation_section,
 )
-from UI.Login.session import google_user_is_logged_in, sync_google_user_to_session
 
 
 st.set_page_config(
@@ -53,19 +52,6 @@ inject_global_css()
 
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
-
-if google_user_is_logged_in(st.user) and not st.session_state["logged_in"]:
-    google_success, google_message, _ = sync_google_user_to_session(
-        st.session_state,
-        st.user,
-    )
-
-    if not google_success:
-        render_navbar(active_page="Discover")
-        st.error(google_message)
-        if st.button("Sign out of Google", type="primary"):
-            st.logout()
-        st.stop()
 
 if not st.session_state["logged_in"]:
     render_navbar(active_page="Discover")
@@ -356,6 +342,5 @@ page_spacer(20)
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 section_title("Navigation")
 render_navigation_section()
-
 
 

@@ -8,7 +8,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from Backend.Functions.library_data import get_genres
 from components.ui_helpers import inject_global_css, page_spacer, render_navbar
 from UI.Login.auth import register_reader
-from UI.Login.session import google_user_is_logged_in, sync_google_user_to_session
 from UI.Login.validators import (
     PASSWORD_REQUIREMENTS_HELP,
     validate_google_email,
@@ -25,22 +24,6 @@ st.set_page_config(
 inject_global_css()
 render_navbar()
 page_spacer(40)
-
-if google_user_is_logged_in(st.user) and not st.session_state.get("logged_in", False):
-    google_success, google_message, google_reader = sync_google_user_to_session(
-        st.session_state,
-        st.user,
-    )
-
-    if google_success and google_reader:
-        st.success(f"Welcome, {google_reader['Name']}!")
-        st.switch_page("app.py")
-    else:
-        st.error(google_message)
-        if st.button("Sign out of Google", type="primary"):
-            st.logout()
-        st.stop()
-
 
 if st.session_state.get("logged_in", False):
     _, center_col, _ = st.columns([1, 1.6, 1])
@@ -165,20 +148,6 @@ with center_col:
                 st.switch_page("pages/01_Login.py")
             else:
                 st.error(message)
-
-    page_spacer(12)
-    st.markdown("<hr>", unsafe_allow_html=True)
-    page_spacer(4)
-
-    if st.button("Continue with Google", use_container_width=True, key="google_register_btn"):
-        try:
-            st.login("google")
-        except Exception:
-            st.error("Google login is not configured yet.")
-            st.caption(
-                "Add .streamlit/secrets.toml with Google OAuth credentials, "
-                "then restart Streamlit."
-            )
 
     page_spacer(12)
     st.markdown("<hr>", unsafe_allow_html=True)
