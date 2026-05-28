@@ -1,7 +1,7 @@
 import streamlit as st
 import sys, os
 
-from Backend.Functions.library_data import get_reader_from_session
+from Backend.Functions.library_data import get_reader_from_session, get_reader_badges
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -15,15 +15,14 @@ st.set_page_config(
     page_title="Badges & Rewards — LibTrack",
     page_icon="🏅",
     layout="wide",
+
 )
 inject_global_css()
 render_navbar("Badges")
-
 current_reader = get_reader_from_session(st.session_state)
 if current_reader is None:
     render_login_required("Please sign in before writing a review.")
     st.stop()
-
 # ── Page-specific CSS ─────────────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -148,185 +147,12 @@ st.markdown("""
 
 spacer(24)
 
-# =============================================================================
-# BADGE DEFINITIONS
-# =============================================================================
-# Each badge has: id, name, description, icon, icon_bg, xp,
-#                 earned (bool), progress (0–100), criteria
-#
-# BADGE OBJECTIVES — the 6 gamified achievements designed for LibTrack:
-#
-# 1. FIRST CHAPTER    — Borrow your first book              → Engagement
-# 2. AVID READER      — Read 10 books total                 → Reading
-# 3. STREAK KEEPER    — Read 7 days in a row                → Regularity
-# 4. CRITIC'S PEN     — Write 5 reviews                     → Community
-# 5. SOCIAL READER    — Get 50 likes on your posts          → Social
-# 6. BOOK CLUB HERO   — Comment on 20 community posts       → Social
-
-BADGES = [
-    # ── EARNED ───────────────────────────────────────────────────────────
-    {
-        "id": "first_chapter",
-        "name": "First Chapter",
-        "description": "Borrow your very first book on LibTrack.",
-        "icon": "📖",
-        "icon_bg": "#DFF2DF",
-        "xp": 50,
-        "earned": True,
-        "earned_date": "Jan 15, 2024",
-        "progress": 100,
-        "criteria": "Borrow 1 book",
-        "rarity": "Common",
-        "rarity_color": "#DFF2DF",
-        "rarity_text": "#3E7255",
-    },
-    {
-        "id": "avid_reader",
-        "name": "Avid Reader",
-        "description": "Read 10 books. Your bookshelf is growing!",
-        "icon": "📚",
-        "icon_bg": "#DFF2DF",
-        "xp": 200,
-        "earned": True,
-        "earned_date": "Mar 3, 2024",
-        "progress": 100,
-        "criteria": "Borrow 10 books",
-        "rarity": "Uncommon",
-        "rarity_color": "#D2B354",
-        "rarity_text": "#654421",
-    },
-    {
-        "id": "critics_pen",
-        "name": "Critic's Pen",
-        "description": "Share your thoughts — write 5 reviews for the community.",
-        "icon": "✍️",
-        "icon_bg": "#EFE5DA",
-        "xp": 150,
-        "earned": True,
-        "earned_date": "Apr 20, 2024",
-        "progress": 100,
-        "criteria": "Write 5 reviews",
-        "rarity": "Uncommon",
-        "rarity_color": "#D2B354",
-        "rarity_text": "#654421",
-    },
-    # ── IN PROGRESS ───────────────────────────────────────────────────────
-    {
-        "id": "streak_keeper",
-        "name": "Streak Keeper",
-        "description": "Read every day for 7 consecutive days. Build the habit.",
-        "icon": "🔥",
-        "icon_bg": "#FFF3CD",
-        "xp": 300,
-        "earned": False,
-        "earned_date": None,
-        "progress": 71,   # 5 / 7 days
-        "criteria": "7-day reading streak",
-        "current": "5 / 7 days",
-        "rarity": "Rare",
-        "rarity_color": "#EFE5DA",
-        "rarity_text": "#654421",
-    },
-    {
-        "id": "social_reader",
-        "name": "Social Reader",
-        "description": "Your reviews inspire others — collect 50 likes on your posts.",
-        "icon": "❤️",
-        "icon_bg": "#FBEAF0",
-        "xp": 250,
-        "earned": False,
-        "earned_date": None,
-        "progress": 62,   # 31 / 50 likes
-        "criteria": "Get 50 likes on posts",
-        "current": "31 / 50 likes",
-        "rarity": "Rare",
-        "rarity_color": "#EFE5DA",
-        "rarity_text": "#654421",
-    },
-    {
-        "id": "book_club_hero",
-        "name": "Book Club Hero",
-        "description": "Be the heart of the community — comment on 20 posts.",
-        "icon": "💬",
-        "icon_bg": "#E6F1FB",
-        "xp": 180,
-        "earned": False,
-        "earned_date": None,
-        "progress": 35,   # 7 / 20 comments
-        "criteria": "Comment on 20 posts",
-        "current": "7 / 20 comments",
-        "rarity": "Common",
-        "rarity_color": "#DFF2DF",
-        "rarity_text": "#3E7255",
-    },
-]
 
 # User stats (mock — replace with API)
 reader_points = current_reader["Points"]
 print(reader_points)
-TOTAL_BADGES = sum(1 for b in BADGES if b["earned"])
-TOTAL_XP_POSSIBLE = sum(b["xp"] for b in BADGES)
-
-# Reward history log (mock)
-HISTORY = [
-    {"icon": "📚", "bg": "#DFF2DF", "name": "Avid Reader earned", "date": "Mar 3, 2024", "xp": +200},
-    {"icon": "✍️", "bg": "#EFE5DA", "name": "Critic's Pen earned", "date": "Apr 20, 2024", "xp": +150},
-    {"icon": "📖", "bg": "#DFF2DF", "name": "First Chapter earned", "date": "Jan 15, 2024", "xp": +50},
-    {"icon": "⭐", "bg": "#FFF3CD", "name": "Posted your first review", "date": "Feb 5, 2024", "xp": +20},
-    {"icon": "💬", "bg": "#E6F1FB", "name": "First community comment", "date": "Jan 20, 2024", "xp": +10},
-]
-
-# XP Leaderboard (mock)
-LEADERS = [
-    {"rank": 1, "name": "Thomas G.", "init": "TG", "bg": "#D2B354", "col": "#654421", "xp": 1840, "you": False},
-    {"rank": 2, "name": "Sophie M.", "init": "SM", "bg": "#EFE5DA", "col": "#654421", "xp": 1320, "you": False},
-    {"rank": 3, "name": "Marie L.",  "init": "ML", "bg": "#D2B354", "col": "#654421", "xp": 400,  "you": True},
-    {"rank": 4, "name": "Alex C.",   "init": "AC", "bg": "#DFF2DF", "col": "#3E7255", "xp": 310,  "you": False},
-]
-
-# =============================================================================
-# XP / LEVEL HERO BANNER
-# =============================================================================
-NEXT_LEVEL_XP = 10000
-CURRENT_LEVEL = 1
-xp_pct = int(reader_points / NEXT_LEVEL_XP * 100)
-earned_badges = [b for b in BADGES if b["earned"]]
-locked_badges  = [b for b in BADGES if not b["earned"]]
-
-st.markdown(f"""
-<div class="xp-hero">
-    <div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap;">
-        <div class="xp-level-ring">
-            <div class="xp-level-num">{CURRENT_LEVEL}</div>
-            <div class="xp-level-lbl">Level</div>
-        </div>
-        <div class="xp-info">
-            <h2>Your Rewards</h2>
-            <p class="sub">
-                {TOTAL_BADGES} badges earned · {reader_points} XP total
-            </p>
-            <div class="xp-bar-bg">
-                <div class="xp-bar-fill" style="width:{xp_pct}%;"></div>
-            </div>
-            <div class="xp-bar-labels">
-                <span>{reader_points} XP</span>
-                <span>Level {CURRENT_LEVEL + 1} at {NEXT_LEVEL_XP} XP</span>
-            </div>
-        </div>
-        <div style="text-align:center;flex-shrink:0;">
-            <div style="font-family:'Playfair Display',serif;font-size:2rem;
-                        font-weight:700;color:#D2B354;line-height:1;">
-                {TOTAL_BADGES}/{len(BADGES)}
-            </div>
-            <div style="font-size:0.72rem;color:rgba(255,255,255,0.5);
-                        text-transform:uppercase;letter-spacing:.1em;">
-                badges
-            </div>
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
+earned_badges = get_reader_badges(current_reader["Reader_ID"])
+locked_badges = get_reader_locked_badges(current_reader["Reader_ID"])
 # =============================================================================
 # MAIN LAYOUT: badges (left 2/3) + sidebar (right 1/3)
 # =============================================================================

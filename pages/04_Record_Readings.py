@@ -275,7 +275,7 @@ with timer_col:
             if final_elapsed < 10:
                 st.warning("Read for at least a few seconds before saving!")
             else:
-                if final_elapsed > 12:
+                if final_elapsed > 120:
                     reader_add_books_read(current_reader["Reader_ID"])
                 mins = max(1, final_elapsed // 60)
                 book = st.session_state["current_book"] or "Unknown book"

@@ -855,32 +855,14 @@ def get_leaderboard(current_reader_id: int | str | None = None, limit: int = 10)
     return leaderboard
 
 
-def get_reader_badges(reader: dict[str, Any] | None, posts_published: int = 0) -> list[dict[str, Any]]:
-    points = int((reader or {}).get("Points") or 0)
-    genres = get_reader_genres(reader)
-
-    return [
-        {
-            "name": "Active reader",
-            "description": "Reach 25 reader points",
-            "earned": points >= 25,
-            "progress": min(100, int((points / 25) * 100)) if points else 0,
-        },
-        {
-            "name": "Community reviewer",
-            "description": "Publish 3 posts or reviews",
-            "earned": posts_published >= 3,
-            "progress": min(100, int((posts_published / 3) * 100)) if posts_published else 0,
-        },
-        {
-            "name": "Genre explorer",
-            "description": "Choose at least 3 preferred genres",
-            "earned": len(genres) >= 3,
-            "progress": min(100, int((len(genres) / 3) * 100)) if genres else 0,
-        },
-    ]
-    if not table_exists("reviews"):
-        return False, "The reviews table does not exist yet. Run the database setup first."
+def get_reader_badges(reader_ID) -> list[dict[str, Any]]:
+    query = """
+    SELECT b.* 
+    FROM given_badges gb
+    JOIN badges b ON gb.Badge_ID = b.Badge_ID
+         readers r ON gb.Reader_ID = r.Reader_ID
+    WHERE r.Reader_ID = %s"""
+    return fetch_all(query, (reader_ID,),)
 
 
 def get_books_by_title(keyword): 
