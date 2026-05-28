@@ -91,3 +91,33 @@ def test_get_badge():
     print("Testing get_badge: ")
     reader_ID = 1
     badge_id = 2
+
+def check_reader_badge(reader_ID):
+    print("Testing check_reader_badge: ")
+    query1="""
+    SELECT Books_Read FROM readers WHERE Reader_ID = %s
+    """
+    result = db_connect.execute_query_fetch(query1, (reader_ID,))
+    if 1 <= result[0]["Books_Read"] < 5:
+        reader_get_badge(reader_ID, 1)
+    elif 5 <= result[0]["Books_Read"] < 20:
+        reader_get_badge(reader_ID, 2)
+    elif 20 <= result[0]["Books_Read"] < 50:
+        reader_get_badge(reader_ID, 3)
+    elif 50 <= result[0]["Books_Read"] < 200:
+        reader_get_badge(reader_ID, 4)
+    elif 200 <= result[0]["Books_Read"] < 500:
+        reader_get_badge(reader_ID, 5)
+    elif 500 <= result[0]["Books_Read"]:
+        reader_get_badge(reader_ID, 6)
+
+
+def reader_add_books_read(reader_ID):
+    print("Testing reader_add_books_read: ")
+    query1 = """
+    UPDATE readers
+    SET Books_Read = Books_Read + 1
+    WHERE Reader_ID = %s
+    """
+    check_reader_badge(reader_ID)
+    db_connect.execute_query(query1, (reader_ID,))

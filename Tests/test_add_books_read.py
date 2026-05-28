@@ -1,0 +1,3 @@
+from Backend.Functions.badges_handler import reader_add_books_read
+
+reader_add_books_read(1)

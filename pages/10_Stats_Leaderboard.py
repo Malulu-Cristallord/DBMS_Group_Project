@@ -46,7 +46,6 @@ stat_cols = st.columns(4)
 
 stats_items = [
     (f'{platform_stats["active_readers"]:,}', "Active readers"),
-    (f'{platform_stats["borrowings_this_month"]:,}', "Borrowings this month"),
     (f'{platform_stats["reviews_published"]:,}', "Posts published"),
     (str(platform_stats["available_titles"]), "Available titles"),
 ]

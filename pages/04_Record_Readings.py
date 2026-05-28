@@ -6,6 +6,7 @@ import sys, os
 from streamlit_autorefresh import st_autorefresh
 from datetime import timedelta
 
+from Backend.Functions.badges_handler import reader_add_books_read
 from Backend.Functions.library_data import get_reader_from_session, get_books_by_title, get_books
 from Backend.Functions.post_handler import get_book_by_isbn
 from Backend.Functions.reader import save_reading_session_time
@@ -274,6 +275,8 @@ with timer_col:
             if final_elapsed < 10:
                 st.warning("Read for at least a few seconds before saving!")
             else:
+                if final_elapsed > 12:
+                    reader_add_books_read(current_reader["Reader_ID"])
                 mins = max(1, final_elapsed // 60)
                 book = st.session_state["current_book"] or "Unknown book"
                 now  = datetime.datetime.now().strftime("%b %d, %Y · %H:%M")
