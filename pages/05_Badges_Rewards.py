@@ -169,7 +169,7 @@ with main_col:
         with earned_cols[i % 3]:
             st.markdown(f"""
             <div class="badge-card">
-                <div class="badge-earned-tag">✓ Earned · {b['earned_date']}</div>
+                <div class="badge-earned-tag">✓ Earned · {b['Given_Date']}</div>
                 <div class="badge-icon-wrap" style="background:{b['icon_bg']};">
                     {b['icon']}
                 </div>

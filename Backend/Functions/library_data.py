@@ -903,7 +903,7 @@ def get_reader_locked_badges(reader_ID) -> list[dict[str, Any]]:
 
 def get_reader_badges(reader_ID) -> list[dict[str, Any]]:
     query = """
-    SELECT b.* 
+    SELECT b.* , gb.*
     FROM given_badges gb
     JOIN badges b ON gb.Badge_ID = b.Badge_ID
     JOIN readers r ON gb.Reader_ID = r.Reader_ID
