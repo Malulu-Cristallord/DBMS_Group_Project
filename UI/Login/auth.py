@@ -266,6 +266,7 @@ def login_or_register_google_reader(user_info: dict) -> tuple[bool, str, dict | 
 
 
 def login_reader(email: str, password: str) -> tuple[bool, str] | tuple[bool, str, dict]:
+    clean_email = (email or "").strip().lower()
     connection = None
     cursor = None
 
@@ -288,7 +289,7 @@ def login_reader(email: str, password: str) -> tuple[bool, str] | tuple[bool, st
             FROM readers
             WHERE Email = %s
             """,
-            (email,),
+            (clean_email,),
         )
         reader = cursor.fetchone()
 
