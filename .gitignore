@@ -25,6 +25,9 @@ ENV/
 .coverage.*
 htmlcov/
 
+# Local project documentation
+docs/
+
 # Build and packaging output
 build/
 dist/
