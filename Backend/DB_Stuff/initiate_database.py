@@ -185,21 +185,49 @@ def initiate_given_badges():
     db_connect.execute_query(query)
 
 def del_all():
-    query = """
-    DROP TABLE IF EXISTS
-        recommendations,
-        comments,
-        likes,
-        reviews,
-        posts,
-        rewards,
-        badges,
-        books,
-        readers,
-        saved_books,
-        given_badges
-    """
-    db_connect.execute_query(query)
+    connection = None
+    cursor = None
+
+    try:
+        connection = db_connect.get_connection()
+        cursor = connection.cursor()
+        cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
+        cursor.execute(
+            """
+            DROP TABLE IF EXISTS
+                book_categories,
+                recommendations,
+                comments,
+                likes,
+                reviews,
+                saved_books,
+                given_badges,
+                posts,
+                rewards,
+                badges,
+                books,
+                readers
+            """
+        )
+        cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
+        connection.commit()
+        print("All known LibTrack tables dropped")
+
+    except Exception as exc:
+        if cursor:
+            try:
+                cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
+            except Exception:
+                pass
+        if connection:
+            connection.rollback()
+        print(f"Failed to drop tables: {exc}")
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
 
 
 def execute_all_methods():

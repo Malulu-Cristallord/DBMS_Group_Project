@@ -129,27 +129,111 @@ def reader_initials(name: str | None) -> str:
     return "".join(word[0].upper() for word in words[:2])
 
 
+def _quote_identifier(identifier: str) -> str:
+    return f"`{identifier.replace('`', '``')}`"
+
+
+def _pick_existing_column(existing_columns: set[str], candidates: list[str]) -> str | None:
+    lower_lookup = {column.lower(): column for column in existing_columns}
+    for candidate in candidates:
+        if candidate in existing_columns:
+            return candidate
+        if candidate.lower() in lower_lookup:
+            return lower_lookup[candidate.lower()]
+    return None
+
+
+def _reader_select_expression(
+    existing_columns: set[str],
+    alias: str,
+    candidates: list[str],
+    default_sql: str | None = None,
+) -> str | None:
+    column = _pick_existing_column(existing_columns, candidates)
+    if column:
+        return f"{_quote_identifier(column)} AS {_quote_identifier(alias)}"
+    if default_sql is not None:
+        return f"{default_sql} AS {_quote_identifier(alias)}"
+    return None
+
+
 def get_reader_by_id(reader_id: int | str | None) -> dict[str, Any] | None:
     if not reader_id:
         return None
 
-    reader = fetch_one(
-        """
+    connection = None
+    cursor = None
+
+    try:
+        connection = get_connection()
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute(
+            """
+            SELECT column_name AS column_name
+            FROM information_schema.columns
+            WHERE table_schema = DATABASE()
+              AND table_name = 'readers'
+            """
+        )
+        existing_columns = {row["column_name"] for row in cursor.fetchall()}
+        reader_id_column = _pick_existing_column(existing_columns, ["Reader_ID", "reader_id"])
+
+        if not reader_id_column:
+            return None
+
+        select_expressions = [
+            _reader_select_expression(existing_columns, "Reader_ID", ["Reader_ID", "reader_id"]),
+            _reader_select_expression(existing_columns, "Name", ["Name", "name"], "''"),
+            _reader_select_expression(existing_columns, "Email", ["Email", "email"], "''"),
+            _reader_select_expression(
+                existing_columns,
+                "Preferred_Category",
+                ["Preferred_Category", "preferred_category"],
+                "NULL",
+            ),
+            _reader_select_expression(existing_columns, "Points", ["Points", "Point", "points", "point"], "0"),
+            _reader_select_expression(
+                existing_columns,
+                "Receive_Recommendations",
+                ["Receive_Recommendations", "receive_recommendations"],
+                "TRUE",
+            ),
+            _reader_select_expression(
+                existing_columns,
+                "Show_Reading_History",
+                ["Show_Reading_History", "show_reading_history"],
+                "TRUE",
+            ),
+            _reader_select_expression(
+                existing_columns,
+                "Created_At",
+                ["Created_At", "Create_At", "created_at", "create_at"],
+                "NULL",
+            ),
+            _reader_select_expression(
+                existing_columns,
+                "Daily_Time_Goal",
+                ["Daily_Time_Goal", "daily_time_goal"],
+                "60",
+            ),
+        ]
+
+        query = f"""
         SELECT
-            Reader_ID,
-            Name,
-            Email,
-            Preferred_Category,
-            Points,
-            Receive_Recommendations,
-            Show_Reading_History,
-            Created_At,
-            Daily_Time_Goal
+            {', '.join(expression for expression in select_expressions if expression)}
         FROM readers
-        WHERE Reader_ID = %s
-        """,
-        (reader_id,),
-    )
+        WHERE {_quote_identifier(reader_id_column)} = %s
+        """
+        cursor.execute(query, (reader_id,))
+        reader = cursor.fetchone()
+    except Exception as exc:
+        print(f"Could not load reader profile: {exc}")
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
 
     if reader:
         reader["reader_id"] = reader.get("Reader_ID")
