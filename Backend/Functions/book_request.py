@@ -72,7 +72,8 @@ def data_to_db(book_data, author_data, gathered_at):
 
 def check_duplicates(isbn_value):
     query = f"""
-    SELECT COUNT(*) AS count FROM Books WHERE ISBN = %s
+    -- webb: Use the actual lowercase books table name from the schema.
+    SELECT COUNT(*) AS count FROM books WHERE ISBN = %s
     """
     values = (isbn_value,)
     result = execute_query_fetch(query, values)

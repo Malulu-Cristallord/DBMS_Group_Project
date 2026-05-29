@@ -1,3 +1,14 @@
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    # webb: Allow this script to be executed directly from the project root.
+    sys.path.insert(0, str(ROOT))
+
 from Backend.DB_Stuff import db_connect
 
 # name, image path, description, rarity, points
@@ -23,12 +34,61 @@ all_badges = (*badges_read,)
 
 # Waiting for change
 def initiate_badges():
+    # webb: Ensure the badges table exists before seeding badge rows.
+    create_query = """
+    CREATE TABLE IF NOT EXISTS badges (
+        Badge_ID           INT              AUTO_INCREMENT PRIMARY KEY,
+        Badge_Name         VARCHAR(255),
+        Badge_Image_Path   VARCHAR(255),
+        Badge_Description  TEXT,
+        Badge_Rarity       VARCHAR(255),
+        Badge_Points       INT
+    )
+    """
+    error = db_connect.execute_query(create_query)
+    if error:
+        raise RuntimeError(error)
+
     query = """
     INSERT INTO badges(Badge_Name, Badge_Image_Path, Badge_Description, Badge_Rarity, Badge_Points)
     values(%s, %s, %s, %s, %s)
     """
+    inserted = []
+    skipped = []
+
     for badge in all_badges:
+        # webb: Skip badges that already exist so repeated runs stay idempotent.
+        existing = db_connect.execute_query_fetch(
+            """
+            SELECT Badge_ID
+            FROM badges
+            WHERE Badge_Name = %s
+            LIMIT 1
+            """,
+            (badge[0],),
+        )
+        if existing is None:
+            raise RuntimeError(f"Failed to check existing badge: {badge[0]}")
+        if existing:
+            print(f"Badge already exists, skipped: {badge[0]}")
+            skipped.append(badge[0])
+            continue
+
         values = (badge[0], badge[1], badge[2], badge[3], badge[4])
-        print("values: ", values)
-        print("\n")
-        db_connect.execute_query(query, values,)
+        error = db_connect.execute_query(query, values)
+        if error:
+            raise RuntimeError(error)
+
+        print(f"Badge inserted: {badge[0]}")
+        inserted.append(badge[0])
+
+    print(
+        "Badge initialization complete: "
+        f"{len(inserted)} inserted, {len(skipped)} skipped."
+    )
+    return {"inserted": inserted, "skipped": skipped}
+
+
+if __name__ == "__main__":
+    # webb: Run badge initialization when this file is executed as a script.
+    initiate_badges()
