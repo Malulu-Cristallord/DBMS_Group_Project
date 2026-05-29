@@ -83,22 +83,27 @@ with center_col:
 
     section_title("Reader preferences")
 
+    # webb: Keep one recommendation switch; off means the reader is not included in recommendations.
     receive_recs = st.toggle(
         "Enable personalized book recommendations",
         value=bool(current_reader.get("Receive_Recommendations")),
         key="settings_recs",
-        help="Saved to readers.Receive_Recommendations.",
+        help=(
+            "Saved to readers.Receive_Recommendations. "
+            "When off, LibTrack hides personalized recommendation cards and stops generating recommendation rows."
+        ),
     )
-
-    show_history = st.toggle(
-        "Show my reading history",
-        value=bool(current_reader.get("Show_Reading_History")),
-        key="settings_history",
-        help="Saved to readers.Show_Reading_History.",
+    st.caption(
+        "When this is off, LibTrack hides personalized recommendation cards, "
+        "does not generate rows in the recommendations table for you, and still shows Popular Books."
     )
 
     if not receive_recs:
-        st.info("Personalized recommendations are disabled. You will still see popular books.")
+        st.info(
+            "Personalized recommendations are disabled. "
+            "Hidden content: Recommend to You cards and generated recommendation rows. "
+            "Still visible: Popular Books and community discovery."
+        )
 
     page_spacer(16)
 
@@ -113,7 +118,7 @@ with center_col:
                     name=new_name.strip(),
                     preferred_category=", ".join(new_genres),
                     receive_recommendations=receive_recs,
-                    show_reading_history=show_history,
+                    show_reading_history=bool(current_reader.get("Show_Reading_History")),
                 )
                 if success:
                     st.session_state["reader_name"] = new_name.strip()

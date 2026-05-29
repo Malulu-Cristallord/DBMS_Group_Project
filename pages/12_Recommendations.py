@@ -53,53 +53,62 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-if st.button("Generate Recommendations", type="primary"):
-    generated = generate_recommendations_for_reader(current_reader["Reader_ID"], limit=10)
-    if generated:
-        st.success("Recommendations generated.")
-    else:
-        st.warning("No recommendations were generated. Check that books and recommendations tables exist.")
+recommendations_enabled = bool(current_reader.get("Receive_Recommendations"))
+# webb: Clearly explain that opting out hides and stops personalized recommendation output.
+if not recommendations_enabled:
+    st.info(
+        "Personalized recommendations are turned off. "
+        "This page will not generate or display recommendation rows until you enable them in Settings. "
+        "Community discovery and Popular Books are still available elsewhere."
+    )
+else:
+    if st.button("Generate Recommendations", type="primary"):
+        generated = generate_recommendations_for_reader(current_reader["Reader_ID"], limit=10)
+        if generated:
+            st.success("Recommendations generated.")
+        else:
+            st.warning("No recommendations were generated. Check that books and recommendations tables exist.")
 
 
-page_spacer(16)
+    page_spacer(16)
 
-recommendations = get_recommendations_for_reader(current_reader["Reader_ID"], limit=10)
+    recommendations = get_recommendations_for_reader(current_reader["Reader_ID"], limit=10)
 
-if not recommendations:
-    st.info("No recommendations yet. Generate recommendations to create rows in the database.")
+    if not recommendations:
+        st.info("No recommendations yet. Generate recommendations to create rows in the database.")
 
-for book in recommendations:
-    cover_col, body_col, action_col = st.columns([0.6, 4, 1.2])
+    for book in recommendations:
+        cover_col, body_col, action_col = st.columns([0.6, 4, 1.2])
 
-    with cover_col:
-        st.markdown(render_book_cover(book["cover"]), unsafe_allow_html=True)
+        with cover_col:
+            st.markdown(render_book_cover(book["cover"]), unsafe_allow_html=True)
 
-    with body_col:
-        st.markdown(
-            f'<strong style="color:{COLORS["dark_green"]};">{escape(book["title"])}</strong><br>'
-            f'<span class="secondary">{escape(book["author"])} - {escape(book["genre"])}</span><br>'
-            f'{render_stars(book["avg_rating"])} '
-            f'<span class="muted">{escape(book["reason"])}</span><br>'
-            f'{render_badge(book["recommendation_status"] or "unread", "beige")}',
-            unsafe_allow_html=True,
-        )
+        with body_col:
+            st.markdown(
+                f'<strong style="color:{COLORS["dark_green"]};">{escape(book["title"])}</strong><br>'
+                f'<span class="secondary">{escape(book["author"])} - {escape(book["genre"])}</span><br>'
+                f'{render_stars(book["avg_rating"])} '
+                f'<span class="muted">{escape(book["reason"])}</span><br>'
+                f'{render_badge(book["recommendation_status"] or "unread", "beige")}',
+                unsafe_allow_html=True,
+            )
 
-    with action_col:
-        if st.button("View", key=f'view_{book["isbn"]}', use_container_width=True):
-            increment_book_clicked(book["isbn"])
-            update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "clicked")
-            st.session_state["selected_book_id"] = book["isbn"]
-            st.switch_page("pages/15_Book_Detail.py")
+        with action_col:
+            if st.button("View", key=f'view_{book["isbn"]}', use_container_width=True):
+                increment_book_clicked(book["isbn"])
+                update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "clicked")
+                st.session_state["selected_book_id"] = book["isbn"]
+                st.switch_page("pages/15_Book_Detail.py")
 
-        if st.button("Save", key=f'save_{book["isbn"]}', use_container_width=True):
-            result = save_book(book["isbn"], current_reader["Reader_ID"])
-            if result["success"]:
-                update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "saved")
-                st.success("Saved.")
-            else:
-                st.info(result["message"])
+            if st.button("Save", key=f'save_{book["isbn"]}', use_container_width=True):
+                result = save_book(book["isbn"], current_reader["Reader_ID"])
+                if result["success"]:
+                    update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "saved")
+                    st.success("Saved.")
+                else:
+                    st.info(result["message"])
 
-    st.markdown("<hr>", unsafe_allow_html=True)
+        st.markdown("<hr>", unsafe_allow_html=True)
 
 page_spacer(20)
 #--------------------------------------------------------------------NAVIGATION
