@@ -207,15 +207,16 @@ book_options = {"No book linked": None}
 get_books()
 book_options.update({f'{b["Title"]} - {b["Author"]}': b["ISBN"] for b in books})
 linked_book = st.selectbox("Select book", list(book_options.keys()))
-st.session_state["current_book"] = linked_book
-st.write("Selected book:", linked_book)
+linked_book_isbn = book_options[linked_book]
+st.session_state["current_book"] = linked_book if linked_book_isbn else ""
+st.write("Selected book:", st.session_state["current_book"] or "No book linked")
 
 spacer(16)
 
 # ── Timer display
 elapsed = get_elapsed()
 display_time = format_time(elapsed)
-book_label = linked_book if linked_book else "No book selected"
+book_label = st.session_state["current_book"] or "No book selected"
 status_sub  = "Reading in progress..." if st.session_state["timer_running"] else "Timer paused"
 
 st.markdown(f"""
@@ -240,7 +241,7 @@ with btn_col1:
             use_container_width=True,
             key="start_btn",
         ):
-            if not linked_book:
+            if not linked_book_isbn:
                 st.warning("Please enter the book you're reading first.")
             else:
                 st.session_state["timer_running"] = True
