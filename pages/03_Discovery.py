@@ -156,7 +156,7 @@ with main_col:
                     save_discovery_book(book)
 
                 if st.button("Review", key=f"disc_review_{book['id']}"):
-                    st.session_state["review_book_id"] = book["id"]
+                    st.session_state["review_book_isbn"] = book["id"]
                     st.switch_page("pages/06_Create_Review.py")
 
         st.markdown("<hr>", unsafe_allow_html=True)
