@@ -11,10 +11,10 @@ from Backend.Functions.review_handler import (
     get_review_by_reader_and_book
 )
 
-from Backend.Functions.library_data import ( 
-    get_books, 
-    get_reader_from_session
-    )
+from Backend.Functions.library_data import (
+    get_books,
+    get_reader_from_session, get_book_by_isbn
+)
 from components.ui_helpers import (
     COLORS,
     inject_global_css,
@@ -60,26 +60,8 @@ with center_col:
     )
     page_spacer(8)
 
-    default_book_id = st.session_state.get("review_book_id")
-    book_options = {f'{book["title"]} - {book["author"]}': book["isbn"] for book in books}
-    option_labels = list(book_options.keys())
-    default_index = 0
-
-    if default_book_id:
-        for index, label in enumerate(option_labels):
-            if str(book_options[label]) == str(default_book_id):
-                default_index = index
-                break
-
-    selected_label = st.selectbox(
-        "Select the book you are reviewing",
-        options=option_labels,
-        index=default_index,
-        key="cr_book_sel",
-    )
-
-    selected_book_id = book_options[selected_label]
-    selected_book = next(book for book in books if str(book["isbn"]) == str(selected_book_id))
+    selected_book_id = st.session_state.get("review_book_isbn")
+    selected_book = get_book_by_isbn(selected_book_id)
     existing_review = get_review_by_reader_and_book(
     current_reader["Reader_ID"],
     selected_book_id,

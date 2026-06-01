@@ -637,7 +637,6 @@ def render_navigation_section():
         ("pages/12_Recommendations.py", "Recommendations", ":material/auto_awesome:"),
         ("pages/17_Saved_Books.py", "Saved Books", ":material/bookmark:"),
         ("pages/04_Record_Readings.py", "Record Readings", ":material/timer:"),
-        ("pages/06_Create_Review.py", "Create Review", ":material/rate_review:"),
         ("pages/07_Create_Post.py", "Create a Post", ":material/edit_square:"),
         ("pages/13_My_Posts.py", "My Posts", ":material/article:"),
         ("pages/05_Badges_Rewards.py", "Badges", ":material/military_tech:"),
