@@ -393,6 +393,43 @@ def inject_global_css():
             margin-top: 8px;
         }}
 
+        [data-testid="stPageLink"] a {{
+            align-items: center;
+            background: {COLORS["white"]};
+            border: 1px solid rgba(62, 114, 85, 0.38);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(31, 63, 46, 0.07);
+            color: {COLORS["dark_green"]};
+            display: flex;
+            min-height: 54px;
+            padding: 12px 14px;
+            transition: background-color 120ms ease, border-color 120ms ease,
+                box-shadow 120ms ease, transform 120ms ease;
+            width: 100%;
+        }}
+
+        [data-testid="stPageLink"] a:hover {{
+            background: {COLORS["light_green"]};
+            border-color: {COLORS["gold"]};
+            box-shadow: 0 5px 14px rgba(31, 63, 46, 0.14);
+            transform: translateY(-1px);
+            text-decoration: none;
+        }}
+
+        [data-testid="stPageLink"] p {{
+            color: {COLORS["dark_green"]};
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin: 0;
+        }}
+
+        [data-testid="stPageLink"] svg {{
+            color: {COLORS["gold"]};
+            flex-shrink: 0;
+        }}
+
         .action-row {{
             color: {COLORS["text_muted"]};
             font-size: 0.85rem;
@@ -593,21 +630,32 @@ def cover(color: str, size: str = "sm") -> str:
     )
 
 def render_navigation_section():
+    nav_items = [
+        ("app.py", "Main Page", ":material/home:"),
+        ("pages/03_Discovery.py", "Discovery", ":material/search:"),
+        ("pages/11_Add_Books.py", "Add Books", ":material/library_add:"),
+        ("pages/12_Recommendations.py", "Recommendations", ":material/auto_awesome:"),
+        ("pages/17_Saved_Books.py", "Saved Books", ":material/bookmark:"),
+        ("pages/04_Record_Readings.py", "Record Readings", ":material/timer:"),
+        ("pages/06_Create_Review.py", "Create Review", ":material/rate_review:"),
+        ("pages/07_Create_Post.py", "Create a Post", ":material/edit_square:"),
+        ("pages/13_My_Posts.py", "My Posts", ":material/article:"),
+        ("pages/05_Badges_Rewards.py", "Badges", ":material/military_tech:"),
+        ("pages/10_Stats.py", "Stats", ":material/bar_chart:"),
+        ("pages/08_Profile.py", "My Profile", ":material/account_circle:"),
+        ("pages/16_Reading_History.py", "Reading History", ":material/history:"),
+        ("pages/09_Settings.py", "Settings", ":material/settings:"),
+    ]
 
-    col_link1, col_link2 = st.columns(2)
-    with col_link1:
-        st.page_link(page="pages/03_Discovery.py", label="Discovery")
-        st.page_link(page="pages/04_Record_Readings.py", label="Record Readings")
-        st.page_link(page="pages/05_Badges_Rewards.py", label="Badges")
-        st.page_link(page="pages/07_Create_Post.py", label="Create a Post")
-        st.page_link(page="pages/08_Profile.py", label="My Profile")
-        st.page_link(page="app.py", label="Main Page")
-    with col_link2:
-        st.page_link(page="pages/11_Add_Books.py", label="Add Books")
-        st.page_link(page="pages/12_Recommendations.py", label="Recommendations")
-        st.page_link(page="pages/13_My_Posts.py", label="My Posts")
-        st.page_link(page="pages/16_Reading_History.py", label="Reading History")
-        st.page_link(page="pages/17_Saved_Books.py", label="Saved Books")
-        st.page_link(page="pages/10_Stats.py", label="Stats")
+    columns = st.columns(3)
+    for index, (page, label, icon) in enumerate(nav_items):
+        with columns[index % len(columns)]:
+            st.page_link(
+                page=page,
+                label=label,
+                icon=icon,
+                use_container_width=True,
+            )
+
     render_logout_button()
-    return col_link1, col_link2
+    return columns

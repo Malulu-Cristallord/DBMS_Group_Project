@@ -117,18 +117,16 @@ with profile_col:
         value=bool(current_reader.get("Show_Reading_History")),
         key="priv_history",
     )
-    receive_recs = st.toggle(
-        "Receive recommendations",
-        value=bool(current_reader.get("Receive_Recommendations")),
-        key="priv_recs",
-    )
+    # webb: Recommendation opt-out is controlled only from Settings to avoid duplicate switches.
+    if not bool(current_reader.get("Receive_Recommendations")):
+        st.info("Personalized recommendations are off. You can turn them back on from Settings.")
 
     if st.button("Save reader preferences", type="primary", key="save_priv"):
         success, message = update_reader_profile(
             reader_id=current_reader["Reader_ID"],
             name=current_reader["Name"],
             preferred_category=current_reader.get("Preferred_Category") or "",
-            receive_recommendations=receive_recs,
+            receive_recommendations=bool(current_reader.get("Receive_Recommendations")),
             show_reading_history=show_history,
         )
         if success:

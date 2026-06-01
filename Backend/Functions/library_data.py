@@ -585,6 +585,10 @@ def get_popular_books(limit: int = 10) -> list[dict[str, Any]]:
 
 def get_personalized_recommendations(reader_id: int | str, limit: int = 10) -> list[dict[str, Any]]:
     reader = get_reader_by_id(reader_id)
+    # webb: Respect the reader preference by returning no personalized recommendations when disabled.
+    if reader and not bool(reader.get("Receive_Recommendations")):
+        return []
+
     if not reader or not get_reader_genres(reader):
         return get_popular_books(limit=limit)
 
@@ -601,6 +605,9 @@ def generate_recommendations_for_reader(reader_id: int | str, limit: int = 10) -
 
     reader = get_reader_by_id(reader_id)
     if not reader:
+        return []
+    # webb: Do not generate recommendation rows when the reader has opted out.
+    if not bool(reader.get("Receive_Recommendations")):
         return []
 
     candidates = get_personalized_recommendations(reader_id, limit=limit)
@@ -634,6 +641,10 @@ def get_recommendations_for_reader(
     limit: int | None = None,
 ) -> list[dict[str, Any]]:
     if not table_exists("recommendations"):
+        return []
+    reader = get_reader_by_id(reader_id)
+    # webb: Hide existing recommendation rows while personalized recommendations are disabled.
+    if reader and not bool(reader.get("Receive_Recommendations")):
         return []
 
     params: list[Any] = [reader_id]
@@ -727,6 +738,10 @@ def decrement_book_saved(book_isbn: int | str) -> tuple[bool, str]:
     )
 
 def get_recommended_books(reader: dict[str, Any] | None, limit: int = 4) -> list[dict[str, Any]]:
+    # webb: Keep helper callers aligned with the recommendation opt-out setting.
+    if reader and not bool(reader.get("Receive_Recommendations")):
+        return []
+
     if not reader or not get_reader_genres(reader):
         return get_popular_books(limit=limit)
 

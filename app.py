@@ -123,40 +123,48 @@ st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 section_title("Recommend to You")
 
-recommended_books = get_personalized_recommendations(current_reader["Reader_ID"], limit=4)
-
-if not recommended_books:
-    st.info("No recommended books found yet. Add books to the database or update your preferred categories.")
+recommendations_enabled = bool(current_reader.get("Receive_Recommendations"))
+# webb: When recommendations are disabled, hide the personalized cards but keep Popular Books below.
+if not recommendations_enabled:
+    st.info(
+        "Personalized recommendations are turned off. "
+        "The Recommend to You cards are hidden, and Popular Books still appears below."
+    )
 else:
-    rec_cols = st.columns(min(len(recommended_books), 4))
+    recommended_books = get_personalized_recommendations(current_reader["Reader_ID"], limit=4)
 
-    for index, book in enumerate(recommended_books[:4]):
-        with rec_cols[index]:
-            st.markdown(render_book_cover(book["cover"], size="card"), unsafe_allow_html=True)
-            st.markdown(
-                f'<strong style="font-size:0.9rem; color:{COLORS["dark_green"]};">'
-                f'{escape(book["title"])}</strong>',
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                f'<span class="muted">{escape(book["author"])}</span><br>'
-                f'{render_stars(book["avg_rating"])}',
-                unsafe_allow_html=True,
-            )
+    if not recommended_books:
+        st.info("No recommended books found yet. Add books to the database or update your preferred categories.")
+    else:
+        rec_cols = st.columns(min(len(recommended_books), 4))
 
-            if st.button("View", key=f"rec_{book['id']}", use_container_width=True):
-                increment_book_clicked(book["id"])
-                update_recommendation_status(current_reader["Reader_ID"], book["id"], "clicked")
-                st.session_state["selected_book_id"] = book["id"]
-                st.switch_page("pages/15_Book_Detail.py")
+        for index, book in enumerate(recommended_books[:4]):
+            with rec_cols[index]:
+                st.markdown(render_book_cover(book["cover"], size="card"), unsafe_allow_html=True)
+                st.markdown(
+                    f'<strong style="font-size:0.9rem; color:{COLORS["dark_green"]};">'
+                    f'{escape(book["title"])}</strong>',
+                    unsafe_allow_html=True,
+                )
+                st.markdown(
+                    f'<span class="muted">{escape(book["author"])}</span><br>'
+                    f'{render_stars(book["avg_rating"])}',
+                    unsafe_allow_html=True,
+                )
 
-            if st.button("Save", key=f'save_{book["isbn"]}', use_container_width=True):
-                result = save_book(book["isbn"], current_reader["Reader_ID"])
-                if result["success"]:
-                    update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "saved")
-                    st.success("Saved.")
-                else:
-                    st.info(result["message"])
+                if st.button("View", key=f"rec_{book['id']}", use_container_width=True):
+                    increment_book_clicked(book["id"])
+                    update_recommendation_status(current_reader["Reader_ID"], book["id"], "clicked")
+                    st.session_state["selected_book_id"] = book["id"]
+                    st.switch_page("pages/15_Book_Detail.py")
+
+                if st.button("Save", key=f'save_{book["isbn"]}', use_container_width=True):
+                    result = save_book(book["isbn"], current_reader["Reader_ID"])
+                    if result["success"]:
+                        update_recommendation_status(current_reader["Reader_ID"], book["isbn"], "saved")
+                        st.success("Saved.")
+                    else:
+                        st.info(result["message"])
 page_spacer(20)
 
 #--------------------------------------------------------------------ADD NEW BOOKS
@@ -343,5 +351,4 @@ page_spacer(20)
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 section_title("Navigation")
 render_navigation_section()
-
 
