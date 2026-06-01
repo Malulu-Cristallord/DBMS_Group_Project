@@ -37,6 +37,22 @@ def inject_global_css():
             font-family: 'Source Serif 4', Georgia, serif !important;
         }}
 
+        ::selection {{
+            background: rgba(210, 179, 84, 0.35) !important;
+            color: {COLORS["dark_green"]} !important;
+        }}
+
+        [data-testid="stWidgetLabel"] p,
+        [data-testid="stRadio"] label p,
+        [data-testid="stSlider"] label p,
+        [data-testid="stTextInput"] label p,
+        [data-testid="stTextArea"] label p,
+        [data-testid="stSelectbox"] label p {{
+            background: transparent !important;
+            color: {COLORS["dark_green"]} !important;
+            font-weight: 700 !important;
+        }}
+
         #MainMenu, footer, header, [data-testid="stHeader"] {{
             display: none !important;
             visibility: hidden !important;
