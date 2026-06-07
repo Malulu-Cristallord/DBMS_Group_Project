@@ -75,6 +75,7 @@ def check_duplicates(isbn_value):
     -- webb: Use the actual lowercase books table name from the schema.
     SELECT COUNT(*) AS count FROM books WHERE ISBN = %s
     """
+    # webb change the table name to books
     values = (isbn_value,)
     result = execute_query_fetch(query, values)
     # Example result:
